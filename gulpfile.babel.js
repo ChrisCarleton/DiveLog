@@ -1,5 +1,6 @@
 import eslint from 'gulp-eslint';
 import gulp from 'gulp';
+import mocha from 'gulp-mocha';
 
 gulp.task('lint', () => {
 	return gulp
@@ -10,7 +11,9 @@ gulp.task('lint', () => {
 });
 
 gulp.task('test', ['lint'], () => {
-	console.log('running tests...');
+	return gulp
+		.src(['tests/**/*.tests.js'])
+		.pipe(mocha());
 });
 
 gulp.task('default', () => {

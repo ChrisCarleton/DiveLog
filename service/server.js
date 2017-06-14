@@ -1,8 +1,16 @@
+import auth from './auth';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import http from 'http';
 import log from './logger';
 
 const app = express();
+
+app.use(cookieParser());
+app.use(bodyParser.json());
+
+auth(app);
 
 app.get('/', (req, res) => {
 	res.send('Hello!');
@@ -11,4 +19,9 @@ app.get('/', (req, res) => {
 const server = http.createServer(app);
 server.listen(8100);
 
-log.info('server started.');
+log.info('Server started on port 8100.');
+
+export default {
+	app: app,
+	server: server
+};
