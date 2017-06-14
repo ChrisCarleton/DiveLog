@@ -2,7 +2,10 @@ machine:
   services:
     - docker
 
-test:
+dependencies:
   override:
     - docker build -t divelog .
+
+test:
+  override:
     - docker run -it divelog npm run test
