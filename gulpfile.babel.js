@@ -43,6 +43,7 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory'], () => {
 		.pipe(mocha({
 			compilers: ['js:babel-core/register']
 		}))
+		.on('error', process.exit.bind(process, 1))
 		.pipe(istanbul.writeReports({
 			dir: './coverage',
 			reporters: ['lcov', 'text-summary']
