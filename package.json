@@ -37,9 +37,12 @@
     "gulp-istanbul": "^1.1.2",
     "gulp-mocha": "^4.3.1",
     "isparta": "^4.0.0",
-    "sinon": "^2.3.4"
+    "mkdirp": "^0.5.1",
+    "sinon": "^2.3.4",
+    "supertest": "^3.0.0"
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "bunyan": "^1.8.10",
     "cookie-parser": "^1.4.3",
@@ -51,6 +54,6 @@
     "passport-google-oauth": "^1.0.0",
     "passport-local": "^1.0.0",
     "topo": "^2.0.2",
-    "vogels": "^2.2.0"
+    "vogels-promisified": "^2.2.3"
   }
 }

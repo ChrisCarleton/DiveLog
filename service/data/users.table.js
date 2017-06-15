@@ -3,17 +3,18 @@ import db from './database';
 import Joi from 'joi';
 
 const Users = db.define(
-	`divelog-${config.env}-users`,
+	'Users',
 	{
 		hashKey: 'UserId',
 		timestamps: true,
 		schema: {
-			UserId: Joi.string(),
+			UserId: db.types.uuid(),
 			UserName: Joi.string(),
 			Email: Joi.string().email(),
 			DisplayName: Joi.string(),
 			PasswordHash: Joi.string()
 		},
+		tableName: `divelog-${config.env}-users`,
 		indexes: [
 			{
 				hashKey: 'UserName',

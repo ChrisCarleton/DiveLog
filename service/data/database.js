@@ -1,10 +1,17 @@
 import config from '../config';
-import vogels from 'vogels';
+import log from '../logger';
+import vogels from 'vogels-promisified';
 
-vogels.AWS.config.update({
+const dynamoConfig = {
 	accessKeyId: config.awsKeyId,
 	secretAccessKey: config.awsSecretKey,
-	region: config.awsRegion
-});
+	region: config.awsRegion,
+	endpoint: config.awsDynamoEndpoint
+};
+
+vogels.AWS.config.update(dynamoConfig);
+
+log.debug('Using DynamoDb configuration:', dynamoConfig);
 
 export default vogels;
+module.exports = vogels;

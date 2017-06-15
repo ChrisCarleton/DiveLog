@@ -1,8 +1,8 @@
-import config from './service/config';
 import coveralls from 'gulp-coveralls';
 import eslint from 'gulp-eslint';
 import gulp from 'gulp';
 import istanbul from 'gulp-istanbul';
+import mkdirp from 'mkdirp';
 import mocha from 'gulp-mocha';
 import path from 'path';
 
@@ -26,8 +26,18 @@ gulp.task('cover', () => {
 		.pipe(istanbul.hookRequire());
 });
 
-gulp.task('test', ['lint', 'cover'], () => {
-	config.logFile = 'logs/test.log';
+gulp.task('ensure-log-directory', done => {
+	mkdirp(path.join(__dirname, 'logs'), done);
+});
+
+gulp.task('test', ['lint', 'cover', 'ensure-log-directory'], () => {
+	process.env.DIVELOG_LOG_LEVEL = 'debug';
+	process.env.DIVELOG_LOG_FILE = path.join(__dirname, 'logs/tests.log');
+
+	if (process.env.NODE_ENV !== 'system-test') {
+		process.env.DIVELOG_AWS_DYNAMO_ENDPOINT = 'http://localhost:7777';
+	}
+
 	return gulp
 		.src(['tests/**/*.tests.js'])
 		.pipe(mocha({
