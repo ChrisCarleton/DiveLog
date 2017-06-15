@@ -5,16 +5,16 @@ const config = {
 
 	awsKeyId: process.env.DIVELOG_AWS_KEY_ID,
 	awsSecretKey: process.env.DIVELOG_AWS_SECRET_KEY,
-	awsRegion: process.env.DIVELOG_AWS_REGION || 'ca-central-1'
+	awsRegion: process.env.DIVELOG_AWS_REGION || 'ca-central-1',
 
 	auth: {
 		google: {
-			consumerId: process.env.DIVELOG_GOOGLE_CONSUMER_ID,
-			consumerSecret: process.env.DIVELOG_GOOGLE_CONSUMER_SECRET
+			consumerId: process.env.DIVELOG_GOOGLE_CONSUMER_ID || 'google-id',
+			consumerSecret: process.env.DIVELOG_GOOGLE_CONSUMER_SECRET || 'google-secret'
 		},
 		github: {
-			clientId: process.env.DIVELOG_GITHUB_CLIENT_ID,
-			clientSecret: process.env.DIVELOG_GITHUB_CLIENT_SECRET
+			clientId: process.env.DIVELOG_GITHUB_CLIENT_ID || 'github-id',
+			clientSecret: process.env.DIVELOG_GITHUB_CLIENT_SECRET || 'github-secret'	
 		}
 	}
 };

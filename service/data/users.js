@@ -8,7 +8,7 @@ const Users = db.define(
 		hashKey: 'UserId',
 		timestamps: true,
 		schema: {
-			UserId: Joi.uuid(),
+			UserId: Joi.string(),
 			UserName: Joi.string(),
 			Email: Joi.string().email(),
 			DisplayName: Joi.string(),

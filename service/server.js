@@ -21,7 +21,10 @@ server.listen(8100);
 
 log.info('Server started on port 8100.');
 
-export default {
+const exportable = {
 	app: app,
 	server: server
 };
+
+export default exportable;
+module.exports = exportable;

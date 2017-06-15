@@ -3,7 +3,7 @@ import passport from 'passport';
 import url from 'url';
 
 import { Strategy as LocalStrategy } from 'passport-local';
-import { Stragegy as GoogleStrategy } from 'passport-google-oauth';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth';
 import { Strategy as GithubStrategy } from 'passport-github';
 
 export default function(app) {
@@ -47,4 +47,4 @@ export default function(app) {
 
 	app.use(passport.initialize());
 	app.use(passport.session());
-};
+}
