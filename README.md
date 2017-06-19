@@ -30,8 +30,12 @@ To stop and remove the previously created Docker containers run
 
 ``` ./deploy/teardown-local.sh ```
 
-### Common Gulp Commands
+### Common Gulp Tasks
 
 Run unit tests:
 
 ``` gulp test ```
+
+Lint the code:
+
+``` gulp lint ```

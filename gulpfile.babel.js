@@ -26,6 +26,10 @@ gulp.task('cover', () => {
 		.pipe(istanbul.hookRequire());
 });
 
+gulp.task('ensure-dist-directory', done => {
+	mkdirp(path.join(__dirname, 'web/dist'), done);
+});
+
 gulp.task('ensure-log-directory', done => {
 	mkdirp(path.join(__dirname, 'logs'), done);
 });

@@ -5,11 +5,12 @@ import Joi from 'joi';
 const OAuth = db.define(
 	'OAuth',
 	{
-		hashKey: 'UserName',
-		rangeKey: 'Provider',
+		hashKey: 'providerId',
+		rangeKey: 'provider',
 		schema: {
-			UserName: Joi.string(),
-			Provider: Joi.string()
+			providerId: Joi.string(),
+			provider: Joi.string(),
+			userId: Joi.string()
 		},
 		tableName: `divelog-${config.env}-oauth`
 	}

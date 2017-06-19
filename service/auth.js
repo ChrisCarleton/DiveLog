@@ -1,6 +1,8 @@
 import config from './config';
+import log from './logger';
 import passport from 'passport';
 import url from 'url';
+import Users from './data/users.table';
 
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth';
@@ -38,11 +40,29 @@ export default function(app) {
 			}));
 
 	passport.serializeUser((user, done) => {
-		done();
+		done(null, user.userId);
 	});
 
 	passport.deserializeUser((userId, done) => {
-		done();
+		log.debug('Deserializing session user:', userId);
+		Users.getAsync(userId)
+			.then(result => {
+				if (!result) {
+					return done(null, null);
+				}
+
+				const user = {
+					userId: result.get('userId'),
+					userName: result.get('userName'),
+					email: result.get('email'),
+					displayName: result.get('displayName'),
+					role: result.get('role'),
+					createdAt: result.get('createdAt')
+				};
+
+				done(null, user);
+			})
+			.catch(done);
 	});
 
 	app.use(passport.initialize());

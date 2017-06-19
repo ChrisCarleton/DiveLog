@@ -42,13 +42,16 @@
     "supertest": "^3.0.0"
   },
   "dependencies": {
+    "bcrypt": "^1.0.2",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "bunyan": "^1.8.10",
     "cookie-parser": "^1.4.3",
     "express": "^4.15.3",
+    "express-session": "^1.15.3",
     "glob": "^7.1.2",
-    "joi": "^10.5.2",
+    "isemail": "^2.2.1",
+    "joi": "^10.6.0",
     "passport": "^0.3.2",
     "passport-github": "^1.1.0",
     "passport-google-oauth": "^1.0.0",
