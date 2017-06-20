@@ -1,5 +1,6 @@
 import coveralls from 'gulp-coveralls';
 import eslint from 'gulp-eslint';
+import glob from 'glob';
 import gulp from 'gulp';
 import istanbul from 'gulp-istanbul';
 import mkdirp from 'mkdirp';
@@ -8,7 +9,7 @@ import path from 'path';
 
 gulp.task('lint', () => {
 	return gulp
-		.src(['service/**/*.js'])
+		.src(['service/**/*.js', 'tests/**/*.js', 'gulpfile.babel.js'])
 		.pipe(eslint())
 		.pipe(eslint.format())
 		.pipe(eslint.failAfterError());
@@ -34,18 +35,31 @@ gulp.task('ensure-log-directory', done => {
 	mkdirp(path.join(__dirname, 'logs'), done);
 });
 
-gulp.task('test', ['lint', 'cover', 'ensure-log-directory'], () => {
+gulp.task('ensure-dynamo-tables', done => {
+	if (process.env.NODE_ENV === 'system-test') {
+		return done();
+	}
+
+	process.env.DIVELOG_AWS_DYNAMO_ENDPOINT =
+		process.env.DIVELOG_AWS_DYNAMO_ENDPOINT || 'http://localhost:7777';
+	const database = require('./service/data/database');
+	const tables = glob.sync('./service/data/**/*.table.js');
+	tables.forEach(table => {
+		require(table);
+	});
+
+	database.createTables(done);
+});
+
+gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-tables'], () => {
 	process.env.DIVELOG_LOG_LEVEL = 'trace';
 	process.env.DIVELOG_LOG_FILE = path.join(__dirname, 'logs/tests.log');
-
-	if (process.env.NODE_ENV !== 'system-test') {
-		process.env.DIVELOG_AWS_DYNAMO_ENDPOINT = 'http://localhost:7777';
-	}
 
 	return gulp
 		.src(['tests/**/*.tests.js'])
 		.pipe(mocha({
-			compilers: ['js:babel-core/register']
+			compilers: ['js:babel-core/register'],
+			timeout: 4000
 		}))
 		.on('error', process.exit.bind(process, 1))
 		.pipe(istanbul.writeReports({
@@ -61,5 +75,5 @@ gulp.task('report-coverage', () => {
 });
 
 gulp.task('default', () => {
-	console.log('gulping!');
+	// TODO: Run dev server
 });

@@ -4,8 +4,15 @@ machine:
 
 dependencies:
   override:
+    - deploy/setup-local.sh
     - docker build -t divelog .
 
 test:
   override:
-    - docker run -it divelog npm run test
+    - docker run -it --link dynamodb:dynamodb \
+      -e "DIVELOG_AWS_DYNAMO_ENDPOINT=http://dynamodb:7777" \
+      divelog npm run test
+
+deployment:
+  override:
+    - docker run -it divelog npm run report-coverage

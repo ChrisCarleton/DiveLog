@@ -1,9 +1,9 @@
 import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
-import db from '../../service/data/database';
 import { expect } from 'chai';
-import log from '../../service/logger';
+//import log from '../../service/logger';
+import { purgeTable } from '../test-utils';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
 
@@ -30,6 +30,12 @@ describe('User routes', () => {
 		const password = 'j0esP@ssw0rd';
 		let idsToDestroy = [];
 		let testUser;
+
+		before(done => {
+			purgeTable(Users, 'userId')
+				.then(() => { done(); })
+				.catch(done);
+		});
 
 		beforeEach(() => {
 			testUser = {
@@ -91,8 +97,6 @@ describe('User routes', () => {
 		});
 
 		it('creating an account logs in the new user', done => {
-			let userId;
-
 			request
 				.post(USERS_ROUTE)
 				.send(testUser)
@@ -162,7 +166,7 @@ describe('User routes', () => {
 								pattern: {},
 								value: '@@ NOtl Va!!lid atALL'
 							},
-							message: '\"userName\" with value \"&#x40;&#x40; NOtl Va&#x21;&#x21;lid atALL\" fails to match the required pattern: /^[0-9a-zA-Z][0-9a-zA-Z.-]*[0-9a-zA-Z]$/',
+							message: '"userName" with value "&#x40;&#x40; NOtl Va&#x21;&#x21;lid atALL" fails to match the required pattern: /^[0-9a-zA-Z][0-9a-zA-Z.-]*[0-9a-zA-Z]$/',
 							path: 'userName',
 							type: 'string.regex.base'
 						}
@@ -253,7 +257,7 @@ describe('User routes', () => {
 								pattern: {},
 								value: 'TooWeak'
 							},
-							message: '\"password\" with value \"TooWeak\" fails to match the required pattern: /^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]*$/',
+							message: '"password" with value "TooWeak" fails to match the required pattern: /^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]*$/',
 							path: 'password',
 							type: 'string.regex.base'
 						}
@@ -278,7 +282,7 @@ describe('User routes', () => {
 								limit: 100,
 								value: testUser.displayName
 							},
-							message: '\"displayName\" length must be less than or equal to 100 characters long',
+							message: '"displayName" length must be less than or equal to 100 characters long',
 							path: 'displayName',
 							type: 'string.max'
 						}
@@ -288,11 +292,65 @@ describe('User routes', () => {
 		});
 
 		it('user creation is rejected if user name is taken', done => {
-			done();
+			const salt = bcrypt.genSaltSync(10);
+			const passwordHash = bcrypt.hashSync(testUser.password, salt);
+
+			Users.createAsync({
+					userName: testUser.userName,
+					passwordHash: passwordHash,
+					displayName: testUser.displayName,
+					email: testUser.email
+				})
+				.then(result => {
+					idsToDestroy.push(result.get('userId'));
+					testUser.email = 'different_now@email.com';
+
+					return request
+						.post(USERS_ROUTE)
+						.send(testUser)
+						.expect('Content-Type', /json/)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body).to.eql({
+						errorId: 1010,
+						error: 'User name is already in use.',
+						details: 'User names must be unique.'
+					});
+					done();
+				})
+				.catch(done);
 		});
 
 		it('user creation is rejected if email address is taken', done => {
-			done();
+			const salt = bcrypt.genSaltSync(10);
+			const passwordHash = bcrypt.hashSync(testUser.password, salt);
+
+			Users.createAsync({
+					userName: testUser.userName,
+					passwordHash: passwordHash,
+					displayName: testUser.displayName,
+					email: testUser.email
+				})
+				.then(result => {
+					idsToDestroy.push(result.get('userId'));
+					testUser.userName = 'DifferentUserName';
+
+					return request
+						.post(USERS_ROUTE)
+						.send(testUser)
+						.expect('Content-Type', /json/)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body).to.eql({
+						errorId: 1010,
+						error: 'Email address is already in use.',
+						details: 'Email addresses must be unique.'
+					});
+					done();
+				})
+				.catch(done);
 		});
 
 	});

@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import Bluebird from 'bluebird';
 import errorResponse from '../utils/error-response';
 import Joi from 'joi';
 import log from '../logger';
@@ -32,22 +33,36 @@ export function signUp(req, res) {
 			'Bad request: Validation failed.',
 			validation.error.details);
 	}
-	
-	const salt = bcrypt.genSaltSync(10);
-	const passwordHash = bcrypt.hashSync(req.body.password, salt);
 
-	log.info('creating user:', {
-		userName: req.body.userName,
-		email: req.body.email
-	});
+	Bluebird.all([
+			Users.query(req.body.userName).usingIndex('UserNameIndex'),
+			Users.query(req.body.email).usingIndex('EmailIndex')
+		])
+		.spread((userNameTaken, emailTaken) => {
+			if (userNameTaken) {
+				throw 'user name taken';
+			}
 
-	Users
-		.createAsync({
-			userName: req.body.userName,
-			displayName: req.body.displayName,
-			email: req.body.email,
-			passwordHash: passwordHash,
-			role: 'user'
+			if (emailTaken) {
+				throw 'email taken';
+			}
+		}).then(() => {
+			const salt = bcrypt.genSaltSync(10);
+			const passwordHash = bcrypt.hashSync(req.body.password, salt);
+
+			log.info('creating user:', {
+				userName: req.body.userName,
+				email: req.body.email
+			});
+
+			return Users
+				.createAsync({
+					userName: req.body.userName,
+					displayName: req.body.displayName,
+					email: req.body.email,
+					passwordHash: passwordHash,
+					role: 'user'
+				})			
 		})
 		.then(result => {
 			const user = {

@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "test": "gulp test",
-    "server": "node service/index.js | bunyan"
+    "server": "node service/index.js | bunyan",
+    "report-coverage": "gulp report-coverage"
   },
   "repository": {
     "type": "git",
@@ -53,6 +54,7 @@
     "glob": "^7.1.2",
     "isemail": "^2.2.1",
     "joi": "^10.6.0",
+    "lodash": "^4.17.4",
     "passport": "^0.3.2",
     "passport-github": "^1.1.0",
     "passport-google-oauth": "^1.0.0",
