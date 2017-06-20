@@ -1,8 +1,37 @@
 import bcrypt from 'bcrypt';
+import errorResponse from '../utils/error-response';
+import Joi from 'joi';
 import log from '../logger';
 import Users from '../data/users.table';
 
+const signUpValidation = Joi.object().keys({
+	userName: Joi
+		.string()
+		.regex(/^[0-9a-zA-Z][0-9a-zA-Z.-]*[0-9a-zA-Z]$/)
+		.min(3)
+		.max(30)
+		.required(),
+	email: Joi.string().email().required(),
+	password: Joi
+		.string()
+		.regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]*$/)
+		.min(7)
+		.max(30)
+		.required(),
+	displayName: Joi.string().max(100)
+});
+
 export function signUp(req, res) {
+
+	const validation = Joi.validate(req.body, signUpValidation);
+	if (validation.error) {
+		log.debug('Sign up request failed validation:', validation.error.details);
+		return errorResponse(
+			res,
+			1000,
+			'Bad request: Validation failed.',
+			validation.error.details);
+	}
 	
 	const salt = bcrypt.genSaltSync(10);
 	const passwordHash = bcrypt.hashSync(req.body.password, salt);

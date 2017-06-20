@@ -8,6 +8,20 @@ import supertest from 'supertest';
 import Users from '../../service/data/users.table';
 
 const request = supertest(app);
+const testValidation = (route, data, expectedErr, done) => {
+	request
+		.post(route)
+		.send(data)
+		.expect('Content-Type', /json/)
+		.expect(400)
+		.then(res => {
+			expect(res.body).to.eql(expectedErr);
+			done();
+		})
+		.catch(done);
+};
+
+const USERS_ROUTE = '/api/users/';
 
 describe('User routes', () => {
 
@@ -43,7 +57,7 @@ describe('User routes', () => {
 			let userId;
 
 			request
-				.post('/api/users/')
+				.post(USERS_ROUTE)
 				.send(testUser)
 				.expect('Content-Type', /json/)
 				.expect(200)
@@ -80,7 +94,7 @@ describe('User routes', () => {
 			let userId;
 
 			request
-				.post('/api/users/')
+				.post(USERS_ROUTE)
 				.send(testUser)
 				.expect('Content-Type', /json/)
 				.expect(200)
@@ -93,6 +107,7 @@ describe('User routes', () => {
 
 					return request
 						.get('/api/user/')
+						.set('cookie', res.headers['set-cookie'])
 						.expect('Content-Type', /json/)
 						.expect(200);
 				})
@@ -110,12 +125,166 @@ describe('User routes', () => {
 				.catch(done);
 		});
 
-		it('user creation is rejected if password and confirmation do not match', done => {
-			done();
+		it('user is rejected if user name is missing', done => {
+			testUser.userName = undefined;
+			testValidation(
+				USERS_ROUTE,
+				testUser,
+				{
+					errorId: 1000,
+					error: 'Bad request: Validation failed.',
+					details: [
+						{
+							context: {
+								key: 'userName'
+							},
+							message: '"userName" is required',
+							path: 'userName',
+							type: 'any.required'
+						}
+					]
+				},
+				done);
 		});
 
-		it('user creation is rejected if parameters are invalid', done => {
-			done();
+		it('user is rejected if user name is invalid', done => {
+			testUser.userName = '@@ NOtl Va!!lid atALL';
+			testValidation(
+				USERS_ROUTE,
+				testUser,
+				{
+					errorId: 1000,
+					error: 'Bad request: Validation failed.',
+					details: [
+						{
+							context: {
+								key: 'userName',
+								pattern: {},
+								value: '@@ NOtl Va!!lid atALL'
+							},
+							message: '\"userName\" with value \"&#x40;&#x40; NOtl Va&#x21;&#x21;lid atALL\" fails to match the required pattern: /^[0-9a-zA-Z][0-9a-zA-Z.-]*[0-9a-zA-Z]$/',
+							path: 'userName',
+							type: 'string.regex.base'
+						}
+					]
+				},
+				done);
+		});
+
+		it('user is rejected if email is missing', done => {
+			testUser.email = undefined;
+			testValidation(
+				USERS_ROUTE,
+				testUser,
+				{
+					errorId: 1000,
+					error: 'Bad request: Validation failed.',
+					details: [
+						{
+							context: {
+								key: 'email'
+							},
+							message: '"email" is required',
+							path: 'email',
+							type: 'any.required'
+						}
+					]
+				},
+				done);
+		});
+
+		it('user is rejected if email is invalid', done => {
+			testUser.email = 'this is not an e-mail address';
+			testValidation(
+				USERS_ROUTE,
+				testUser,
+				{
+					errorId: 1000,
+					error: 'Bad request: Validation failed.',
+					details: [
+						{
+							context: {
+								key: 'email',
+								value: 'this is not an e-mail address'
+							},
+							message: '"email" must be a valid email',
+							path: 'email',
+							type: 'string.email'
+						}
+					]
+				},
+				done);
+		});
+
+		it('user is rejected password is missing', done => {
+			testUser.password = undefined;
+			testValidation(
+				USERS_ROUTE,
+				testUser,
+				{
+					errorId: 1000,
+					error: 'Bad request: Validation failed.',
+					details: [
+						{
+							context: {
+								key: 'password'
+							},
+							message: '"password" is required',
+							path: 'password',
+							type: 'any.required'
+						}
+					]
+				},
+				done);
+		});
+
+		it('user is rejected if password is weak', done => {
+			testUser.password = 'TooWeak';
+			testValidation(
+				USERS_ROUTE,
+				testUser,
+				{
+					errorId: 1000,
+					error: 'Bad request: Validation failed.',
+					details: [
+						{
+							context: {
+								key: 'password',
+								pattern: {},
+								value: 'TooWeak'
+							},
+							message: '\"password\" with value \"TooWeak\" fails to match the required pattern: /^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]*$/',
+							path: 'password',
+							type: 'string.regex.base'
+						}
+					]
+				},
+				done);
+		});
+
+		it('user is rejected if display name is too long', done => {
+			testUser.displayName
+				= 'OMFG, this is a really long display name. I mean, seriously, this is long, isn\'t? I should really think about shortening this.';
+			testValidation(
+				USERS_ROUTE,
+				testUser,
+				{
+					errorId: 1000,
+					error: 'Bad request: Validation failed.',
+					details: [
+						{
+							context: {
+								key: 'displayName',
+								limit: 100,
+								value: testUser.displayName
+							},
+							message: '\"displayName\" length must be less than or equal to 100 characters long',
+							path: 'displayName',
+							type: 'string.max'
+						}
+					]
+				},
+				done);
 		});
 
 		it('user creation is rejected if user name is taken', done => {

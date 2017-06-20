@@ -11,6 +11,8 @@ const dynamoConfig = {
 
 vogels.AWS.config.update(dynamoConfig);
 
+dynamoConfig.secretAccessKey = '*****';
+
 log.debug('Using DynamoDb configuration:', dynamoConfig);
 
 export default vogels;

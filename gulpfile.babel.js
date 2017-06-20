@@ -35,7 +35,7 @@ gulp.task('ensure-log-directory', done => {
 });
 
 gulp.task('test', ['lint', 'cover', 'ensure-log-directory'], () => {
-	process.env.DIVELOG_LOG_LEVEL = 'debug';
+	process.env.DIVELOG_LOG_LEVEL = 'trace';
 	process.env.DIVELOG_LOG_FILE = path.join(__dirname, 'logs/tests.log');
 
 	if (process.env.NODE_ENV !== 'system-test') {

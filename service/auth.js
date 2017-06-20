@@ -40,11 +40,12 @@ export default function(app) {
 			}));
 
 	passport.serializeUser((user, done) => {
+		log.trace('Serializing user:', user);
 		done(null, user.userId);
 	});
 
 	passport.deserializeUser((userId, done) => {
-		log.debug('Deserializing session user:', userId);
+		log.trace('Deserializing session user:', userId);
 		Users.getAsync(userId)
 			.then(result => {
 				if (!result) {
