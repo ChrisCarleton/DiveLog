@@ -13,4 +13,4 @@ test:
 
 deployment:
   override:
-    - docker run -it divelog npm run report-coverage
+    - docker run -it -e COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN divelog npm run report-coverage
