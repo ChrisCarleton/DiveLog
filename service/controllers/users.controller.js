@@ -22,6 +22,9 @@ const signUpValidation = Joi.object().keys({
 	displayName: Joi.string().max(100)
 });
 
+const ERR_USERNAME_TAKEN = 'user name taken';
+const ERR_EMAIL_TAKEN = 'email taken';
+
 export function signUp(req, res) {
 
 	const validation = Joi.validate(req.body, signUpValidation);
@@ -35,15 +38,15 @@ export function signUp(req, res) {
 	}
 
 	Bluebird.all([
-			Users.query(req.body.userName).usingIndex('UserNameIndex'),
-			Users.query(req.body.email).usingIndex('EmailIndex')
+			Users.query(req.body.userName).usingIndex('UserNameIndex').limit(1).execAsync(),
+			Users.query(req.body.email).usingIndex('EmailIndex').limit(1).execAsync()
 		])
 		.spread((userNameTaken, emailTaken) => {
-			if (userNameTaken) {
+			if (userNameTaken.Items.length > 0) {
 				throw 'user name taken';
 			}
 
-			if (emailTaken) {
+			if (emailTaken.Items.length > 0) {
 				throw 'email taken';
 			}
 		}).then(() => {
@@ -88,8 +91,39 @@ export function signUp(req, res) {
 			});
 		})
 		.catch(err => {
-			log.error(err);
-			res.status(400).json(err);
+			if (err === ERR_USERNAME_TAKEN) {
+				log.debug(
+					'Sign up request was rejected because user name was taken:',
+					req.body.userName);
+				return errorResponse(
+					res,
+					1010,
+					'User name already taken',
+					'The user name you selected is already in use. Please select a unique user name or ' +
+						'if you already have an account, try reseting your password.');
+			}
+
+			if (err === ERR_EMAIL_TAKEN) {
+				log.debug(
+					'Sign up request was rejected because the e-mail address was taken:',
+					req.body.email);
+				return errorResponse(
+					res,
+					1020,
+					'E-mail address already taken',
+					'The e-mail address you selected is already in use. Please select a unique address or ' +
+						'if you already have an account, try reseting your password.');
+			}
+
+			log.error(
+				'An unexpected error occured while attempting to create a user:',
+				err);
+			errorResponse(
+				res,
+				2000,
+				'Internal server error',
+				'An unknown error occured while attempting to create your account. Please try again later.',
+				500);
 		});
 }
 

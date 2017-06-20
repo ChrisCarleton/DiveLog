@@ -314,8 +314,9 @@ describe('User routes', () => {
 				.then(res => {
 					expect(res.body).to.eql({
 						errorId: 1010,
-						error: 'User name is already in use.',
-						details: 'User names must be unique.'
+						error: 'User name already taken',
+						details: 'The user name you selected is already in use. Please select a unique user name or ' +
+							'if you already have an account, try reseting your password.'
 					});
 					done();
 				})
@@ -344,9 +345,10 @@ describe('User routes', () => {
 				})
 				.then(res => {
 					expect(res.body).to.eql({
-						errorId: 1010,
-						error: 'Email address is already in use.',
-						details: 'Email addresses must be unique.'
+						errorId: 1020,
+						error: 'E-mail address already taken',
+						details: 'The e-mail address you selected is already in use. Please select a unique address or ' +
+							'if you already have an account, try reseting your password.'
 					});
 					done();
 				})
