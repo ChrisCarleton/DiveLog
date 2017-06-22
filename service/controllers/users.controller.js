@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
-import errorResponse from '../utils/error-response';
+import errorResponse, { serverErrorResponse } from '../utils/error-response';
 import Joi from 'joi';
 import log from '../logger';
 import Users from '../data/users.table';
@@ -118,12 +118,7 @@ export function signUp(req, res) {
 			log.error(
 				'An unexpected error occured while attempting to create a user:',
 				err);
-			errorResponse(
-				res,
-				2000,
-				'Internal server error',
-				'An unknown error occured while attempting to create your account. Please try again later.',
-				500);
+			serverErrorResponse(res);
 		});
 }
 

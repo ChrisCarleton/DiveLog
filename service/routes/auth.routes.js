@@ -1,3 +1,5 @@
+import passport from 'passport';
+
 import {
 	login,
 	logout,

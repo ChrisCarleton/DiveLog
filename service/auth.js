@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import config from './config';
 import log from './logger';
 import passport from 'passport';
@@ -12,9 +13,34 @@ export default function(app) {
 	passport.use(
 		new LocalStrategy(
 			(username, password, done) => {
-				// Fetch user.
+				Users
+					.query(username)
+					.usingIndex('UserNameIndex')
+					.limit(1)
+					.execAsync()
+					.then(response => {
+						if (response.Items.length === 0) {
+							return done(null, null);
+						}
 
-				return done();
+						const result = response.Items[0];
+
+						if (!bcrypt.compareSync(password, result.get('passwordHash'))) {
+							return done(null, null);
+						}
+
+						done(
+							null,
+							{
+								userId: result.get('userId'),
+								userName: result.get('userName'),
+								email: result.get('email'),
+								displayName: result.get('displayName'),
+								role: result.get('role'),
+								createdAt: result.get('createdAt')
+							});
+					})
+					.catch(done);
 			}));
 
 	passport.use(
