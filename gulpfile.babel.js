@@ -21,7 +21,7 @@ gulp.task('cover', () => {
 	return gulp
 		.src(['service/**/*.js'])
 		.pipe(istanbul({
-			instrumenter: isparta.Instrumenter
+			instrumenter: isparta.Instrumenter,
 			includeUntested: true
 		}))
 		.pipe(istanbul.hookRequire());
