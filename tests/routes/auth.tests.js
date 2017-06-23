@@ -2,6 +2,7 @@ import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import { expect } from 'chai';
+import log from '../../service/logger';
 import { purgeTable } from '../test-utils';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
@@ -10,6 +11,7 @@ const request = supertest(app);
 
 const AUTH_ROUTE = '/api/auth/';
 const LOGIN_ROUTE = AUTH_ROUTE + 'login/';
+const LOGOUT_ROUTE = AUTH_ROUTE + 'logout/';
 
 describe('Authentication routes', () => {
 
@@ -219,11 +221,49 @@ describe('Authentication routes', () => {
 	describe('logout method', () => {
 
 		it('will end an active session', done => {
-			done();
+			let userId;
+
+			Users
+				.createAsync(testUser)
+				.then(result => {
+					userId = result.get('userId');
+					idsToDestroy.push(userId);
+
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: 'NonExistentUser',
+							password: password
+						})
+						.expect('Content-Type', /json/)
+						.expect(401);
+				})
+				.then(() => {
+					return request
+						.post(LOGOUT_ROUTE)
+						.expect(200);
+				})
+				.then(res => {
+					log.debug('Response Headers:', res.headers);
+					return request
+						.get('/api/user/')
+						.expect(401);
+				})
+				.then(() => { done(); })
+				.catch(done);
 		});
 
 		it('will do nothing if there is no active session', done => {
-			done();
+			request
+				.post(LOGOUT_ROUTE)
+				.expect(200)
+				.then(() => {
+					return request
+						.get('/api/user/')
+						.expect(401);
+				})
+				.then(() => { done(); })
+				.catch(done);
 		});
 
 	});
