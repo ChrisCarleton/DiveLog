@@ -26,9 +26,12 @@ routeLoaders.forEach(loader => {
 	require(loader)(app);
 });
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, '../web/pug'));
+
 app.get('/', (req, res) => {
 	// TODO: Serve web application.
-	res.send('Hello!');
+	res.render('index');
 });
 
 //app.all('*', (req, res) => {});
