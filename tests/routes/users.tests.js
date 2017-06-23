@@ -2,7 +2,6 @@ import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import { expect } from 'chai';
-//import log from '../../service/logger';
 import { purgeTable } from '../test-utils';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';

@@ -7,6 +7,8 @@ import mkdirp from 'mkdirp';
 import mocha from 'gulp-mocha';
 import path from 'path';
 
+const isparta = require('isparta');
+
 gulp.task('lint', () => {
 	return gulp
 		.src(['service/**/*.js', 'tests/**/*.js', 'gulpfile.babel.js'])
@@ -16,13 +18,11 @@ gulp.task('lint', () => {
 });
 
 gulp.task('cover', () => {
-	const isparta = require('isparta').Instrumenter;
-
 	return gulp
-		.src([path.resolve(__dirname, 'service/**/*.js')])
+		.src(['service/**/*.js'])
 		.pipe(istanbul({
-			instrumenter: isparta,
-			includeUntested: true
+			instrumenter: isparta.Instrumenter
+			//includeUntested: true
 		}))
 		.pipe(istanbul.hookRequire());
 });
@@ -41,7 +41,7 @@ gulp.task('ensure-dynamo-tables', done => {
 	}
 
 	process.env.DIVELOG_AWS_DYNAMO_ENDPOINT =
-		process.env.DIVELOG_AWS_DYNAMO_ENDPOINT || 'http://localhost:7777';
+	process.env.DIVELOG_AWS_DYNAMO_ENDPOINT || 'http://localhost:7777';
 	const database = require('./service/data/database');
 	const tables = glob.sync('./service/data/**/*.table.js');
 	tables.forEach(table => {
@@ -59,13 +59,14 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 		.src(['tests/**/*.tests.js'])
 		.pipe(mocha({
 			compilers: ['js:babel-core/register'],
+			reporter: 'spec',
 			timeout: 4000
 		}))
-		.on('error', process.exit.bind(process, 1))
 		.pipe(istanbul.writeReports({
 			dir: './coverage',
 			reporters: ['lcov', 'text-summary']
-		}));
+		}))
+		.on('error', process.exit.bind(process, 1));
 });
 
 gulp.task('report-coverage', ['test'], () => {

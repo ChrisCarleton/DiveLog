@@ -3,19 +3,21 @@ import log from '../logger';
 import passport from 'passport';
 
 export function login(req, res) {
-	passport.authenticate('local', (err, user, info) => {
+	passport.authenticate('local', (err, user) => {
 		if (err) {
 			log.error('An error occured while attempting to log in a user:', err);
 			return serverErrorResponse(res);
 		}
 
 		if (user) {
+			log.trace('Attempting to log in user:', user.userName);
 			return req.login(user, loginErr => {
 				if (loginErr) {
 					log.error('An error occured while attempting to log in a user:', loginErr);
 					return serverErrorResponse(res);
 				}
 
+				log.info('User', user.userName, 'has been successfully authenticated.');
 				res.json(user);
 			});
 		}
@@ -24,7 +26,7 @@ export function login(req, res) {
 			res,
 			3000,
 			'Authentication failed',
-			'The user could not be authenticated. Either the user name or password (or both) is incorrect.'
+			'The user could not be authenticated. Either the user name or password (or both) is incorrect.',
 			401);
 	})(req, res);
 }
