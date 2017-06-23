@@ -22,7 +22,7 @@ gulp.task('cover', () => {
 		.src(['service/**/*.js'])
 		.pipe(istanbul({
 			instrumenter: isparta.Instrumenter
-			//includeUntested: true
+			includeUntested: true
 		}))
 		.pipe(istanbul.hookRequire());
 });
