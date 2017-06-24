@@ -12,7 +12,7 @@ const isparta = require('isparta');
 
 gulp.task('lint', () => {
 	return gulp
-		.src(['service/**/*.js', 'tests/**/*.js', 'gulpfile.babel.js'])
+		.src(['service/**/*.js', 'web/**/*.js', 'web/**/*.jsx', 'tests/**/*.js', 'gulpfile.babel.js'])
 		.pipe(eslint())
 		.pipe(eslint.format())
 		.pipe(eslint.failAfterError());
