@@ -6,6 +6,7 @@ import istanbul from 'gulp-istanbul';
 import mkdirp from 'mkdirp';
 import mocha from 'gulp-mocha';
 import path from 'path';
+import webpack from 'gulp-webpack';
 
 const isparta = require('isparta');
 
@@ -28,7 +29,7 @@ gulp.task('cover', () => {
 });
 
 gulp.task('ensure-dist-directory', done => {
-	mkdirp(path.join(__dirname, 'web/dist'), done);
+	mkdirp(path.join(__dirname, 'dist'), done);
 });
 
 gulp.task('ensure-log-directory', done => {
@@ -73,6 +74,12 @@ gulp.task('report-coverage', ['test'], () => {
 	return gulp
 		.src('coverage/lcov.info')
 		.pipe(coveralls());
+});
+
+gulp.task('bundle', ['ensure-dist-directory'], () => {
+	gulp
+		.src('web/app.js')
+		.pipe(webpack(require('./webpack.config.js')));
 });
 
 gulp.task('default', () => {
