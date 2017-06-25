@@ -1,11 +1,13 @@
 import auth from './auth';
 import bodyParser from 'body-parser';
+import config from './config';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import glob from 'glob';
 import http from 'http';
 import log from './logger';
 import path from 'path';
+import pug from 'pug';
 import session from 'express-session';
 
 const app = express();
@@ -16,30 +18,29 @@ app.use(session({
 	secret: 'my-secret',
 	resave: false,
 	saveUninitialized: false
-}));	// TODO: Upgrade this to proper storage!
+}));	// TODO: Upgrade this to proper storage! (Use DynamoDb!)
 
 auth(app);
 
-const routeLoaders = glob.sync(path.join(__dirname, 'routes/**/*.routes.js'));
+const routeLoaders = glob.sync(path.resolve(__dirname, 'routes/**/*.routes.js'));
 routeLoaders.forEach(loader => {
 	log.debug('Loading route loader:', loader);
 	require(loader)(app);
 });
 
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, '../web/pug'));
+const homePage = pug.compileFile(
+	path.resolve(__dirname, 'views/index.pug'));
 
 app.get('/', (req, res) => {
-	// TODO: Serve web application.
-	res.render('index');
+	res.send(homePage({
+		env: config.env
+	}));
 });
 
-//app.all('*', (req, res) => {});
-
 const server = http.createServer(app);
-server.listen(8100);
+server.listen(config.port);
 
-log.info('Server started on port 8100.');
+log.info('Server started on port', config.port);
 
 const exportable = {
 	app: app,

@@ -1,11 +1,15 @@
 import coveralls from 'gulp-coveralls';
 import eslint from 'gulp-eslint';
 import glob from 'glob';
+import gls from 'gulp-live-server';
 import gulp from 'gulp';
 import istanbul from 'gulp-istanbul';
 import mkdirp from 'mkdirp';
 import mocha from 'gulp-mocha';
 import path from 'path';
+import rename from 'gulp-rename';
+import uglify from 'gulp-uglify';
+import util from 'gulp-util';
 import webpack from 'gulp-webpack';
 
 const isparta = require('isparta');
@@ -42,7 +46,7 @@ gulp.task('ensure-dynamo-tables', done => {
 	}
 
 	process.env.DIVELOG_AWS_DYNAMO_ENDPOINT =
-	process.env.DIVELOG_AWS_DYNAMO_ENDPOINT || 'http://localhost:7777';
+		process.env.DIVELOG_AWS_DYNAMO_ENDPOINT || 'http://localhost:7777';
 	const database = require('./service/data/database');
 	const tables = glob.sync('./service/data/**/*.table.js');
 	tables.forEach(table => {
@@ -54,7 +58,7 @@ gulp.task('ensure-dynamo-tables', done => {
 
 gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-tables'], () => {
 	process.env.DIVELOG_LOG_LEVEL = 'trace';
-	process.env.DIVELOG_LOG_FILE = path.join(__dirname, 'logs/tests.log');
+	process.env.DIVELOG_LOG_FILE = path.resolve(__dirname, 'logs/tests.log');
 
 	return gulp
 		.src(['tests/**/*.tests.js'])
@@ -76,12 +80,44 @@ gulp.task('report-coverage', ['test'], () => {
 		.pipe(coveralls());
 });
 
-gulp.task('bundle', ['ensure-dist-directory'], () => {
-	gulp
+gulp.task('bundle', ['lint', 'ensure-dist-directory'], () => {
+	return gulp
 		.src('web/app.js')
-		.pipe(webpack(require('./webpack.config.js')));
+		.pipe(webpack(require('./webpack.config.js')))
+		.pipe(gulp.dest('dist/'));
 });
 
-gulp.task('default', () => {
-	// TODO: Run dev server
+gulp.task('minify', ['bundle'], () => {
+	return gulp
+		.src('dist/bundle.js')
+		.pipe(uglify())
+		.pipe(rename('bundle.min.js'))
+		.pipe(gulp.dest('dist/'));
 });
+
+gulp.task('dev-server', ['ensure-log-directory', 'ensure-dynamo-tables', 'bundle'], () => {
+	const server = gls(
+		'service/index.js',
+		{ env: 
+			{
+				NODE_ENV: 'dev-server',
+				DIVELOG_PORT: 3000,
+				DIVELOG_LOG_LEVEL: 'trace',
+				DIVELOG_LOG_FILE: path.resolve(__dirname, 'logs/dev.log')
+			}
+		},
+		false);
+
+	gulp.watch(['service/**/*.js', 'service/views/**/*.pug'], () => {
+		server.start.bind(server)();
+		util.log(util.colors.yellow.bold('File modification detected; dev server has been restarted.'));
+	});
+
+	util.log(
+		util.colors.yellow.bold('Starting dev server on port', 3000, '... Logs will be written to:'),
+		util.colors.yellow('./logs/dev.log'));
+	server.start();
+
+});
+
+gulp.task('default', ['dev-server']);

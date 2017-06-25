@@ -3,6 +3,7 @@ const config = {
 	logLevel: process.env.DIVELOG_LOG_LEVEL || 'info',
 	logFile: process.env.DIVELOG_LOG_FILE,
 	baseUrl: process.env.DIVELOG_BASE_URL || 'http://localhost:8100/',
+	port: process.env.DIVELOG_PORT || 8100,
 
 	awsKeyId: process.env.DIVELOG_AWS_KEY_ID || 'awskey',
 	awsSecretKey: process.env.DIVELOG_AWS_SECRET_KEY || 'shhh!secret!',
