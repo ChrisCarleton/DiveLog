@@ -7,7 +7,7 @@ const config = {
 
 	awsKeyId: process.env.DIVELOG_AWS_KEY_ID || 'awskey',
 	awsSecretKey: process.env.DIVELOG_AWS_SECRET_KEY || 'shhh!secret!',
-	awsRegion: process.env.DIVELOG_AWS_REGION || 'ca-central-1',
+	awsRegion: process.env.DIVELOG_AWS_REGION || 'us-east-1',
 	awsDynamoEndpoint: process.env.DIVELOG_AWS_DYNAMO_ENDPOINT,
 
 	auth: {

@@ -103,7 +103,8 @@ gulp.task('dev-server', ['ensure-log-directory', 'ensure-dynamo-tables', 'bundle
 				NODE_ENV: 'dev-server',
 				DIVELOG_PORT: 3000,
 				DIVELOG_LOG_LEVEL: 'trace',
-				DIVELOG_LOG_FILE: path.resolve(__dirname, 'logs/dev.log')
+				DIVELOG_LOG_FILE: path.resolve(__dirname, 'logs/dev.log'),
+				DIVELOG_AWS_DYNAMO_ENDPOINT: 'http://localhost:7777'
 			}
 		},
 		false);

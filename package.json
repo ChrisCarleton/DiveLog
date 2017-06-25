@@ -7,7 +7,8 @@
   "scripts": {
     "test": "gulp test",
     "server": "node service/index.js | bunyan",
-    "report-coverage": "gulp report-coverage"
+    "report-coverage": "gulp report-coverage",
+    "dev": "gulp dev-server"
   },
   "repository": {
     "type": "git",
