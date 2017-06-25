@@ -10,6 +10,14 @@ module.exports = {
 		path: outputDir
 	},
 	devtool: 'cheap-module-source-map',
+	devServer: {
+		contentBase: outputDir,
+		port: 3002,
+		compress: true,
+		historyApiFallback: true,
+		hot: true,
+		hotOnly: true
+	},
 	module: {
 		loaders: [
 			{

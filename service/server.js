@@ -45,6 +45,14 @@ switch (config.env) {
 		break;
 }
 
+app.use(
+	'/public',
+	express.static(
+		path.resolve(__dirname, '../dist'),
+		{
+			index: false
+		}));
+
 app.get('/', (req, res) => {
 	res.send(homePage({
 		env: config.env,

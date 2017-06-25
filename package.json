@@ -45,12 +45,12 @@
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
-    "gulp-webpack": "^1.5.0",
     "isparta": "^4.0.0",
     "mkdirp": "^0.5.1",
     "sinon": "^2.3.4",
     "style-loader": "^0.18.2",
     "supertest": "^3.0.0",
+    "webpack": "^3.0.0",
     "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {

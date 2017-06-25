@@ -10,7 +10,8 @@ import path from 'path';
 import rename from 'gulp-rename';
 import uglify from 'gulp-uglify';
 import util from 'gulp-util';
-import webpack from 'gulp-webpack';
+import webpack from 'webpack';
+//import WebpackDevServer from 'webpack-dev-server';
 
 const isparta = require('isparta');
 
@@ -80,11 +81,18 @@ gulp.task('report-coverage', ['test'], () => {
 		.pipe(coveralls());
 });
 
-gulp.task('bundle', ['lint', 'ensure-dist-directory'], () => {
-	return gulp
-		.src('web/app.js')
-		.pipe(webpack(require('./webpack.config.js')))
-		.pipe(gulp.dest('dist/'));
+gulp.task('bundle', ['lint', 'ensure-dist-directory'], done => {
+	webpack(
+		require('./webpack.config.js'),
+		(err, stats) => {
+			if (err) {
+				throw new util.PluginError('webpack', err);
+			}
+
+			util.log('[webpack]', stats.toString());
+
+			done();
+		});
 });
 
 gulp.task('minify', ['bundle'], () => {
