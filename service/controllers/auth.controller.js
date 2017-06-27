@@ -1,4 +1,4 @@
-import errorRespone, { serverErrorResponse } from '../utils/error-response';
+import errorRespone, { notAuthroizedResponse, serverErrorResponse } from '../utils/error-response';
 import log from '../logger';
 import passport from 'passport';
 
@@ -59,5 +59,13 @@ export function requireUser(req, res, next) {
 		return next();
 	}
 
-	res.status(401).json({});
+	notAuthroizedResponse(res);
+}
+
+export function requireAdminUser(req, res, next) {
+	if (req.user && req.user.role === 'admin') {
+		return next();
+	}
+
+	notAuthroizedResponse(res);
 }
