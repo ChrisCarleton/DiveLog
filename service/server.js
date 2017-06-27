@@ -34,7 +34,7 @@ const homePage = pug.compileFile(
 let bundleLocation;
 switch (config.env) {
 	case 'dev-server':
-		bundleLocation = 'public/bundle.min.js';//'http://localhost:3002/bundle.js';
+		bundleLocation = 'http://localhost:3002/bundle.js';
 		break;
 
 	case 'production':
