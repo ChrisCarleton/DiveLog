@@ -7,11 +7,9 @@ import istanbul from 'gulp-istanbul';
 import mkdirp from 'mkdirp';
 import mocha from 'gulp-mocha';
 import path from 'path';
-import rename from 'gulp-rename';
-import uglify from 'gulp-uglify';
 import util from 'gulp-util';
 import webpack from 'webpack';
-//import WebpackDevServer from 'webpack-dev-server';
+import WebpackDevServer from 'webpack-dev-server';
 
 const isparta = require('isparta');
 
@@ -81,9 +79,9 @@ gulp.task('report-coverage', ['test'], () => {
 		.pipe(coveralls());
 });
 
-gulp.task('bundle', ['lint', 'ensure-dist-directory'], done => {
+function bundle(config, done) {
 	webpack(
-		require('./webpack.config.js'),
+		config,
 		(err, stats) => {
 			if (err) {
 				throw new util.PluginError('webpack', err);
@@ -92,18 +90,35 @@ gulp.task('bundle', ['lint', 'ensure-dist-directory'], done => {
 			util.log('[webpack]', stats.toString());
 
 			done();
+		});	
+}
+
+gulp.task('bundle-dev', ['lint', 'ensure-dist-directory'], done => {
+	bundle(require('./webpack.dev.js'), done);
+});
+
+gulp.task('bundle-prod', ['ensure-dist-directory'], done => {
+	bundle(require('./webpack.prod.js'), done);
+});
+
+gulp.task('bundle', ['bundle-dev', 'bundle-prod']);
+
+gulp.task('webpack-server', ['ensure-dist-directory'], done => {
+	const compiler = webpack(require('./webpack.dev.js'));
+
+	new WebpackDevServer(compiler)
+		.listen(3002, 'localhost', err => {
+			if (err) {
+				throw new util.PluginError('webpack-dev-server', err);
+			}
+
+			util.log('[webpack-dev-server]', "Webpack Dev Server started on port 3002.");
+
+			done();
 		});
 });
 
-gulp.task('minify', ['bundle'], () => {
-	return gulp
-		.src('dist/bundle.js')
-		.pipe(uglify())
-		.pipe(rename('bundle.min.js'))
-		.pipe(gulp.dest('dist/'));
-});
-
-gulp.task('dev-server', ['ensure-log-directory', 'ensure-dynamo-tables', 'bundle'], () => {
+gulp.task('dev-server', ['ensure-log-directory', 'ensure-dynamo-tables', 'webpack-server'], () => {
 	const server = gls(
 		'service/index.js',
 		{ env: 

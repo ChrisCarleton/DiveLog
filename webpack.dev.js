@@ -1,4 +1,5 @@
 var path = require('path');
+var webpack = require('webpack');
 
 var appDir = path.resolve(__dirname, 'web/');
 var outputDir = path.resolve(__dirname, 'dist/');
@@ -7,8 +8,12 @@ module.exports = {
 	entry: path.resolve(appDir, 'app.js'),
 	output: {
 		filename: 'bundle.js',
-		path: outputDir
+		path: outputDir,
+		publicPath: 'http://localhost:3000/public/'
 	},
+	plugins: [
+		new webpack.HotModuleReplacementPlugin()
+	],
 	devtool: 'cheap-module-source-map',
 	devServer: {
 		contentBase: outputDir,
@@ -16,7 +21,8 @@ module.exports = {
 		compress: true,
 		historyApiFallback: true,
 		hot: true,
-		hotOnly: true
+		hotOnly: true,
+		publicPath: 'http://localhost:3000/public/'
 	},
 	module: {
 		loaders: [

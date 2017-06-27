@@ -31,17 +31,18 @@ routeLoaders.forEach(loader => {
 const homePage = pug.compileFile(
 	path.resolve(__dirname, 'views/index.pug'));
 
-let scriptLocation;
+let bundleLocation;
 switch (config.env) {
-	//case 'dev-server':
-	// TODO: Point this at the webpack-dev-server for hot reloading!
+	case 'dev-server':
+		bundleLocation = 'public/bundle.min.js';//'http://localhost:3002/bundle.js';
+		break;
 
 	case 'production':
-		scriptLocation = 'public/bundle.min.js';
+		bundleLocation = 'public/bundle.min.js';
 		break;
 
 	default:
-		scriptLocation = 'public/bundle.js';
+		bundleLocation = 'public/bundle.js';
 		break;
 }
 
@@ -56,7 +57,8 @@ app.use(
 app.get('/', (req, res) => {
 	res.send(homePage({
 		env: config.env,
-		scriptLocation: scriptLocation
+		baseUrl: config.baseUrl,
+		bundleLocation: bundleLocation
 	}));
 });
 
