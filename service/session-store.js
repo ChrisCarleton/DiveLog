@@ -1,8 +1,29 @@
+import AWS from 'aws-sdk';
 import config from './config';
-import Store from 'connect-dynamodb';
+import duration from 'parse-duration';
+import connectDynamoDb from 'connect-dynamodb';
 
-const opts = {
-	table: `divelog-${config.env}-sessions`	
-};
+export default function(expressSession) {
 
-export default new Store(opts);
+	const Store = connectDynamoDb({ session: expressSession });
+	const opts = {
+		table: `divelog-${config.env}-sessions`,
+		AWSConfigJSON: {
+			accessKeyId: config.awsKeyId,
+			secretAccessKey: config.awsSecretKey,
+			region: config.awsRegion
+		},
+		reapInterval: duration('2h'),
+		prefix: '',
+		session: expressSession
+	};
+
+	if (config.awsDynamoEndpoint) {
+		opts.client = new AWS.DynamoDB({
+			endpoint: new AWS.Endpoint(config.awsDynamoEndpoint)
+		});
+	}
+
+	return new Store(opts);
+
+}

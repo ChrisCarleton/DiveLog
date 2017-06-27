@@ -80,3 +80,15 @@ resource "aws_dynamodb_table" "oauth_table" {
 	}
 
 }
+
+resource "aws_dynamodb_table" "sessions_table" {
+	name = "divelog-${var.env}-sessions"
+	read_capacity = 1
+	write_capacity = 1
+	hash_key = "id"
+
+	attribute {
+		name = "id"
+		type = "S"
+	}
+}
