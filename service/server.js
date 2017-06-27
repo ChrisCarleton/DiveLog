@@ -9,16 +9,20 @@ import log from './logger';
 import path from 'path';
 import pug from 'pug';
 import session from 'express-session';
+import SessionStore from './session-store';
 
 const app = express();
 
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+const sessionStore = SessionStore(session);
 app.use(session({
+	store: sessionStore,
 	secret: 'my-secret',
 	resave: false,
 	saveUninitialized: false
-}));	// TODO: Upgrade this to proper storage! (Use DynamoDb!)
+}));
 
 auth(app);
 
