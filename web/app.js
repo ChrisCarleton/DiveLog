@@ -1,13 +1,15 @@
+import { BrowserRouter as Router } from 'react-router-dom';
+import Home from './components/home.jsx';
 import React from 'react';
 import { render } from 'react-dom';
 
-class App extends React.Component {
-	render () {
+class AppRouter extends React.Component {
+	render() {
 		return (
-			<div>
-				<h1>{ "Dive Log" }</h1>
-			</div>);
+			<Router>
+				<Home />
+			</Router>);
 	}
 }
 
-render(<App />, document.getElementById('app'));
+render(<AppRouter />, document.getElementById('app'));

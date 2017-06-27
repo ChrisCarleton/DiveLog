@@ -73,7 +73,9 @@
     "passport-local": "^1.0.0",
     "pug": "^2.0.0-rc.2",
     "react": "^15.6.1",
+    "react-bootstrap": "^0.31.0",
     "react-dom": "^15.6.1",
+    "react-router-dom": "^4.1.1",
     "topo": "^2.0.2",
     "vogels-promisified": "^2.2.3"
   }
