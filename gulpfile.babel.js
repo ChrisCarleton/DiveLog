@@ -93,7 +93,7 @@ function bundle(config, done) {
 		});	
 }
 
-gulp.task('bundle-dev', ['lint', 'ensure-dist-directory'], done => {
+gulp.task('bundle-dev', ['ensure-dist-directory'], done => {
 	bundle(require('./webpack.dev.js'), done);
 });
 
