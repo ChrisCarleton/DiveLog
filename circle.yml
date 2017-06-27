@@ -10,3 +10,12 @@ dependencies:
 test:
   override:
     - docker run -it --link dynamodb:dynamodb -e COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN -e "DIVELOG_AWS_DYNAMO_ENDPOINT=http://dynamodb:7777" divelog npm run report-coverage
+
+deployment:
+  staging:
+    branch: master
+    commands:
+      - $(aws ecr get-login --no-include-email --region us-east-1)
+      - docker tag divelog:latest 961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest
+      - docker push 961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest
+
