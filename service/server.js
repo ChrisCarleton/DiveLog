@@ -58,7 +58,7 @@ app.use(
 			index: false
 		}));
 
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
 	res.send(homePage({
 		env: config.env,
 		baseUrl: config.baseUrl,
