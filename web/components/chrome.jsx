@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from './nav-bar.jsx';
+import PropTypes from 'prop-types';
 
 class Chrome extends React.Component {
 	render() {
@@ -12,5 +13,9 @@ class Chrome extends React.Component {
 			</div>);
 	}
 }
+
+Chrome.propTypes = {
+	children: PropTypes.node
+};
 
 export default Chrome;
