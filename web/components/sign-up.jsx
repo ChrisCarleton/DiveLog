@@ -14,6 +14,7 @@ class SignUp extends React.Component {
 	constructor() {
 		super();
 		this.state = {
+			value: '',
 			canSubmit: false
 		};
 	}
@@ -27,10 +28,22 @@ class SignUp extends React.Component {
 					<Row>
 						<Col md={5}>
 							<h4>Create an Account</h4>
-							<Formsy.Form horizontal>
+							<Formsy.Form className="form-horizontal">
 								<TextBox
-									label="User name:"
-									controlId="username" />
+									label="User name"
+									controlId="username"
+									name="username"
+									validations={{
+										matchRegexp: /^[0-9a-zA-Z][0-9a-zA-Z.-_]*[0-9a-zA-Z]$/,
+										minLength: 3,
+										maxLength: 30
+									}}
+									validationErrors={{
+										matchRegexp: 'User names must contain letters and numbers. Hyphens, periods, and underscores are allowed in the middle.',
+										minLength: 'User names must be between 3 and 30 characters long.',
+										maxLength: 'User names must be between 3 and 30 characters long.'
+									}}
+									required />
 								<Button bsStyle="primary" disabled={!this.state.canSubmit}>
 									Create Account
 								</Button>

@@ -8,7 +8,7 @@ import Users from '../data/users.table';
 const signUpValidation = Joi.object().keys({
 	userName: Joi
 		.string()
-		.regex(/^[0-9a-zA-Z][0-9a-zA-Z.-]*[0-9a-zA-Z]$/)
+		.regex(/^[0-9a-zA-Z][0-9a-zA-Z.-_]*[0-9a-zA-Z]$/)
 		.min(3)
 		.max(30)
 		.required(),
