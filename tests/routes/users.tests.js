@@ -165,7 +165,7 @@ describe('User routes', () => {
 								pattern: {},
 								value: '@@ NOtl Va!!lid atALL'
 							},
-							message: '"userName" with value "&#x40;&#x40; NOtl Va&#x21;&#x21;lid atALL" fails to match the required pattern: /^[0-9a-zA-Z][0-9a-zA-Z.-]*[0-9a-zA-Z]$/',
+							message: '"userName" with value "&#x40;&#x40; NOtl Va&#x21;&#x21;lid atALL" fails to match the required pattern: /^[0-9a-zA-Z][0-9a-zA-Z.-_]*[0-9a-zA-Z]$/',
 							path: 'userName',
 							type: 'string.regex.base'
 						}

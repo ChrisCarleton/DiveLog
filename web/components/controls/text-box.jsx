@@ -21,14 +21,21 @@ class TextBox extends React.Component {
 	}
 
 	onTextChanged(e) {
-		this.state.value = e.target.value;
-		this.setState(this.state);
+		this.props.setValue(e.target.value);
+		const validationState = this.props.isValid() ? 'success' : 'error';
+		this.setState(Object.assign(
+			{},
+			this.state,
+			{
+				value: e.target.value,
+				validationState: validationState
+			}));
 	}
 
 	onLostFocus() {
 		this.props.setValue(this.state.value);
-		this.state.validationState = this.props.isValid() ? 'success' : 'error';
-		this.setState(this.state);
+		const validationState = this.props.isValid() ? 'success' : 'error';
+		this.setState(Object.assign({}, this.state, { validationState: validationState }));
 	}
 
 	render() {
@@ -42,6 +49,20 @@ class TextBox extends React.Component {
 					onChange={this.onTextChanged}
 					onBlur={this.onLostFocus} />
 				<FormControl.Feedback />
+				<HelpBlock>
+					{
+						this.props.showError()
+						? this.props.getErrorMessage()
+						: null
+					}
+				</HelpBlock>
+				<HelpBlock>
+					{
+						(!this.props.isPristine() && this.props.showRequired())
+						? this.props.label + ' is required.'
+						: null
+					}
+				</HelpBlock>
 				<HelpBlock>{this.props.helpText}</HelpBlock>
 			</FormGroup>);
 	}
@@ -49,10 +70,17 @@ class TextBox extends React.Component {
 
 TextBox.propTypes = {
 	controlId: PropTypes.string.isRequired,
+	getErrorMessage: PropTypes.func,
+	getValue: PropTypes.func,
 	helpText: PropTypes.string,
 	isPassword: PropTypes.bool,
+	isPristine: PropTypes.func,
+	isValid: PropTypes.func,
 	label: PropTypes.string.isRequired,
 	placeholder: PropTypes.string,
+	setValue: PropTypes.func,
+	showError: PropTypes.func,
+	showRequired: PropTypes.func,
 	value: PropTypes.string
 };
 
