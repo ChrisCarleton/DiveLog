@@ -66,11 +66,11 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 			reporter: 'spec',
 			timeout: 4000
 		}))
+		.on('error', process.exit.bind(process, 1))
 		.pipe(istanbul.writeReports({
 			dir: './coverage',
 			reporters: ['lcov', 'text-summary']
-		}))
-		.on('error', process.exit.bind(process, 1));
+		}));
 });
 
 gulp.task('report-coverage', ['test'], () => {
