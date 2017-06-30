@@ -64,7 +64,7 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 		.pipe(mocha({
 			compilers: ['js:babel-core/register'],
 			reporter: 'spec',
-			timeout: 6000
+			timeout: 4000
 		}))
 		.on('error', process.exit.bind(process, 1))
 		.pipe(istanbul.writeReports({

@@ -13,16 +13,14 @@ export default function(expressSession) {
 		session: expressSession
 	};
 
-	if (config.awsDynamoEndpoint) {
-		opts.client = new AWS.DynamoDB({
-			accessKeyId: config.awsKeyId,
-			secretAccessKey: config.awsSecretKey,			
-			region: config.awsRegion,
-			endpoint: config.awsDynamoEndpoint
-				? new AWS.Endpoint(config.awsDynamoEndpoint)
-				: undefined
-		});
-	}
+	opts.client = new AWS.DynamoDB({
+		accessKeyId: config.awsKeyId,
+		secretAccessKey: config.awsSecretKey,			
+		region: config.awsRegion,
+		endpoint: config.awsDynamoEndpoint
+			? new AWS.Endpoint(config.awsDynamoEndpoint)
+			: undefined
+	});
 
 	return new Store(opts);
 
