@@ -2,7 +2,7 @@ const config = {
 	env: process.env.NODE_ENV || 'dev',
 	logLevel: process.env.DIVELOG_LOG_LEVEL || 'info',
 	logFile: process.env.DIVELOG_LOG_FILE,
-	baseUrl: process.env.DIVELOG_BASE_URL || 'http://localhost:8100/',
+	baseUrl: process.env.DIVELOG_BASE_URL || 'http://localhost:3000/',
 	port: process.env.DIVELOG_PORT || 8100,
 
 	awsKeyId: process.env.DIVELOG_AWS_KEY_ID || 'awskey',
