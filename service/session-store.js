@@ -8,21 +8,19 @@ export default function(expressSession) {
 	const Store = connectDynamoDb({ session: expressSession });
 	const opts = {
 		table: `divelog-${config.env}-sessions`,
-		AWSConfigJSON: {
-			accessKeyId: config.awsKeyId,
-			secretAccessKey: config.awsSecretKey,
-			region: config.awsRegion
-		},
 		reapInterval: duration('2h'),
 		prefix: '',
 		session: expressSession
 	};
 
-	if (config.awsDynamoEndpoint) {
-		opts.client = new AWS.DynamoDB({
-			endpoint: new AWS.Endpoint(config.awsDynamoEndpoint)
-		});
-	}
+	opts.client = new AWS.DynamoDB({
+		accessKeyId: config.awsKeyId,
+		secretAccessKey: config.awsSecretKey,			
+		region: config.awsRegion,
+		endpoint: config.awsDynamoEndpoint
+			? new AWS.Endpoint(config.awsDynamoEndpoint)
+			: undefined
+	});
 
 	return new Store(opts);
 
