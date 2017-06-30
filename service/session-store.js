@@ -20,6 +20,7 @@ export default function(expressSession) {
 
 	if (config.awsDynamoEndpoint) {
 		opts.client = new AWS.DynamoDB({
+			region: config.awsRegion,
 			endpoint: new AWS.Endpoint(config.awsDynamoEndpoint)
 		});
 	}
