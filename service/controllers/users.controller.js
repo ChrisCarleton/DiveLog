@@ -12,10 +12,10 @@ const signUpValidation = Joi.object().keys({
 		.min(3)
 		.max(30)
 		.required(),
-	email: Joi.string().email().required(),
+	email: Joi.string().email().max(150).required(),
 	password: Joi
 		.string()
-		.regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]*$/)
+		.regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?+)(&.-=/\\\][~`]).*$/)
 		.min(7)
 		.max(30)
 		.required(),

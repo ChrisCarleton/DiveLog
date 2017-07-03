@@ -1,3 +1,4 @@
+import alt from './alt';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Chrome from './components/chrome.jsx';
 import Home from './components/home.jsx';
@@ -23,4 +24,5 @@ class AppRouter extends React.Component {
 	}
 }
 
+alt.bootstrap(JSON.stringify(window.initialState));
 render(<AppRouter />, document.getElementById('app'));

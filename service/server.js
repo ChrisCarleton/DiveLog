@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import glob from 'glob';
 import http from 'http';
+import initialState from './initial-state';
 import log from './logger';
 import path from 'path';
 import pug from 'pug';
@@ -62,7 +63,8 @@ app.get('*', (req, res) => {
 	res.send(homePage({
 		env: config.env,
 		baseUrl: config.baseUrl,
-		bundleLocation: bundleLocation
+		bundleLocation: bundleLocation,
+		initialState: JSON.stringify(initialState(req))
 	}));
 });
 
