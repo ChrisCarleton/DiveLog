@@ -3,18 +3,22 @@ import UserActions from '../actions/user-actions';
 
 class UserStore {
 	constructor() {
-		this.user = null;
+		this.currentUser = null;
 		this.bindListeners({
-			signInUser: UserActions.signInUser
+			signInUser: UserActions.SIGN_IN_SUCCEEDED,
+			signOutUser: UserActions.SIGN_OUT_USER
 		});
+
+		this.signInUser = this.signInUser.bind(this);
+		this.signOutUser = this.signOutUser.bind(this);
 	}
 
 	signInUser(user) {
-		this.user = user;
+		this.currentUser = user;
 	}
 
 	signOutUser() {
-		this.user = null;
+		this.currentUser = null;
 	}
 }
 

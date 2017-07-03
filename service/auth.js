@@ -20,12 +20,14 @@ export default function(app) {
 					.execAsync()
 					.then(response => {
 						if (response.Items.length === 0) {
+							log.info('Could not log in user "', username, '". User does not exist');
 							return done(null, null);
 						}
 
 						const result = response.Items[0];
 
 						if (!bcrypt.compareSync(password, result.get('passwordHash'))) {
+							log.info('Could not log in user "', username, '". Password was invalid.');
 							return done(null, null);
 						}
 

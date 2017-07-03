@@ -1,23 +1,41 @@
-import alt, { baseUrl } from '../alt';
-import agent from 'superagent-promise';
-
-const request = agent(baseUrl);
+import AlertActions from './alert-actions';
+import alt from '../alt';
+import request from '../request-agent';
 
 class UserActions {
-	signInUser(user) {
-		return user;
+	loginUser(credentials) {
+		return dispatch => {
+			dispatch();
+			request
+				.post('/api/auth/login/')
+				.send(credentials)
+				.then(res => {
+					this.signInSucceeded(res.body);
+				})
+				.catch(AlertActions.handleErrorResponse);			
+		};
 	}
 
 	signUpUser(info) {
-		request
-			.post('/api/users/')
-			.send(info)
-			.then(() => {})
-			.catch(() => {});
+		return dispatch => {
+			dispatch();
+			info.confirmPassword = undefined;
+			request
+				.post('/api/users/')
+				.send(info)
+				.then(res => {
+					this.signInSucceeded(res.body);
+				})
+				.catch(AlertActions.handleErrorResponse);
+		};
 	}
 
 	signOutUser() {
-		return null;
+		return {};
+	}
+
+	signInSucceeded(user) {
+		return user;
 	}
 }
 
