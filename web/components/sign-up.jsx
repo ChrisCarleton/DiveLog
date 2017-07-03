@@ -1,8 +1,10 @@
-import AlertBox from './controls/alert-box.jsx';
+import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import TextBox from './controls/text-box.jsx';
 import UserActions from '../actions/user-actions';
+import UserStore from '../stores/user-store';
 
 import {
 	Button,
@@ -16,10 +18,27 @@ class SignUp extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			canSubmit: false
+			canSubmit: false,
+			signedIn: UserStore.getState().currentUser ? true : false
 		};
 		this.enableButton = this.enableButton.bind(this);
 		this.disableButton = this.disableButton.bind(this);
+		this.onUserChanged = this.onUserChanged.bind(this);
+	}
+
+	componentDidMount() {
+		UserStore.listen(this.onUserChanged);
+	}
+
+	componentWillUnmount() {
+		UserStore.unlisten(this.onUserChanged);
+	}
+
+	onUserChanged(userInfo) {
+		this.setState(Object.assign(
+			{},
+			this.state,
+			{ signedIn: userInfo.currentUser ? true : false }));
 	}
 
 	enableButton() {
@@ -31,14 +50,18 @@ class SignUp extends React.Component {
 	}
 
 	submit(model) {
+		AlertActions.dismissAlert();
 		UserActions.signUpUser(model);
 	}
 
 	render() {
+		if (this.state.signedIn) {
+			return <Redirect to="/" push />;
+		}
+
 		return (
 			<div>
 				<PageHeader>Sign Up</PageHeader>
-				<AlertBox />
 				<Grid>
 					<Row>
 						<Col md={5}>

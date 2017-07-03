@@ -1,5 +1,7 @@
+import AlertBox from './controls/alert-box.jsx';
 import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
 import React from 'react';
+import UserActions from '../actions/user-actions';
 import UserStore from '../stores/user-store';
 
 import {
@@ -12,25 +14,25 @@ class AppNavbar extends React.Component {
 		this.state = {
 			user: UserStore.getState().currentUser
 		};
-		this.userChanged = this.userChanged.bind(this);
+		this.onUserChanged = this.onUserChanged.bind(this);
 	}
 
 	componentDidMount() {
-		UserStore.listen(this.userChanged);
+		UserStore.listen(this.onUserChanged);
 	}
 
 	componentWillUnmount() {
-		UserStore.unlisten(this.userChanged);
+		UserStore.unlisten(this.onUserChanged);
 	}
 
-	userChanged(userInfo) {
+	onUserChanged(userInfo) {
 		const state = Object.assign({}, this.state, { user: userInfo.currentUser });
 		this.setState(state);
 	}
 
 	render() {
 		return (
-			<Navbar inverse collapseOnSelect>
+			<Navbar fixedTop inverse collapseOnSelect>
 				<Navbar.Header>
 					<Navbar.Brand>
 						<IndexLinkContainer to="/">
@@ -49,7 +51,7 @@ class AppNavbar extends React.Component {
 						<Nav pullRight>
 							<NavDropdown id="user-nav" title={ this.state.user.displayName || this.state.user.userName }>
 								<MenuItem divider />
-								<MenuItem>Log Out</MenuItem>
+								<MenuItem onClick={ UserActions.signOutUser }>Log Out</MenuItem>
 							</NavDropdown>
 						</Nav>
 						:
@@ -63,6 +65,7 @@ class AppNavbar extends React.Component {
 						</Nav>							
 					}
 				</Navbar.Collapse>
+				<AlertBox />
 			</Navbar>);
 	}
 }

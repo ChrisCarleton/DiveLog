@@ -6,7 +6,7 @@ class UserStore {
 		this.currentUser = null;
 		this.bindListeners({
 			signInUser: UserActions.SIGN_IN_SUCCEEDED,
-			signOutUser: UserActions.SIGN_OUT_USER
+			signOutUser: UserActions.SIGN_OUT_SUCCEEDED
 		});
 
 		this.signInUser = this.signInUser.bind(this);

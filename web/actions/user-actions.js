@@ -31,11 +31,23 @@ class UserActions {
 	}
 
 	signOutUser() {
-		return {};
+		return dispatch => {
+			dispatch();
+			request
+				.post('/api/auth/logout/')
+				.then(() => {
+					this.signOutSucceeded();
+				})
+				.catch(AlertActions.handleErrorResponse);
+		};
 	}
 
 	signInSucceeded(user) {
 		return user;
+	}
+
+	signOutSucceeded() {
+		return {};
 	}
 }
 

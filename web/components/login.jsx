@@ -1,4 +1,4 @@
-import AlertBox from './controls/alert-box.jsx';
+import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
@@ -32,12 +32,15 @@ class LogIn extends React.Component {
 		UserStore.unlisten(this.onUserChanged);
 	}
 
-	onUserChanged() {
-		const currentUser = UserStore.getState().currentUser;
-		this.setState(Object.assign({}, this.state, { signedIn: currentUser ? true :false }));
+	onUserChanged(userInfo) {
+		this.setState(Object.assign(
+			{},
+			this.state,
+			{ signedIn: userInfo.currentUser ? true :false }));
 	}
 
 	submit(model) {
+		AlertActions.dismissAlert();
 		UserActions.loginUser(model);
 	}
 
@@ -49,7 +52,6 @@ class LogIn extends React.Component {
 		return (
 		<div>
 			<PageHeader>Log In</PageHeader>
-			<AlertBox />
 			<Grid>
 				<Row>
 					<Col md={5}>
