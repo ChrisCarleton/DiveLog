@@ -1,10 +1,17 @@
-const initialState = {};
+const initialState = {
+	AlertStore: {
+		alertVisible: false
+	},
+	UserStore: {}
+};
 
 export default function(req) {
 	return Object.assign(
 		{},
 		initialState,
 		{
-			user: req.user
+			UserStore: {
+				currentUser: req.user
+			}
 		});
 }
