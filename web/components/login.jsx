@@ -1,8 +1,10 @@
 import AlertBox from './controls/alert-box.jsx';
 import Formsy from 'formsy-react';
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import TextBox from './controls/text-box.jsx';
 import UserActions from '../actions/user-actions';
+import UserStore from '../stores/user-store';
 
 import {
 	Col,
@@ -15,6 +17,24 @@ import {
 class LogIn extends React.Component {
 	constructor() {
 		super();
+		const currentUser = UserStore.getState().currentUser;
+		this.state = {
+			signedIn: currentUser ? true : false
+		};
+		this.onUserChanged = this.onUserChanged.bind(this);
+	}
+
+	componentDidMount() {
+		UserStore.listen(this.onUserChanged);
+	}
+
+	componentWillUnmount() {
+		UserStore.unlisten(this.onUserChanged);
+	}
+
+	onUserChanged() {
+		const currentUser = UserStore.getState().currentUser;
+		this.setState(Object.assign({}, this.state, { signedIn: currentUser ? true :false }));
 	}
 
 	submit(model) {
@@ -22,6 +42,10 @@ class LogIn extends React.Component {
 	}
 
 	render() {
+		if (this.state.signedIn) {
+			return <Redirect to="/" push />;
+		}
+
 		return (
 		<div>
 			<PageHeader>Log In</PageHeader>
