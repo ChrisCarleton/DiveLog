@@ -48,7 +48,7 @@ POST
 #### Success Response
 __Status Code:__ 200
 
-The details of the newly-created user account are returned.
+The details of the newly-authenticated user account are returned.
 
 ```javascript
 {
@@ -62,7 +62,7 @@ The details of the newly-created user account are returned.
 
 #### Error Response
 ##### Status Code 400
-* __Error ID 1000:__ Validation error. A required field was omitted or a field value was invalid. See error details for more information.
+* __Error ID 1000:__ Validation error. Either the username or password fields were omitted.
 
 ##### Status Code 401
 * __Error ID 3000:__ Authentication failed. The user name or password (or both) was invalid.
@@ -94,3 +94,5 @@ than an error.
 ## Users
 
 ### Create New User (Local)
+
+Creates a new user account in the sytem.
