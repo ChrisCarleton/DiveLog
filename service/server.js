@@ -36,23 +36,22 @@ routeLoaders.forEach(loader => {
 const homePage = pug.compileFile(
 	path.resolve(__dirname, 'views/index.pug'));
 
-let bundleLocation, styleLocation;
+let bundleLocation;
 switch (config.env) {
 	case 'dev-server':
-		styleLocation = 'http://localhost:3002/styles/divelog.css';
 		bundleLocation = 'http://localhost:3002/bundle.js';
 		break;
 
 	case 'production':
-		styleLocation = '/public/styles/divelog.min.css';
-		bundleLocation = 'public/bundle.min.js';
+		bundleLocation = '/public/bundle.min.js';
 		break;
 
 	default:
-		styleLocation = '/public/styles/divelog.css';
-		bundleLocation = 'public/bundle.js';
+		bundleLocation = '/public/bundle.js';
 		break;
 }
+
+const styleLocation = config.env === 'production' ? '/public/bundle.css' : null;
 
 app.use(
 	'/public',

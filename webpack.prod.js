@@ -1,3 +1,9 @@
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+var extractStyles = new ExtractTextPlugin({
+	filename: 'bundle.css'
+});
+
 var path = require('path');
 var webpack = require('webpack');
 
@@ -33,17 +39,36 @@ module.exports = {
 				warnings: false
 			},
 			comments: false
-		})
+		}),
+		extractStyles
 	],
 	module: {
-		loaders: [
+		rules: [
 			{
 				test: /\.jsx?$/,
 				include: appDir,
-				loader: 'babel-loader',
-				query: {
-					presets: ['es2015', 'react']
-				}
+				use: [
+					{
+						loader: 'babel-loader',
+						query: {
+							presets: ['es2015', 'react']
+						}
+					}
+				]
+			},
+			{
+				test: /\.less$/,
+				include: appDir,
+				use: extractStyles.extract({
+					use: [
+						{
+							loader: 'css-loader'
+						},
+						{
+							loader: 'less-loader'
+						}
+					]
+				})
 			}
 		]
 	}

@@ -8,6 +8,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import SignUp from './components/sign-up.jsx';
 
+require('./styles/divelog.less');
+
 class AppRouter extends React.Component {
 	render() {
 		return (
