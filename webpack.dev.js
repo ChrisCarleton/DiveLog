@@ -25,14 +25,32 @@ module.exports = {
 		publicPath: 'http://localhost:3000/public/'
 	},
 	module: {
-		loaders: [
+		rules: [
 			{
 				test: /\.jsx?$/,
 				include: appDir,
-				loader: 'babel-loader',
-				query: {
-					presets: ['es2015', 'react']
-				}
+				use: [
+					{
+						loader: 'babel-loader',
+						query: {
+							presets: ['es2015', 'react']
+						}
+					}
+				]
+			},
+			{
+				test: /\.less$/,
+				use: [
+					{
+						loader: 'style-loader'
+					},
+					{
+						loader: 'css-loader'
+					},
+					{
+						loader: 'less-loader'
+					}
+				]
 			}
 		]
 	}

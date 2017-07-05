@@ -31,10 +31,6 @@ gulp.task('cover', () => {
 		.pipe(istanbul.hookRequire());
 });
 
-gulp.task('ensure-dist-directory', done => {
-	mkdirp(path.join(__dirname, 'dist'), done);
-});
-
 gulp.task('ensure-log-directory', done => {
 	mkdirp(path.join(__dirname, 'logs'), done);
 });
@@ -93,17 +89,17 @@ function bundle(config, done) {
 		});	
 }
 
-gulp.task('bundle-dev', ['ensure-dist-directory'], done => {
+gulp.task('bundle-dev', done => {
 	bundle(require('./webpack.dev.js'), done);
 });
 
-gulp.task('bundle-prod', ['ensure-dist-directory'], done => {
+gulp.task('bundle-prod', done => {
 	bundle(require('./webpack.prod.js'), done);
 });
 
 gulp.task('bundle', ['bundle-dev', 'bundle-prod']);
 
-gulp.task('webpack-server', ['ensure-dist-directory'], done => {
+gulp.task('webpack-server', done => {
 	const compiler = webpack(require('./webpack.dev.js'));
 
 	new WebpackDevServer(compiler)

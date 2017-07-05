@@ -43,13 +43,15 @@ switch (config.env) {
 		break;
 
 	case 'production':
-		bundleLocation = 'public/bundle.min.js';
+		bundleLocation = '/public/bundle.min.js';
 		break;
 
 	default:
-		bundleLocation = 'public/bundle.js';
+		bundleLocation = '/public/bundle.js';
 		break;
 }
+
+const styleLocation = config.env === 'production' ? '/public/bundle.css' : null;
 
 app.use(
 	'/public',
@@ -63,6 +65,7 @@ app.get('*', (req, res) => {
 	res.send(homePage({
 		env: config.env,
 		baseUrl: config.baseUrl,
+		styleLocation: styleLocation,
 		bundleLocation: bundleLocation,
 		initialState: JSON.stringify(initialState(req))
 	}));
