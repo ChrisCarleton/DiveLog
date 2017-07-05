@@ -47,7 +47,6 @@
     "sinon": "^2.3.4",
     "style-loader": "^0.18.2",
     "supertest": "^3.0.0",
-    "to-string-loader": "^1.1.5",
     "webpack": "^3.0.0",
     "webpack-dev-server": "^2.5.0"
   },
