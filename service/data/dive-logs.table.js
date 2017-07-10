@@ -9,10 +9,10 @@ const DiveLogs = db.define(
 		timestamps: true,
 		schema: {
 			logId: db.types.uuid(),
-			ownerId: Joi.string().uuid(),
+			ownerId: Joi.string().uuid().required(),
+			entryTime: Joi.string().isoDate().required(),
 			diveNumber: Joi.number().integer().min(1),
 			diveTime: Joi.object().keys({
-				entryTime: Joi.string().isoDate(),
 				exitTime: Joi.string().isoDate(),
 				surfaceInterval: Joi.number().integer().positive(),
 				bottomTime: Joi.number().integer().positive(),
@@ -56,9 +56,14 @@ const DiveLogs = db.define(
 			current: Joi.number().min(0).max(100)
 		},
 		tableName: `divelog-${config.env}-divelogs`,
-		// indexes: [
-
-		// ]
+		indexes: [
+			{
+				hashKey: 'ownerId',
+				rangeKey: 'entryTime',
+				name: 'OwnerIndex',
+				type: 'global'
+			}
+		]
 	});
 
 export default DiveLogs;
