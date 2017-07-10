@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import config from './config';
 import cookieParser from 'cookie-parser';
 import express from 'express';
+import forceSsl from 'express-force-ssl';
 import glob from 'glob';
 import http from 'http';
 import initialState from './initial-state';
@@ -16,6 +17,10 @@ const app = express();
 
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+if (config.forceSsl) {
+	app.use(forceSsl);
+}
 
 const sessionStore = SessionStore(session);
 app.use(session({
