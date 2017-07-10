@@ -18,4 +18,5 @@ deployment:
       - $(aws ecr get-login --region us-east-1)
       - docker tag divelog:latest 961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest
       - docker push 961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest
-
+      - zip CloudFormation deploy/cf/*
+      - aws s3 mv CloudFormation.zip s3://codepipeline-us-east-1-785113840179/CloudFormation.zip
