@@ -4,6 +4,7 @@ const config = {
 	logFile: process.env.DIVELOG_LOG_FILE,
 	baseUrl: process.env.DIVELOG_BASE_URL || 'http://localhost:3000/',
 	port: process.env.DIVELOG_PORT || 8100,
+	forceSsl: process.env.DIVELOG_FORCE_SSL || false,
 
 	awsKeyId: process.env.DIVELOG_AWS_KEY_ID || 'awskey',
 	awsSecretKey: process.env.DIVELOG_AWS_SECRET_KEY || 'shhh!secret!',
