@@ -218,6 +218,14 @@ Resources:
       FromPort: '80'
       ToPort: '80'
       CidrIp: 0.0.0.0/0
+  EcsSecurityGroupHTTPSinbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'EcsSecurityGroup'
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      CidrIp: 0.0.0.0/0
   EcsSecurityGroupSSHinbound:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -259,6 +267,8 @@ Resources:
             Value: !Ref AwsSecretKey
           - Name: DIVELOG_AWS_REGION
             Value: !Ref AWS::Region
+          - Name: DIVELOG_FORCE_SSL
+            Value: true
         Memory: '300'
         LogConfiguration:
           LogDriver: awslogs
@@ -288,9 +298,33 @@ Resources:
       LoadBalancerArn: !Ref 'ECSALB'
       Port: '80'
       Protocol: HTTP
+  ALBListenerHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: ECSServiceRole
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      LoadBalancerArn: !Ref 'ECSALB'
+      Port: '443'
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: arn:aws:acm:us-east-1:961445962603:certificate/aa379366-6422-4af3-9ca4-01f0724a7394
   ECSALBListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     DependsOn: ALBListener
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      Conditions:
+      - Field: path-pattern
+        Values: [/]
+      ListenerArn: !Ref 'ALBListener'
+      Priority: 1
+  ECSALBListenerRuleHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    DependsOn: ALBListenerHTTPS
     Properties:
       Actions:
       - Type: forward
