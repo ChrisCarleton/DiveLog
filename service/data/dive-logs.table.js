@@ -3,8 +3,6 @@ import db from './database';
 import Joi from 'joi';
 
 export const schema = {
-	logId: Joi.string().uuid().required(),
-	ownerId: Joi.string().uuid().required(),
 	entryTime: Joi.string().isoDate().required(),
 
 	createdAt: Joi.string().isoDate(),
@@ -26,8 +24,8 @@ export const schema = {
 	location: Joi.string(),
 	site: Joi.string(),
 	gps: Joi.object().keys({
-		lat: Joi.string(),
-		long: Joi.string()
+		latitude: Joi.number(),
+		longitude: Joi.number()
 	}),
 
 	cnsO2Percent: Joi.number().min(0).max(150).precision(2),
@@ -51,23 +49,33 @@ export const schema = {
 		max: Joi.number().positive()
 	}),
 
+	temperature: Joi.object().keys({
+		surface: Joi.number(),
+		water: Joi.number(),
+		thermocline1: Joi.number(),
+		thermocline2: Joi.number()
+	}),
+
 	exposure: Joi.object().keys({
 		body: Joi.string().regex(/^(none|shorty|full|dry)$/),
 		thickness: Joi.number().integer().min(1).max(10),
 		gloves: Joi.boolean(),
-		hood: Joi.boolean()
+		hood: Joi.boolean(),
+		boots: Joi.boolean()
 	}),
 
 	equipment: Joi.object().keys({
 		compass: Joi.boolean(),
 		computer: Joi.boolean(),
 		knife: Joi.boolean(),
+		light: Joi.boolean(),
 		scooter: Joi.boolean(),
 		slate: Joi.boolean(),
 		surfaceMarker: Joi.boolean()
 	}),
 
 	diveType: Joi.object().keys({
+		altitude: Joi.boolean(),
 		boat: Joi.boolean(),
 		cave: Joi.boolean(),
 		deep: Joi.boolean(),
@@ -76,14 +84,17 @@ export const schema = {
 		night: Joi.boolean(),
 		reef: Joi.boolean(),
 		saltWater: Joi.boolean(),
-		searchAndRescue: Joi.boolean(),
+		searchAndRecovery: Joi.boolean(),
 		training: Joi.boolean(),
 		wreck: Joi.boolean()
 	}),
 
 	visibility: Joi.number().min(0).max(101),
 	current: Joi.number().min(0).max(100),
+	surfaceConditions: Joi.string().regex(/^(calm|moderate|rough)$/),
 	weather: Joi.string(),
+
+	mood: Joi.string(),
 
 	weight: Joi.object().keys({
 		amount: Joi.number().positive(),
@@ -104,9 +115,8 @@ const DiveLogs = db.define(
 			{},
 			schema,
 			{
-				logId: db.types.uuid(),
-				createdAt: undefined,
-				modifiedAt: undefined
+				logId: db.types.uuid().required(),
+				ownerId: Joi.string().uuid().required()
 			}),
 		tableName: `divelog-${config.env}-divelogs`,
 		indexes: [

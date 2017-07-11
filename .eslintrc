@@ -18,5 +18,6 @@
 		"plugin:react/recommended"
 	],
 	"rules": {
+		"no-console": 1
 	}
 }
