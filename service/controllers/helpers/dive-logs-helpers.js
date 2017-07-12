@@ -17,6 +17,7 @@ export function doCreateLog(owner, logInfo) {
 		{},
 		logInfo,
 		{ ownerId: owner.userId });
+
 	return DiveLogs
 		.createAsync(logEntry)
 		.then(result => {

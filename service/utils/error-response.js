@@ -17,6 +17,14 @@ export default function(res, errorId, title, description, statusCode) {
 	});
 }
 
+export function badRequestResponse(res, details) {
+	res.status(400).json({
+		errorId: errorIds['invalid-input'],
+		error: 'The request could not be completed because there was a problem with the data provided',
+		details: details
+	});
+}
+
 export function serverErrorResponse(res) {
 	res.status(500).json({
 		errorId: errorIds['server-error'],

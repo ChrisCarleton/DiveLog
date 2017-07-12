@@ -11,7 +11,7 @@ export function getUserByName(userName) {
 				return null;
 			}
 
-			return res.Items[0];
+			return res.Items[0].attrs;
 		});
 }
 
@@ -26,6 +26,6 @@ export function getUserByEmail(email) {
 				return null;
 			}
 
-			return res.Items[0];
+			return res.Items[0].attrs;
 		});
 }
