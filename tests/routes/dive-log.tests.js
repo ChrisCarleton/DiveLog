@@ -374,7 +374,7 @@ describe('Dive log routes:', () => {
 					return DiveLogs.getAsync(logId);
 				})
 				.then(res => {
-					console.log(res);
+					expect(res).to.be.null;
 					done();
 				})
 				.catch(done);
