@@ -24,3 +24,14 @@ export function doCreateLog(owner, logInfo) {
 			return result.attrs;
 		});
 }
+
+export function doGetLog(logId) {
+	return DiveLogs.getAsync(logId)
+		.then(result => {
+			if (result) {
+				return result.attrs;
+			}
+
+			return null;
+		});
+}

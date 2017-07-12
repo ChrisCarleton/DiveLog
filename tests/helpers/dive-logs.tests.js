@@ -1,10 +1,12 @@
+import DiveLogs from '../../service/data/dive-logs.table';
 import { expect } from 'chai';
 import geolib from 'geolib';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
 
 import {
-	doCreateLog
+	doCreateLog,
+	doGetLog
 } from '../../service/controllers/helpers/dive-logs-helpers';
 
 describe('Dive log helpers', () => {
@@ -24,79 +26,79 @@ describe('Dive log helpers', () => {
 			});
 	});
 
-	describe('doCreateLog method', () => {
-
-		let testLog;
-		beforeEach(() => {
-			testLog = {
-				entryTime: '2017-02-01T20:26:00.000Z',
-				diveNumber: 40,
-				diveTime: {
-					exitTime: '2017-02-01T21:16:00.000Z',
-					surfaceInterval: 53,
-					bottomTime: 45,
-					decoStops: [
-						{
-							depth: 15,
-							duration: 3
-						}
-					]
-				},
-				location: 'Cozumel, MX',
-				site: 'Paso de Cedral',
-				gps: {
-					latitude: geolib.useDecimal('20° 21\' 15.420" N'),
-					longitude: geolib.useDecimal('87° 1\' 41.760" W')
-				},
-				cnsO2Percent: 20,
-				cylinders: [
+	let testLog;
+	beforeEach(() => {
+		testLog = {
+			entryTime: '2017-02-01T20:26:00.000Z',
+			diveNumber: 40,
+			diveTime: {
+				exitTime: '2017-02-01T21:16:00.000Z',
+				surfaceInterval: 53,
+				bottomTime: 45,
+				decoStops: [
 					{
-						gas: {
-							o2Percent: 31,
-							startPressure: 2900,
-							endPressure: 1000
-						},
-						volume: 80,
-						type: 'aluminum',
-						number: 1
+						depth: 15,
+						duration: 3
 					}
-				],
-				depth: {
-					average: 38,
-					max: 55
-				},
-				temperature: {
-					surface: 90,
-					water: 81
-				},
-				exposure: {
-					body: 'full',
-					thickness: 3,
-					boots: true
-				},
-				equipment: {
-					computer: true,
-					light: true,
-					surfaceMarker: true
-				},
-				diveType: {
-					boat: true,
-					drift: true,
-					reef: true,
-					saltWater: true
-				},
-				visibility: 101,
-				current: 90,
-				surfaceConditions: 'calm',
-				mood: 'great',
-				weight: {
-					amount: 16,
-					correctness: 'good',
-					trim: 'good'
-				},
-				notes: 'Amazing dive!!'
-			};
-		});
+				]
+			},
+			location: 'Cozumel, MX',
+			site: 'Paso de Cedral',
+			gps: {
+				latitude: geolib.useDecimal('20° 21\' 15.420" N'),
+				longitude: geolib.useDecimal('87° 1\' 41.760" W')
+			},
+			cnsO2Percent: 20,
+			cylinders: [
+				{
+					gas: {
+						o2Percent: 31,
+						startPressure: 2900,
+						endPressure: 1000
+					},
+					volume: 80,
+					type: 'aluminum',
+					number: 1
+				}
+			],
+			depth: {
+				average: 38,
+				max: 55
+			},
+			temperature: {
+				surface: 90,
+				water: 81
+			},
+			exposure: {
+				body: 'full',
+				thickness: 3,
+				boots: true
+			},
+			equipment: {
+				computer: true,
+				light: true,
+				surfaceMarker: true
+			},
+			diveType: {
+				boat: true,
+				drift: true,
+				reef: true,
+				saltWater: true
+			},
+			visibility: 101,
+			current: 90,
+			surfaceConditions: 'calm',
+			mood: 'great',
+			weight: {
+				amount: 16,
+				correctness: 'good',
+				trim: 'good'
+			},
+			notes: 'Amazing dive!!'
+		};
+	});
+
+	describe('doCreateLog method', () => {
 
 		it('will save a new dive log', done => {
 			doCreateLog(logOwner, testLog)
@@ -150,6 +152,39 @@ describe('Dive log helpers', () => {
 					done();
 				});
 		});
+	});
+
+	describe('doGetLog method', () => {
+
+		it('will return the log entry if successful', done => {
+			testLog.ownerId = logOwner.userId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					return doGetLog(result.get('logId'));
+				})
+				.then(result => {
+					const expected = Object.assign(
+						{},
+						testLog,
+						{
+							createdAt: result.createdAt,
+							logId: result.logId
+						});
+					expect(result).to.eql(expected);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return null if the log entry cannot be found', done => {
+			doGetLog(uuid())
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
+		});
+
 	});
 
 });

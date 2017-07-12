@@ -9,7 +9,8 @@ import {
 } from '../utils/error-response';
 
 import {
-	doCreateLog
+	doCreateLog,
+	doGetLog
 } from './helpers/dive-logs-helpers';
 
 export function listLogs() {
@@ -41,20 +42,32 @@ export function createLog(req, res) {
 		});
 }
 
-export function viewLog() {
-
+export function viewLog(req, res) {
+	res.json(req.logEntry);
 }
 
 export function editLog() {
 
 }
 
-export function deleteLog() {
-
+export function deleteLog(req, res) {
+	res.send('ok');
 }
 
-export function ensureReadPermission() {
+export function ensureReadPermission(req, res, next) {
+	if (!req.user) {
+		return notAuthroizedResponse(res);
+	}
 
+	if (req.user.role === 'admin') {
+		return next();
+	}
+
+	if (req.user.userId !== req.logOwner.userId) {
+		return notAuthroizedResponse(res);
+	}
+	
+	next();
 }
 
 export function ensureEditPermission(req, res, next) {
@@ -84,11 +97,23 @@ export function getLogBookOwner(req, res, next) {
 			next();
 		})
 		.catch(err => {
-			log.error('An error occurred while trying to fetch the owner of a log entry', err);
+			log.error('An error occurred while trying to fetch the owner of a log entry:', err);
 			serverErrorResponse(res);
 		});
 }
 
-export function getLogInfo() {
+export function getLogInfo(req, res, next) {
+	doGetLog(req.params['logId'])
+		.then(entry => {
+			if (!entry) {
+				return resourceNotFoundResponse(res);
+			}
 
+			req.logEntry = entry;
+			next();
+		})
+		.catch(err => {
+			log.error('An error occurred while trying to fetch a dive log entry:', err);
+			serverErrorResponse(res);
+		});
 }

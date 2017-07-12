@@ -6,6 +6,7 @@ import { expect } from 'chai';
 import geolib from 'geolib';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
+import uuid from 'uuid/v4';
 
 const request = supertest(app);
 
@@ -280,6 +281,112 @@ describe('Dive log routes:', () => {
 				.catch(done);
 		});
 
+	});
+
+	describe('get log route', () => {
+
+		it('will return the requested log', done => {
+			let logId;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/${logId}`)
+						.set('cookie', cookie)
+						.expect(200);
+				})
+				.then(res => {
+					const expected = Object.assign(
+						{},
+						testLog,
+						{
+							createdAt: res.body.createdAt,
+							logId: logId
+						});
+					expect(res.body).to.eql(expected);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if log does not exist', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/${uuid()}`)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user does not have permission to view the log', done => {
+			let logId;
+			testLog.ownerId = user2.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user2.userName}/${logId}`)
+						.set('cookie', cookie)
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
+	describe('delete log route', () => {
+
+		it('will delete the requested log', done => {
+			let logId;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					return request
+						.delete(`/api/logs/${user1.userName}/${logId}/`)
+						.set('cookie', cookie)
+						.expect(200);
+				})
+				.then(() => {
+					return DiveLogs.getAsync(logId);
+				})
+				.then(res => {
+					console.log(res);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if the log cannot be found', done => {
+			done();
+		});
+
+		it('will return 401 if deletion is not permitted', done => {
+			done();
+		})
 	});
 
 });
