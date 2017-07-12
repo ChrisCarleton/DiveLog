@@ -25,6 +25,10 @@ export function doCreateLog(owner, logInfo) {
 		});
 }
 
+export function doDeleteLog(logId) {
+	return DiveLogs.destroyAsync(logId);
+}
+
 export function doGetLog(logId) {
 	return DiveLogs.getAsync(logId)
 		.then(result => {

@@ -10,6 +10,7 @@ import {
 
 import {
 	doCreateLog,
+	doDeleteLog,
 	doGetLog
 } from './helpers/dive-logs-helpers';
 
@@ -51,7 +52,15 @@ export function editLog() {
 }
 
 export function deleteLog(req, res) {
-	res.send('ok');
+	doDeleteLog(req.logEntry.logId)
+		.then(() => {
+			log.debug('Log entry deleted:', req.logEntry.logId);
+			res.json({ status: 'ok' });
+		})
+		.catch(err => {
+			log.error('An error occurred while attempting to delete a log entry:', err);
+			serverErrorResponse(res);
+		});
 }
 
 export function ensureReadPermission(req, res, next) {
@@ -66,7 +75,7 @@ export function ensureReadPermission(req, res, next) {
 	if (req.user.userId !== req.logOwner.userId) {
 		return notAuthroizedResponse(res);
 	}
-	
+
 	next();
 }
 

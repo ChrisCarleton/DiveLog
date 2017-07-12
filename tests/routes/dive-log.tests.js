@@ -381,11 +381,40 @@ describe('Dive log routes:', () => {
 		});
 
 		it('will return 404 if the log cannot be found', done => {
-			done();
+			loginUser1()
+				.then(cookie => {
+					return request
+						.delete(`/api/logs/${user1.userName}/${uuid()}/`)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100)
+					done();
+				})
+				.catch(done);
 		});
 
 		it('will return 401 if deletion is not permitted', done => {
-			done();
+			let logId;
+			testLog.ownerId = user2.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					return request
+						.delete(`/api/logs/${user2.userName}/${logId}`)
+						.set('cookie', cookie)
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
 		})
 	});
 

@@ -6,6 +6,7 @@ import uuid from 'uuid/v4';
 
 import {
 	doCreateLog,
+	doDeleteLog,
 	doGetLog
 } from '../../service/controllers/helpers/dive-logs-helpers';
 
@@ -185,6 +186,32 @@ describe('Dive log helpers', () => {
 				.catch(done);
 		});
 
+	});
+
+	describe('doDeleteLog method', () => {
+		it('will delete a log entry', done => {
+			testLog.ownerId = logOwner.userId;
+			let logId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return doDeleteLog(logId);
+				})
+				.then(() => {
+					return DiveLogs.getAsync(logId);
+				})
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will treat a non-existent log entry as a no-op', done => {
+			doDeleteLog(uuid())
+				.then(() => done())
+				.catch(done);
+		});
 	});
 
 });
