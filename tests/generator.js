@@ -24,11 +24,11 @@ function generateDiveLogEntry(ownerIds) {
 			return faker.random.uuid()
 		}
 
-		if (typeof ownerIds === 'array') {
-			return faker.random.arrayElement(ownerIds);
+		if (typeof ownerIds === 'string') {
+			return ownerIds;
 		}
 
-		return ownerIds;
+		return faker.random.arrayElement(ownerIds);
 	};
 
 	return {
@@ -84,7 +84,7 @@ function generateDiveLogEntry(ownerIds) {
 			thickness: faker.random.arrayElement([3, 5, 7]),
 			gloves: faker.random.boolean(),
 			hood: faker.random.boolean(),
-			gloves: faker.random.boolean()
+			boots: faker.random.boolean()
 		},
 
 		equipment: {
