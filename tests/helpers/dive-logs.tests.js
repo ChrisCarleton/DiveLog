@@ -289,6 +289,27 @@ describe('Dive log helpers', () => {
 				.catch(done);
 		});
 
+		it('will fail if the user attempts to delete a required field', done => {
+			const newValue = generator.generateDiveLogEntry(logOwner.userId);
+			let logId;
+
+			testLog.ownerId = logOwner.userId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					newValue.location = null;
+					
+					return doUpdateLog(logOwner, logId, newValue);
+				})
+				.then(() => {
+					done('should not have succeeded');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('ValidationError');
+					done();
+				});			
+		})
+
 		it('will fail if the user attempts to change the owner ID', done => {
 			const newValue = generator.generateDiveLogEntry(logOwner.userId);
 			let logId;

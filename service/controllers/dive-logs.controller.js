@@ -11,7 +11,8 @@ import {
 import {
 	doCreateLog,
 	doDeleteLog,
-	doGetLog
+	doGetLog,
+	doUpdateLog
 } from './helpers/dive-logs-helpers';
 
 export function listLogs() {
@@ -47,8 +48,25 @@ export function viewLog(req, res) {
 	res.json(req.logEntry);
 }
 
-export function editLog() {
+export function editLog(req, res) {
+	doUpdateLog(req.logOwner, req.logEntry.logId, req.body)
+		.then(result => {
+			res.json(result);
+		})
+		.catch(err => {
+			if (err.name === 'ValidationError') {
+				log.debug('Validation failed while updating dive log entry:', err.details);
+				return badRequestResponse(res, err.details);
+			}
 
+			if (err.name === 'ForbiddenActionError') {
+				log.warn('User attempted a forbidden action:', err);
+				return forbiddenActionResponse(res, err.message);
+			}
+
+			log.error('An error occured while attempting to update a dive log entry:', err);
+			serverErrorResponse(res);
+		});
 }
 
 export function deleteLog(req, res) {

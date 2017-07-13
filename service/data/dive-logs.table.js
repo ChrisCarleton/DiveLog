@@ -21,8 +21,8 @@ const baseSchema = {
 		)
 	}),
 	
-	location: Joi.string(),
-	site: Joi.string(),
+	location: Joi.string().required(),
+	site: Joi.string().required(),
 	gps: Joi.object().keys({
 		latitude: Joi.number(),
 		longitude: Joi.number()
@@ -106,10 +106,19 @@ const baseSchema = {
 	notes: Joi.string()
 };
 
-export const schema = Joi.object().keys(
+export const createSchema = Joi.object().keys(baseSchema);
+
+export const updateSchema = Joi.object().keys(
 	Object.assign({}, baseSchema, {
-		createdAt: Joi.string().isoDate(),
-		updatedAt: Joi.string().isoDate()
+		// These are not required on update - but cannot be removed from the database!
+		entryTime: Joi.string().isoDate().invalid(null),
+		location: Joi.string().invalid(null),
+		site: Joi.string().invalid(null),
+
+		// Allow these just in case users are posting back objects they just received
+		// with small modifications.
+		createdAt: Joi.any().strip(),
+		updatedAt: Joi.any().strip()
 	}));
 
 const DiveLogs = db.define(

@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import DiveLogs, { schema as diveLogsSchema } from '../../data/dive-logs.table';
+import DiveLogs, { createSchema, updateSchema } from '../../data/dive-logs.table';
 import { ForbiddenActionError, ValidationError } from '../../utils/exceptions';
 import Joi from 'joi';
 
@@ -14,13 +14,17 @@ export function doCreateLog(owner, logInfo) {
 			new ForbiddenActionError('The owner of the log entry cannot be changed. Please omit the "ownerId" field.'));
 	}
 
-	const logEntry = Object.assign(
-		{},
-		logInfo,
-		{ ownerId: owner.userId });
+	logInfo.ownerId = owner.userId;
+	const validation = Joi.validate(logInfo, createSchema);
+	if (validation.error) {
+		return Bluebird.reject(
+			new ValidationError(
+				'Could not create log entry. Validation failed.',
+				validation.error.details));
+	}
 
 	return DiveLogs
-		.createAsync(logEntry)
+		.createAsync(logInfo)
 		.then(result => {
 			return result.attrs;
 		});
@@ -55,7 +59,7 @@ export function doUpdateLog(owner, logId, logInfo) {
 				'The log entry ID is fixed and cannot be changed. Please omit the "logId" field from the data.'));
 	}
 
-	const validation = Joi.validate(logInfo, diveLogsSchema);
+	const validation = Joi.validate(logInfo, updateSchema);
 	if (validation.error) {
 		return Bluebird.reject(
 			new ValidationError(

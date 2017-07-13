@@ -24,5 +24,6 @@ module.exports = function(app) {
 	app.route(logRoute)
 		.get(ensureReadPermission, viewLog)
 		.put(ensureEditPermission, editLog)
+		.patch(ensureEditPermission, editLog)
 		.delete(ensureEditPermission, deleteLog);
 }

@@ -3,6 +3,7 @@ import Bluebird from 'bluebird';
 import { createUser, purgeTable } from '../test-utils';
 import DiveLogs from '../../service/data/dive-logs.table';
 import { expect } from 'chai';
+import generator from '../generator';
 import geolib from 'geolib';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
@@ -415,7 +416,159 @@ describe('Dive log routes:', () => {
 					done();
 				})
 				.catch(done);
-		})
+		});
+	});
+
+	describe('update log route', () => {
+
+		it('will return 200 if successful', done => {
+			const newValue = generator.generateDiveLogEntry(user1.userId);
+			let logId;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					return request
+						.put(`/api/logs/${user1.userName}/${logId}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(200);
+				})
+				.then(result => {
+					expect(result.body.updatedAt).to.exist;
+					Object.assign(newValue, {
+						logId: result.body.logId,
+						createdAt: result.body.createdAt,
+						updatedAt: result.body.updatedAt
+					});
+					expect(result.body).to.eql(newValue);
+					return DiveLogs.getAsync(logId);
+				})
+				.then(res => {
+					expect(res.attrs).to.eql(newValue);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('can do partial updates (earning it the PATCH alias!)', done => {
+			const newValue = {
+				cnsO2Percent: 120,
+				weight: {
+					amount: 46
+				}
+			};
+
+			let logId, expected;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					return request
+						.put(`/api/logs/${user1.userName}/${logId}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(200);
+				})
+				.then(result => {
+					expected = Object.assign({}, testLog, newValue, {
+						logId: result.body.logId,
+						createdAt: result.body.createdAt,
+						updatedAt: result.body.updatedAt
+					});
+					expect(result.body).to.eql(expected);
+					return DiveLogs.getAsync(logId);
+				})
+				.then(res => {
+					expect(res.attrs).to.eql(expected);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if validation fails', done => {
+			const newValue = generator.generateDiveLogEntry(user1.userId);
+			let logId;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					newValue.cnsO2Percent = 'wat?';
+
+					return request
+						.put(`/api/logs/${user1.userName}/${logId}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(400);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is not authorized to update log entry', done => {
+			const newValue = generator.generateDiveLogEntry(user2.userId);
+			let logId;
+			testLog.ownerId = user2.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					return request
+						.put(`/api/logs/${user2.userName}/${logId}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(401);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 403 if the user attempts something illegal like changing the owner', done => {
+			const newValue = generator.generateDiveLogEntry(user1.userId);
+			let logId;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginUser1();
+				})
+				.then(cookie => {
+					newValue.ownerId = uuid();
+
+					return request
+						.put(`/api/logs/${user1.userName}/${logId}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(403);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3200);
+					done();
+				})
+				.catch(done);
+		});
 	});
 
 });
