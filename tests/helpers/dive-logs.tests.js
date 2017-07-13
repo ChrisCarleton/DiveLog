@@ -1,5 +1,6 @@
 import DiveLogs from '../../service/data/dive-logs.table';
 import { expect } from 'chai';
+import generator from '../generator';
 import geolib from 'geolib';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
@@ -7,7 +8,8 @@ import uuid from 'uuid/v4';
 import {
 	doCreateLog,
 	doDeleteLog,
-	doGetLog
+	doGetLog,
+	doUpdateLog
 } from '../../service/controllers/helpers/dive-logs-helpers';
 
 describe('Dive log helpers', () => {
@@ -214,4 +216,121 @@ describe('Dive log helpers', () => {
 		});
 	});
 
+	describe('doUpdateLog method', () => {
+
+		it('will update the log entry', done => {
+			const newValue = generator.generateDiveLogEntry(logOwner.userId);
+			let logId;
+
+			testLog.ownerId = logOwner.userId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					newValue.logId = logId;
+
+					return doUpdateLog(logOwner, logId, newValue);
+				})
+				.then(result => {
+					newValue.createdAt = result.createdAt;
+					expect(result).to.eql(newValue);
+					return DiveLogs.getAsync(logId);
+				})
+				.then(result => {
+					expect(result.attrs).to.eql(newValue);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail if validation fails', done => {
+			const newValue = generator.generateDiveLogEntry(logOwner.userId);
+			let logId;
+
+			testLog.ownerId = logOwner.userId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					newValue.logId = logId;
+					newValue.exposure.body = 'bikini';
+					newValue.weight.amount = 'not much';
+
+					return doUpdateLog(logOwner, logId, newValue);
+				})
+				.then(() => {
+					done('should not have succeeded');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('ValidationError');
+					done();
+				});
+		});
+
+		it('will not overwrite "createdAt" and "updatedAt" values', done => {
+			const newValue = generator.generateDiveLogEntry(logOwner.userId);
+			const fakeCreatedAt = '2011-01-18T13:56:00.000Z';
+			const fakeUpdatedAt = '2012-04-06T04:09:00.000Z';
+			let logId;
+
+			testLog.ownerId = logOwner.userId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					newValue.logId = logId;
+					newValue.createdAt = fakeCreatedAt;
+					newValue.updatedAt = fakeUpdatedAt;
+
+					return doUpdateLog(logOwner, logId, newValue);
+				})
+				.then(result => {
+					expect(result.createdAt).to.not.equal(fakeCreatedAt);
+					expect(result.updatedAt).to.not.equal(fakeUpdatedAt);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail if the user attempts to change the owner ID', done => {
+			const newValue = generator.generateDiveLogEntry(logOwner.userId);
+			let logId;
+
+			testLog.ownerId = logOwner.userId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					newValue.logId = logId;
+					newValue.ownerId = uuid();
+
+					return doUpdateLog(logOwner, logId, newValue);
+				})
+				.then(() => {
+					done('should not have succeeded');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('ForbiddenActionError');
+					done();
+				});
+		});
+
+		it('will fail if the user attempts to change the log ID', done => {
+			const newValue = generator.generateDiveLogEntry(logOwner.userId);
+			let logId;
+
+			testLog.ownerId = logOwner.userId;
+			DiveLogs.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					newValue.logId = uuid();
+
+					return doUpdateLog(logOwner, logId, newValue);
+				})
+				.then(() => {
+					done('should not have succeeded');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('ForbiddenActionError');
+					done();
+				});
+		});
+
+	});
 });

@@ -2,11 +2,11 @@ import config from '../config';
 import db from './database';
 import Joi from 'joi';
 
-export const schema = {
-	entryTime: Joi.string().isoDate().required(),
+const baseSchema = {
+	logId: Joi.string().uuid(),
+	ownerId: Joi.string().uuid(),
 
-	createdAt: Joi.string().isoDate(),
-	modifiedAt: Joi.string().isoDate(),
+	entryTime: Joi.string().isoDate().required(),
 
 	diveNumber: Joi.number().integer().min(1),
 	diveTime: Joi.object().keys({
@@ -106,6 +106,12 @@ export const schema = {
 	notes: Joi.string()
 };
 
+export const schema = Joi.object().keys(
+	Object.assign({}, baseSchema, {
+		createdAt: Joi.string().isoDate(),
+		updatedAt: Joi.string().isoDate()
+	}));
+
 const DiveLogs = db.define(
 	'DiveLogs',
 	{
@@ -113,7 +119,7 @@ const DiveLogs = db.define(
 		timestamps: true,
 		schema: Object.assign(
 			{},
-			schema,
+			baseSchema,
 			{
 				logId: db.types.uuid().required(),
 				ownerId: Joi.string().uuid().required()
