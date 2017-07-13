@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Chrome from './components/chrome.jsx';
 import Home from './components/home.jsx';
 import LogIn from './components/login.jsx';
-import NotFound from './components/errors/not-found.jsx'
+import NotFound from './components/errors/not-found.jsx';
 import React from 'react';
 import { render } from 'react-dom';
 import SignUp from './components/sign-up.jsx';

@@ -38,7 +38,7 @@ describe('Dive log routes:', () => {
 			.expect(200)
 			.then(res => {
 				return res.headers['set-cookie'];
-			});		
+			});
 	}
 
 	before(done => {
@@ -390,7 +390,7 @@ describe('Dive log routes:', () => {
 						.expect(404);
 				})
 				.then(res => {
-					expect(res.body.errorId).to.equal(2100)
+					expect(res.body.errorId).to.equal(2100);
 					done();
 				})
 				.catch(done);

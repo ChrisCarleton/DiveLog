@@ -20,7 +20,7 @@ const baseSchema = {
 			})
 		)
 	}),
-	
+
 	location: Joi.string().required(),
 	site: Joi.string().required(),
 	gps: Joi.object().keys({

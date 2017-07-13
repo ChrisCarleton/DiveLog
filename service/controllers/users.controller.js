@@ -65,7 +65,7 @@ export function signUp(req, res) {
 					email: req.body.email,
 					passwordHash: passwordHash,
 					role: 'user'
-				})			
+				});
 		})
 		.then(result => {
 			const user = {
@@ -87,7 +87,7 @@ export function signUp(req, res) {
 					return res.status(500).json({});	// TODO: Return a valid error.
 				}
 
-				res.json(user);	
+				res.json(user);
 			});
 		})
 		.catch(err => {

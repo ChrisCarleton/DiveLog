@@ -43,7 +43,7 @@ describe('User routes', () => {
 				email: 'test@testerson.ca',
 				password: password
 			};
-		})
+		});
 
 		afterEach(done => {
 			const promises = [];

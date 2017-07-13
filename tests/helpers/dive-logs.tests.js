@@ -298,7 +298,7 @@ describe('Dive log helpers', () => {
 				.then(result => {
 					logId = result.get('logId');
 					newValue.location = null;
-					
+
 					return doUpdateLog(logOwner, logId, newValue);
 				})
 				.then(() => {
@@ -307,8 +307,8 @@ describe('Dive log helpers', () => {
 				.catch(err => {
 					expect(err.name).to.equal('ValidationError');
 					done();
-				});			
-		})
+				});
+		});
 
 		it('will fail if the user attempts to change the owner ID', done => {
 			const newValue = generator.generateDiveLogEntry(logOwner.userId);

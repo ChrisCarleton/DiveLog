@@ -13,4 +13,4 @@ module.exports = function(app) {
 
 	app.post(baseRoute + 'login/', login);
 	app.post(baseRoute + 'logout/', logout);
-}
+};

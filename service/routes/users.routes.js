@@ -10,4 +10,4 @@ module.exports = function(app) {
 
 	app.get(meBaseRoute, requireUser, me);
 	app.post(usersBaseRoute, signUp);
-}
+};

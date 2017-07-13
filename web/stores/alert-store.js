@@ -17,7 +17,7 @@ class AlertStore {
 				AlertActions.HANDLE_ERROR_RESPONSE
 			],
 			onDismiss: AlertActions.DISMISS_ALERT
-		})
+		});
 	}
 
 	onShow(alertState) {

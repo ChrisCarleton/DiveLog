@@ -18,6 +18,8 @@
 		"plugin:react/recommended"
 	],
 	"rules": {
-		"no-console": 1
+		"no-console": 1,
+		"semi": 2,
+		"no-trailing-spaces": 2
 	}
 }
