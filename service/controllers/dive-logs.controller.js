@@ -20,7 +20,8 @@ import {
 const listLogsQueryValidation = Joi.object().keys({
 	limit: Joi.number().integer().positive().max(1000),
 	order: Joi.string().regex(/^(asc|desc)$/i),
-	startAfter: Joi.string().isoDate()
+	before: Joi.string().isoDate(),
+	after: Joi.string().isoDate()
 });
 
 export function listLogs(req, res) {

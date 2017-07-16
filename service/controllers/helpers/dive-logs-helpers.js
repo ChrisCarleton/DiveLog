@@ -56,16 +56,16 @@ export function doListLogs(ownerId, options) {
 		.usingIndex('OwnerIndex')
 		.limit(options.limit);
 
-	if (options.order === 'asc') {
-		baseQuery = baseQuery.ascending();
-		if (options.startAfter) {
-			baseQuery = baseQuery.where('entryTime').gt(options.startAfter);
-		}
-	} else {
-		baseQuery = baseQuery.descending();
-		if (options.startAfter) {
-			baseQuery = baseQuery.where('entryTime').lt(options.startAfter);
-		}
+	baseQuery = (options.order === 'asc')
+		? baseQuery.ascending()
+		: baseQuery.descending();
+
+	if (options.before) {
+		baseQuery = baseQuery.where('entryTime').lt(options.before);
+	}
+
+	if (options.after) {
+		baseQuery = baseQuery.where('entryTime').gt(options.after);
 	}
 
 	return baseQuery

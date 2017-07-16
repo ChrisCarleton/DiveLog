@@ -572,7 +572,7 @@ describe('Dive log routes:', () => {
 						.get(`/api/logs/${user1.userName}/`)
 						.query({
 							order: 'asc',
-							startAfter: records[100].entryTime,
+							after: records[100].entryTime,
 							limit: 20
 						})
 						.set('cookie', cookie)
@@ -630,7 +630,7 @@ describe('Dive log routes:', () => {
 						.get(`/api/logs/${user2.userName}/`)
 						.query({
 							order: 'desc',
-							startAfter: records[100].entryTime,
+							before: records[100].entryTime,
 							limit: 500
 						})
 						.set('cookie', cookie)

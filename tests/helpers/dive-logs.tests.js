@@ -362,7 +362,7 @@ describe('Dive log helpers', () => {
 		});
 
 		it('will retrieve more results if requested', done => {
-			doListLogs(logOwner.userId, { startAfter: records[99].entryTime })
+			doListLogs(logOwner.userId, { before: records[99].entryTime })
 				.then(results => {
 					for(let i = 0; i < results.length; i++) {
 						records[100 + i].logId = results[i].logId;
@@ -374,7 +374,7 @@ describe('Dive log helpers', () => {
 		});
 
 		it('will retrieve more results if requested in ascending order', done => {
-			doListLogs(logOwner.userId, { order: 'asc', startAfter: records[records.length - 100].entryTime })
+			doListLogs(logOwner.userId, { order: 'asc', after: records[records.length - 100].entryTime })
 				.then(results => {
 					for(let i = 0; i < results.length; i++) {
 						records[records.length - 101 - i].logId = results[i].logId;
@@ -387,7 +387,7 @@ describe('Dive log helpers', () => {
 		});
 
 		it('will retrieve fewer records if there are no more to display', done => {
-			doListLogs(logOwner.userId, { startAfter: records[199].entryTime })
+			doListLogs(logOwner.userId, { before: records[199].entryTime })
 				.then(results => {
 					expect(results).to.have.length(20);
 					done();
