@@ -1,4 +1,5 @@
 import { getUserByName } from './helpers/users-helpers';
+import Joi from 'joi';
 import log from '../logger';
 import {
 	badRequestResponse,
@@ -12,11 +13,30 @@ import {
 	doCreateLog,
 	doDeleteLog,
 	doGetLog,
+	doListLogs,
 	doUpdateLog
 } from './helpers/dive-logs-helpers';
 
-export function listLogs() {
+const listLogsQueryValidation = Joi.object().keys({
+	limit: Joi.number().integer().positive().max(1000),
+	order: Joi.string().regex(/^(asc|desc)$/i),
+	startAfter: Joi.string().isoDate()
+});
 
+export function listLogs(req, res) {
+	const validation = Joi.validate(req.query, listLogsQueryValidation);
+	if (validation.error) {
+		return badRequestResponse(res, validation.error.details);
+	}
+
+	doListLogs(req.logOwner.userId, req.query)
+		.then(result => {
+			res.status(200).json(result);
+		})
+		.catch(err => {
+			log.error('An error occured while trying to list dive log entries:', err);
+			serverErrorResponse(res);
+		});
 }
 
 export function createLog(req, res) {

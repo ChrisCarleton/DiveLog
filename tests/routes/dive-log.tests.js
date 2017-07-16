@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { app } from '../../service/server';
 import Bluebird from 'bluebird';
 import { createUser, purgeTable } from '../test-utils';
@@ -565,6 +566,166 @@ describe('Dive log routes:', () => {
 				})
 				.then(result => {
 					expect(result.body.errorId).to.equal(3200);
+					done();
+				})
+				.catch(done);
+		});
+	});
+
+	describe('list logs route', () => {
+		let records = [];
+
+		before(done => {
+			for (let i = 0; i < 220; i++) {
+				records.push(generator.generateDiveLogEntry(user1.userId));
+			}
+
+			purgeTable(DiveLogs, 'logId')
+				.then(() => {
+					return DiveLogs.createAsync(records);
+				})			
+				.then(() => {
+					records = _.orderBy(
+						_.map(records, rec => {
+							return _.pick(
+								rec,
+								[
+									'ownerId',
+									'entryTime',
+									'logId',
+									'diveNumber',
+									'location',
+									'site',
+									'depth'
+								])
+						}),
+						['entryTime'],
+						['desc']);
+					done();
+				})
+				.catch(done);
+		});
+
+		after(done => {
+			purgeTable(DiveLogs, 'logId')
+				.then(() => done())
+				.catch(done);
+		});
+
+		it('will retrieve a list of dive log entries', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body).to.have.length(100);
+					for (let i = 0; i < res.body.length; i++) {
+						records[i].logId = res.body[i].logId;
+						expect(res.body[i]).to.eql(records[i]);
+					}
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will accept query string params to change the behaviour', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.query({
+							order: 'asc',
+							startAfter: records[100].entryTime,
+							limit: 20
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body).to.have.length(20);
+					for (let i = 0; i < 20; i++) {
+						records[99 - i].logId = res.body[i].logId;
+						expect(res.body[i]).to.eql(records[99 - i]);
+					}
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if query string params are invalid', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.query({
+							order: 'not-valid',
+							limit: 20,
+							wat: true
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is unauthenticated', done => {
+			request
+				.get(`/api/logs/${user1.userName}/`)
+				.expect('Content-Type', /json/)
+				.expect(401)
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user does not have permission to view log entries', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user2.userName}/`)
+						.query({
+							order: 'desc',
+							startAfter: records[100].entryTime,
+							limit: 500
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('admins can view other users\' private logs', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body).to.have.length(100);
+					for (let i = 0; i < res.body.length; i++) {
+						records[i].logId = res.body[i].logId;
+						expect(res.body[i]).to.eql(records[i]);
+					}
 					done();
 				})
 				.catch(done);
