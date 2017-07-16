@@ -67,74 +67,75 @@ describe('Dive log routes:', () => {
 	});
 
 	beforeEach(() => {
-		testLog = {
-			entryTime: '2017-02-01T20:26:00.000Z',
-			diveNumber: 40,
-			diveTime: {
-				exitTime: '2017-02-01T21:16:00.000Z',
-				surfaceInterval: 53,
-				bottomTime: 45,
-				decoStops: [
-					{
-						depth: 15,
-						duration: 3
-					}
-				]
-			},
-			location: 'Cozumel, MX',
-			site: 'Paso de Cedral',
-			gps: {
-				latitude: geolib.useDecimal('20° 21\' 15.420" N'),
-				longitude: geolib.useDecimal('87° 1\' 41.760" W')
-			},
-			cnsO2Percent: 20,
-			cylinders: [
-				{
-					gas: {
-						o2Percent: 31,
-						startPressure: 2900,
-						endPressure: 1000
-					},
-					volume: 80,
-					type: 'aluminum',
-					number: 1
-				}
-			],
-			depth: {
-				average: 38,
-				max: 55
-			},
-			temperature: {
-				surface: 90,
-				water: 81
-			},
-			exposure: {
-				body: 'full',
-				thickness: 3,
-				boots: true
-			},
-			equipment: {
-				computer: true,
-				light: true,
-				surfaceMarker: true
-			},
-			diveType: {
-				boat: true,
-				drift: true,
-				reef: true,
-				saltWater: true
-			},
-			visibility: 101,
-			current: 90,
-			surfaceConditions: 'calm',
-			mood: 'great',
-			weight: {
-				amount: 16,
-				correctness: 'good',
-				trim: 'good'
-			},
-			notes: 'Amazing dive!!'
-		};
+		testLog = generator.generateDiveLogEntry();
+		//  {
+		// 	entryTime: '2017-02-01T20:26:00.000Z',
+		// 	diveNumber: 40,
+		// 	diveTime: {
+		// 		exitTime: '2017-02-01T21:16:00.000Z',
+		// 		surfaceInterval: 53,
+		// 		bottomTime: 45,
+		// 		decoStops: [
+		// 			{
+		// 				depth: 15,
+		// 				duration: 3
+		// 			}
+		// 		]
+		// 	},
+		// 	location: 'Cozumel, MX',
+		// 	site: 'Paso de Cedral',
+		// 	gps: {
+		// 		latitude: geolib.useDecimal('20° 21\' 15.420" N'),
+		// 		longitude: geolib.useDecimal('87° 1\' 41.760" W')
+		// 	},
+		// 	cnsO2Percent: 20,
+		// 	cylinders: [
+		// 		{
+		// 			gas: {
+		// 				o2Percent: 31,
+		// 				startPressure: 2900,
+		// 				endPressure: 1000
+		// 			},
+		// 			volume: 80,
+		// 			type: 'aluminum',
+		// 			number: 1
+		// 		}
+		// 	],
+		// 	depth: {
+		// 		average: 38,
+		// 		max: 55
+		// 	},
+		// 	temperature: {
+		// 		surface: 90,
+		// 		water: 81
+		// 	},
+		// 	exposure: {
+		// 		body: 'full',
+		// 		thickness: 3,
+		// 		boots: true
+		// 	},
+		// 	equipment: {
+		// 		computer: true,
+		// 		light: true,
+		// 		surfaceMarker: true
+		// 	},
+		// 	diveType: {
+		// 		boat: true,
+		// 		drift: true,
+		// 		reef: true,
+		// 		saltWater: true
+		// 	},
+		// 	visibility: 101,
+		// 	current: 90,
+		// 	surfaceConditions: 'calm',
+		// 	mood: 'great',
+		// 	weight: {
+		// 		amount: 16,
+		// 		correctness: 'good',
+		// 		trim: 'good'
+		// 	},
+		// 	notes: 'Amazing dive!!'
+		// };
 	});
 
 	describe('allow edit middleware', () => {
