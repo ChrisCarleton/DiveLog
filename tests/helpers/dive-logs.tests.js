@@ -1,7 +1,9 @@
+import _ from 'lodash';
+import Bluebird from 'bluebird';
 import DiveLogs from '../../service/data/dive-logs.table';
 import { expect } from 'chai';
 import generator from '../generator';
-import geolib from 'geolib';
+import { purgeTable } from '../test-utils';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
 
@@ -9,6 +11,7 @@ import {
 	doCreateLog,
 	doDeleteLog,
 	doGetLog,
+	doListLogs,
 	doUpdateLog
 } from '../../service/controllers/helpers/dive-logs-helpers';
 
@@ -31,75 +34,18 @@ describe('Dive log helpers', () => {
 
 	let testLog;
 	beforeEach(() => {
-		testLog = {
-			entryTime: '2017-02-01T20:26:00.000Z',
-			diveNumber: 40,
-			diveTime: {
-				exitTime: '2017-02-01T21:16:00.000Z',
-				surfaceInterval: 53,
-				bottomTime: 45,
-				decoStops: [
-					{
-						depth: 15,
-						duration: 3
-					}
-				]
-			},
-			location: 'Cozumel, MX',
-			site: 'Paso de Cedral',
-			gps: {
-				latitude: geolib.useDecimal('20° 21\' 15.420" N'),
-				longitude: geolib.useDecimal('87° 1\' 41.760" W')
-			},
-			cnsO2Percent: 20,
-			cylinders: [
-				{
-					gas: {
-						o2Percent: 31,
-						startPressure: 2900,
-						endPressure: 1000
-					},
-					volume: 80,
-					type: 'aluminum',
-					number: 1
-				}
-			],
-			depth: {
-				average: 38,
-				max: 55
-			},
-			temperature: {
-				surface: 90,
-				water: 81
-			},
-			exposure: {
-				body: 'full',
-				thickness: 3,
-				boots: true
-			},
-			equipment: {
-				computer: true,
-				light: true,
-				surfaceMarker: true
-			},
-			diveType: {
-				boat: true,
-				drift: true,
-				reef: true,
-				saltWater: true
-			},
-			visibility: 101,
-			current: 90,
-			surfaceConditions: 'calm',
-			mood: 'great',
-			weight: {
-				amount: 16,
-				correctness: 'good',
-				trim: 'good'
-			},
-			notes: 'Amazing dive!!'
-		};
+		testLog = generator.generateDiveLogEntry();
+		testLog.ownerId = undefined;
 	});
+
+	after(done => {
+		Bluebird.all([
+				purgeTable(Users, 'userId'),
+				purgeTable(DiveLogs, 'logId')
+			])
+			.then(() => done())
+			.catch(done);
+	})
 
 	describe('doCreateLog method', () => {
 
@@ -353,5 +299,131 @@ describe('Dive log helpers', () => {
 				});
 		});
 
+	});
+
+	describe('doListLogs method', () => {
+		let records = [];
+
+		before(done => {
+			// Make lots of records to list!
+			for (let i = 0; i < 220; i++) {
+				records.push(generator.generateDiveLogEntry(logOwner.userId));
+			}
+
+			purgeTable(DiveLogs, 'logId')
+				.then(() => {
+					return DiveLogs.createAsync(records);
+				})			
+				.then(() => {
+					records = _.orderBy(records, ['entryTime'], ['desc']);
+					done();
+				})
+				.catch(done);
+		});
+
+		after(done => {
+			purgeTable(DiveLogs, 'logId')
+				.then(() => done())
+				.catch(done);
+		});
+
+		it('will retrieve records correctly and in reverse chronological order', done => {
+			doListLogs(logOwner.userId)
+				.then(results => {
+					for(let i = 0; i < results.length; i++) {
+						Object.assign(records[i], {
+							createdAt: results[i].createdAt,
+							logId: results[i].logId
+						});
+						expect(results[i]).to.eql(records[i]);
+					}
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return an empty array if no records are found', done => {
+			doListLogs(uuid())
+				.then(results => {
+					expect(results).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will retrieve 100 records by default', done => {
+			doListLogs(logOwner.userId)
+				.then(results => {
+					expect(results).to.have.length(100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will retrieve more results if requested', done => {
+			doListLogs(logOwner.userId, { startAfter: records[99].entryTime })
+				.then(results => {
+					for(let i = 0; i < results.length; i++) {
+						Object.assign(records[100 + i], {
+							createdAt: results[i].createdAt,
+							logId: results[i].logId
+						});
+						expect(results[i]).to.eql(records[100 + i]);
+					}
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will retrieve more results if requested in ascending order', done => {
+			doListLogs(logOwner.userId, { order: 'asc', startAfter: records[records.length - 100].entryTime })
+				.then(results => {
+					for(let i = 0; i < results.length; i++) {
+						Object.assign(records[records.length - 101 - i], {
+							createdAt: results[i].createdAt,
+							logId: results[i].logId
+						});
+						expect(results[i]).to.eql(records[records.length - 101 - i]);
+					}
+					
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will retrieve fewer records if there are no more to display', done => {
+			doListLogs(logOwner.userId, { startAfter: records[199].entryTime })
+				.then(results => {
+					expect(results).to.have.length(20);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will retrieve records in chronological order if requested', done => {
+			doListLogs(logOwner.userId, { order: 'asc' })
+				.then(results => {
+					for(let i = 0; i < results.length; i++) {
+						Object.assign(records[records.length - 1 - i], {
+							createdAt: results[i].createdAt,
+							logId: results[i].logId
+						});
+						expect(results[i]).to.eql(records[records.length - 1 - i]);
+					}
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will retrieve the desired number of records', done => {
+			const expectedCount = 55;
+
+			doListLogs(logOwner.userId, { limit: expectedCount })
+				.then(results => {
+					expect(results).to.have.length(expectedCount);
+					done();
+				})
+				.catch(done);
+		});
 	});
 });

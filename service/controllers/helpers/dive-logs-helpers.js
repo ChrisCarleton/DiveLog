@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import Bluebird from 'bluebird';
 import DiveLogs, { createSchema, updateSchema } from '../../data/dive-logs.table';
 import { ForbiddenActionError, ValidationError } from '../../utils/exceptions';
@@ -42,6 +43,37 @@ export function doGetLog(logId) {
 			}
 
 			return null;
+		});
+}
+
+export function doListLogs(ownerId, options) {
+	options = options || {};
+	options.limit = options.limit || 100;
+	options.order = options.order || 'desc';
+
+	let baseQuery = DiveLogs
+		.query(ownerId)
+		.usingIndex('OwnerIndex')
+		.limit(options.limit);
+
+	if (options.order === 'asc') {
+		baseQuery = baseQuery.ascending();
+		if (options.startAfter) {
+			baseQuery = baseQuery.where('entryTime').gt(options.startAfter);
+		}
+	} else {
+		baseQuery = baseQuery.descending();
+		if (options.startAfter) {
+			baseQuery = baseQuery.where('entryTime').lt(options.startAfter);
+		}
+	}
+
+	return baseQuery
+		.execAsync()
+		.then(result => {
+			return _.map(result.Items, item => {
+				return item.attrs;
+			});
 		});
 }
 
