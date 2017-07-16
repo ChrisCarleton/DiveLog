@@ -126,3 +126,150 @@ The details of the newly-created user account are returned.
   * __Error ID 1010:__ User name is taken. The selected user name already belongs to a user in the database. Select a new user name and try again.
   * __Error ID 1020:__ Email is taken. The selected e-mail address already belongs to a user in the database. Perhaps an account recovery is in order?
 * __Status Code 500:__ Internal server error.
+
+## Dive Log Entries
+
+### Dive Log Entry Objects
+Many of the log entry APIs accept or return a Dive Log Entry Object. Here is the specification:
+```javascript
+// TODO
+```
+
+### List Log Entries
+
+Gets an ordered list of dive log entries for a user.
+
+#### Route
+```
+GET /api/logs/:userName/
+```
+* __:userName__ The user name that identifies the user for which log entries should be returned.
+
+#### Query Params
+```
+?before=2017-04-21T09:18:00.000Z&after=2017-01-01T00:00:00.000Z&order=desc&limit=50
+```
+All of the query parameters are optional.
+* __order:__ Valid values are `asc` or `desc`. Results are ordered by the dive entry times. The default is descending order (reverse-chronological order.) For chronological order set order to `asc`.
+* __before:__ An ISO 8601 date and time string. When specified, only log entries with dive entry times that occurred before this time will be returned.
+* __after:__  An ISO 8601 date and time string. When specified, only log entries with dive entry times that occurred after this time will be returned.
+* __limit:__ The maximum number of records to return in the result set. Must be a positive integer between 1 and 1000.
+
+#### Success Response
+* __Status Code:__ 200
+
+Returns an array of dive log entries matching the supplied query parameters. The entries will contain a subset of the fields for a full dive log entry:
+```javascript
+[
+	{
+		logId: [uuid],
+		ownerId: [userId],
+		entryTime: [isoDate],
+		location: [string],
+		site: [string],
+		depth: {
+			average: [number],
+			max: [number]
+		}
+	},
+	...
+]
+```
+
+#### Error Response
+* __Status Code 400:__ Bad request. One or more of the query string parameters is invalid.
+* __Status Code 401:__ Not authorized. The current user is not authorized to view the log book for the requested `:userName` or the current user is unauthenticated.
+* __Status Code 500:__ Internal server error.
+
+
+### Create New Dive Log Entry
+
+Creates a new dive log entry in the specified user's log book.
+
+#### Route
+```
+POST /api/logs/:userName/
+```
+* __:userName__ The user name that identifies the user for which log entries should be returned.
+
+#### Data Params
+The method accepts a Dive Log Entry Object.
+
+#### Success Response
+* __Status Code:__ 200
+
+The newly-created Dive Log Entry Object is returned with `logId` and `createdAt` fields populated.
+
+#### Error Response
+* __Status Code 400:__ Bad request. One or more of the fields of the new log entry was invalid. See Dive Log Entry Object for the proper specification.
+* __Status Code 401:__ Not authorized. The current user is not permitted to add logs to the log book for the requested `:userName` or the current user is unauthenticated.
+* __Status Code 403:__ Forbidden. The `ownerId` field was set to a value that did not match the user Id of the user indicated in the `:userName` route parameter.
+* __Status Code 500:__ Internal server error.
+
+### Retrieve a Dive Log Entry
+
+Retrieves a log entry from the specified user's log book.
+
+#### Route
+```
+GET /api/logs/:userName/:logId/
+```
+* __:userName__ The user name that identifies the user for which log entries should be returned.
+* __:logId__ The ID of the log entry to be retrieved.
+
+#### Success Response
+* __Status Code:__ 200
+
+The Dive Log Entry Object is returned in the response body.
+
+#### Error Response
+* __Status Code 401:__ Not authorized. The current user is not permitted to view the entries in the log book for the requested `:userName` or the current user is unauthenticated.
+* __Status Code 500:__ Internal server error.
+
+### Delete a Dive Log Entry
+
+Deletes a log entry from the specified user's log book.
+
+#### Route
+```
+DELETE /api/logs/:userName/:logId/
+```
+* __:userName__ The user name that identifies the user for which log entry should be deleted.
+* __:logId__ The ID of the log entry to be deleted.
+
+#### Success Response
+* __Status Code:__ 200
+
+#### Error Response
+* __Status Code 401:__ Not authorized. The current user is not permitted to delete the entries in the log book for the requested `:userName` or the current user is unauthenticated.
+* __Status Code 500:__ Internal server error.
+
+### Update An Existing Dive Log Entry
+
+Creates a new dive log entry in the specified user's log book.
+
+#### Route
+```
+PUT|PATCH /api/logs/:userName/:logId/
+```
+* __:userName__ The user name that identifies the user for which the log entry should be updated.
+* __:logId__ The ID of the log entry to be updated.
+
+This route will respond on both `PUT` and `PATCH` HTTP verbs. (Technically, the operation is more of a `PATCH` but `PUT` is aliased nonetheless.)
+
+#### Data Params
+The method accepts a Dive Log Entry Object with updated field values. Fields that are not being updated can be omitted - they will retain their values. Non-required fields can be deleted by setting their values to `null`.
+
+#### Success Response
+* __Status Code:__ 200
+
+The newly-created Dive Log Entry Object is returned with `logId` and `createdAt` fields populated.
+
+#### Error Response
+* __Status Code 400:__ Bad request. One or more of the fields of the new log entry was invalid. See Dive Log Entry Object for the proper specification.
+* __Status Code 401:__ Not authorized. The current user is not permitted to add logs to the log book for the requested `:userName` or the current user is unauthenticated.
+* __Status Code 403:__ Forbidden. A forbidden action was taken. One of:
+  * The `ownerId` field was set to a value that did not match the user Id of the user indicated in the `:userName` route parameter.
+  * A required field was requested to be removed (by setting it's value to `null` in the request body.)
+* __Status Code 500:__ Internal server error.
+
