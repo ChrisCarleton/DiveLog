@@ -235,7 +235,7 @@ Resources:
               - "diveNumber"
               - "location"
               - "site"
-              - "depth.max"
+              - "depth"
             ProjectionType: "INCLUDE"
           ProvisionedThroughput:
             ReadCapacityUnits:

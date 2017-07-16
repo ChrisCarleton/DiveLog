@@ -305,7 +305,6 @@ describe('Dive log helpers', () => {
 		let records = [];
 
 		before(done => {
-			// Make lots of records to list!
 			for (let i = 0; i < 220; i++) {
 				records.push(generator.generateDiveLogEntry(logOwner.userId));
 			}
@@ -315,7 +314,12 @@ describe('Dive log helpers', () => {
 					return DiveLogs.createAsync(records);
 				})			
 				.then(() => {
-					records = _.orderBy(records, ['entryTime'], ['desc']);
+					records = _.orderBy(
+						_.map(records, rec => {
+							return _.pick(rec, ['ownerId', 'entryTime', 'logId', 'diveNumber', 'location', 'site', 'depth'])
+						}),
+						['entryTime'],
+						['desc']);
 					done();
 				})
 				.catch(done);
@@ -331,10 +335,7 @@ describe('Dive log helpers', () => {
 			doListLogs(logOwner.userId)
 				.then(results => {
 					for(let i = 0; i < results.length; i++) {
-						Object.assign(records[i], {
-							createdAt: results[i].createdAt,
-							logId: results[i].logId
-						});
+						records[i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[i]);
 					}
 					done();
@@ -364,10 +365,7 @@ describe('Dive log helpers', () => {
 			doListLogs(logOwner.userId, { startAfter: records[99].entryTime })
 				.then(results => {
 					for(let i = 0; i < results.length; i++) {
-						Object.assign(records[100 + i], {
-							createdAt: results[i].createdAt,
-							logId: results[i].logId
-						});
+						records[100 + i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[100 + i]);
 					}
 					done();
@@ -379,10 +377,7 @@ describe('Dive log helpers', () => {
 			doListLogs(logOwner.userId, { order: 'asc', startAfter: records[records.length - 100].entryTime })
 				.then(results => {
 					for(let i = 0; i < results.length; i++) {
-						Object.assign(records[records.length - 101 - i], {
-							createdAt: results[i].createdAt,
-							logId: results[i].logId
-						});
+						records[records.length - 101 - i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[records.length - 101 - i]);
 					}
 					
@@ -404,10 +399,7 @@ describe('Dive log helpers', () => {
 			doListLogs(logOwner.userId, { order: 'asc' })
 				.then(results => {
 					for(let i = 0; i < results.length; i++) {
-						Object.assign(records[records.length - 1 - i], {
-							createdAt: results[i].createdAt,
-							logId: results[i].logId
-						});
+						records[records.length - 1 - i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[records.length - 1 - i]);
 					}
 					done();
