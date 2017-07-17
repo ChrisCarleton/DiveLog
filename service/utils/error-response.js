@@ -7,7 +7,7 @@ export const errorIds = {
 	'authentication-failed': 3000,
 	'not-authorized': 3100,
 	'forbidden-action': 3200
-}
+};
 
 export default function(res, errorId, title, description, statusCode) {
 	res.status(statusCode || 400).json({

@@ -15,7 +15,7 @@ export default function(expressSession) {
 
 	opts.client = new AWS.DynamoDB({
 		accessKeyId: config.awsKeyId,
-		secretAccessKey: config.awsSecretKey,			
+		secretAccessKey: config.awsSecretKey,
 		region: config.awsRegion,
 		endpoint: config.awsDynamoEndpoint
 			? new AWS.Endpoint(config.awsDynamoEndpoint)

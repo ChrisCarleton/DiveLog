@@ -45,7 +45,7 @@ class AlertActions {
 		} else if (res.body.errorId === 1000) {
 			// General validation failure. Don't render the details.
 			state.title = 'There was a problem with the information you submitted.';
-			state.description = 'Re-check the information you entered and follow any suggestions given.'
+			state.description = 'Re-check the information you entered and follow any suggestions given.';
 		} else {
 			state.title = res.body.error;
 			state.description = res.body.details;

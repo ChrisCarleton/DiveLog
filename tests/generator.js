@@ -21,7 +21,7 @@ function generateDiveLogEntry(ownerIds) {
 
 	const ownerId = () => {
 		if (!ownerIds) {
-			return faker.random.uuid()
+			return faker.random.uuid();
 		}
 
 		if (typeof ownerIds === 'string') {

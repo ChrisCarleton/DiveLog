@@ -12,7 +12,7 @@ class UserActions {
 				.then(res => {
 					this.signInSucceeded(res.body);
 				})
-				.catch(AlertActions.handleErrorResponse);			
+				.catch(AlertActions.handleErrorResponse);
 		};
 	}
 

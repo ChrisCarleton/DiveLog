@@ -86,7 +86,7 @@ function bundle(config, done) {
 			util.log('[webpack]', stats.toString());
 
 			done();
-		});	
+		});
 }
 
 gulp.task('bundle-dev', done => {
@@ -117,7 +117,7 @@ gulp.task('webpack-server', done => {
 gulp.task('dev-server', ['ensure-log-directory', 'ensure-dynamo-tables', 'webpack-server'], () => {
 	const server = gls(
 		'service/index.js',
-		{ env: 
+		{ env:
 			{
 				NODE_ENV: 'dev-server',
 				DIVELOG_PORT: 3000,

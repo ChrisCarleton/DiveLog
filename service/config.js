@@ -18,7 +18,7 @@ const config = {
 		},
 		github: {
 			clientId: process.env.DIVELOG_GITHUB_CLIENT_ID || 'github-id',
-			clientSecret: process.env.DIVELOG_GITHUB_CLIENT_SECRET || 'github-secret'	
+			clientSecret: process.env.DIVELOG_GITHUB_CLIENT_SECRET || 'github-secret'
 		}
 	}
 };

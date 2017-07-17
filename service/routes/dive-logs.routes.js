@@ -26,4 +26,4 @@ module.exports = function(app) {
 		.put(ensureEditPermission, editLog)
 		.patch(ensureEditPermission, editLog)
 		.delete(ensureEditPermission, deleteLog);
-}
+};
