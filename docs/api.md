@@ -132,8 +132,168 @@ The details of the newly-created user account are returned.
 ### Dive Log Entry Objects
 Many of the log entry APIs accept or return a Dive Log Entry Object. Here is the specification:
 ```javascript
-// TODO
+{
+	logId: [uuid],
+	ownerId: [userId],
+	entryTime: [dateAndTime],
+	diveNumber: [integer]
+	diveTime: {
+		exitTime: [dateAndTime],
+		surfaceInterval: [integer],
+		bottomTime: [dateAndTime],
+		decoStops: [
+			{
+				depth: [number],
+				duration: [integer]
+			}
+		]
+	},
+	location: [string],
+	site: [string],
+	gps: {
+		latitude: [number],
+		longitude: [number]
+	},
+	cnsO2Percent: [number],
+	cylinders: [
+		{
+			gas: {
+				o2Percent: [number],
+				hePercent: [number],
+				startPressure: [number],
+				endPressure: [number]
+			},
+			volume: [number],
+			type: [string],
+			number: [number]
+		}
+	],
+	depth: {
+		average: [number],
+		max: [number]
+	},
+	temperature: {
+		surface: [number],
+		water: [number],
+		thermocline1: [number],
+		thermocline2: [number]
+	},
+	exposure: {
+		body: [string],
+		thickness: [number],
+		gloves: [boolean],
+		hood: [boolean],
+		boots: [boolean]
+	},
+	equipment: {
+		compass: [boolean],
+		computer: [boolean],
+		knife: [boolean],
+		light: [boolean],
+		scooter: [boolean],
+		slate: [boolean],
+		surfaceMarker: [boolean]
+	},
+	diveType: {
+		altitude: [boolean],
+		boat: [boolean],
+		cave: [boolean],
+		deep: [boolean],
+		drift: [boolean],
+		ice: [boolean],
+		night: [boolean],
+		reef: [boolean],
+		saltWater: [boolean],
+		searchAndRecovery: [boolean],
+		training: [boolean],
+		wreck: [boolean]
+	},
+	visibility: [number],
+	current: [number],
+	surfaceConditions: [string],
+	weather: [string],
+	mood: [string],
+	weight: {
+		amount: [number],
+		correctness: [string],
+		trim: [string],
+		notes: [string]
+	},
+	notes: [string]
+}
 ```
+* __logId:__ A uuid that uniquely identifies the log entry. This is not required when posting, putting, or patching entries - the Log ID will be provided in the route path.
+* __ownerId:__ The ID of the user who owns the log entry. This is not required when posting, putting, or patching entries - the user will be provided in the route path.
+* __entryTime:__ Required. An ISO date/time string ([ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)) that indicates when the dive took place (i.e. the start of the descent.)
+* __diveNumber:__ A positive integer indicating the dive number for allowing the user to track how many dives they have under their belt.
+* __diveTime:__
+  * __exitTime:__ An ISO date/time indicating the dive exit time (i.e. when the diver returned to the surface.)
+  * __surfaceInterval:__ A positive integer. Number of minutes of surface interval since the previous dive, if applicable.
+  * __bottomTime:__ A positive integer. Number of minutes of bottom time for the dive. (I.e. The number of minutes from the beginning of the initial descent to the beginning of the final ascent.)
+  * __decoStops:__ An array of decompression stops made on this dive.
+    * __depth:__ A positive number at which the depth at which the stop took place.
+    * __duration:__ A positive integer indicating the number of minutes that the stop took place for.
+* __location:__ The place or city at which the time took place.
+* __site:__ The name of the dive site.
+* __gps:__ The GPS coordinates for the dive site.
+  * __latitude__
+  * __longitude__
+* __cnsO2Percent:__ A positive number between 0 and 110 indicating the diver's CNS O2 exposure at the end of the dive.
+* __cylinders:__ An array listing the cylinders that the diver had with them on this dive.
+  * __gas:__
+    * __o2Percent:__ A number between 1 and 100 indicating the percentage of the gas blend that was oxygen.
+    * __hePercent:__ A number between 0 and 99 indicating the percentage of the gas blend that was helium.
+    * __startPressure:__ A positive number indicating the starting pressure of the cylinder(s).
+    * __endPressure:__ A positive number indicating the pressure of the cylinder(s).
+  * __volume:__ A positive number indicating the volume of the cylinder.
+  * __type:__ A string. Valid values are `aluminum` or `steel`.
+  * __number:__ A positive integer indicating the number of tanks in the configuration. (E.g. 2 for doubles.)
+* __depth:__
+  * __average:__ A positive number indicating the average depth of the dive.
+  * __max:__ A positive number indicating the maximum depth of the dive.
+* __temperature:__
+  * __surface:__ A number indicating the surface temperature
+  * __water:__ A number indicating the water temperature at the surface
+  * __thermocline1:__ A number indicating the water temperature below the first thermocline
+  * __thermocline2:__ A number indicating the water temperature below the second thermocline
+* __exposure:__
+  * __body:__ String. Valid values are `none`, `shorty`, `full`, and `dry`.
+  * __thickness:__ Integer indicating the thickness of the wetsuit, if applicable, (usually 3, 5, or 7mm.)
+  * __gloves:__ Boolean. True if gloves were worn on the dive.
+  * __hood:__ Boolean. True if a hood was worn on the dive.
+  * __boots:__ Boolean. True if boots were worn on the dive.
+* __equipment:__
+  * __compass:__ Boolean. True if a compass was worn on the dive.
+  * __computer:__ Boolean. True if a computer was worn on the dive.
+  * __knife:__ Boolean. True if a knife was carried on the dive.
+  * __light:__ Boolean. True if a light was carried on the dive.
+  * __scooter:__ Boolean. True if a scooter was brought along on the dive.
+  * __slate:__ Boolean. True if a slate was carried on the dive.
+  * __surfaceMarker:__ True if a surface marker was carried on the dive.
+* __diveType:__
+  * __altitude:__ Boolean. True for altitude dives.
+  * __boat:__ Boolean. True for boat dives (as opposed to shore dives.)
+  * __cave:__ Boolean. True for cave dives.
+  * __deep:__ Boolean. True for deep dives.
+  * __drift:__ Boolean. True for drift dives.
+  * __ice:__ Boolean. True for ice dives.
+  * __night:__ Boolean. True for night dives.
+  * __reef:__ Boolean. True for reef dives.
+  * __saltWater:__ Boolean. True for salt water dives (as opposed to fresh.)
+  * __searchAndRecovery:__ Boolean. True for search and recovery dives.
+  * __training:__ Boolean. True for training dives.
+  * __wreck:__ Boolean. True for wreck dives.
+* __visibility:__ A positive number indicating the amount of visibility on the dive.
+* __current:__ A positive number between 0 and 10 indicating the relative speed of the current.
+* __surfaceConditions:__ String. One of `calm`, `moderate`, or `rough`.
+* __weather:__ A brief string denoting the weather conditions.
+* __mood:__ A brief string denoting the diver's mood on this dive.
+* __weight:__ {
+  * __amount:__ A positive number indicating how much ballast weight the diver was wearing.
+  * __correctness:__ A string indicating how well the diver was weighted. Valid values are `good`, `too much`, or `too little`.
+  * __trim:__ A string indicating how the diver's trim was. Valid values are `good`, `head up`, or `head down`.
+  * __notes:__ A free-form string for making notes on weight configuration.
+* __notes:__ A free-form string for making notes on the dive in general.
 
 ### List Log Entries
 
