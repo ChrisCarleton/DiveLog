@@ -45,7 +45,7 @@ describe('Dive log helpers', () => {
 			])
 			.then(() => done())
 			.catch(done);
-	})
+	});
 
 	describe('doCreateLog method', () => {
 
@@ -312,7 +312,7 @@ describe('Dive log helpers', () => {
 			purgeTable(DiveLogs, 'logId')
 				.then(() => {
 					return DiveLogs.createAsync(records);
-				})			
+				})
 				.then(() => {
 					records = _.orderBy(
 						_.map(records, rec => {
@@ -323,7 +323,7 @@ describe('Dive log helpers', () => {
 								'diveNumber',
 								'location',
 								'site',
-								'depth'])
+								'depth']);
 						}),
 						['entryTime'],
 						['desc']);
@@ -401,7 +401,7 @@ describe('Dive log helpers', () => {
 						records[records.length - 101 - i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[records.length - 101 - i]);
 					}
-					
+
 					done();
 				})
 				.catch(done);

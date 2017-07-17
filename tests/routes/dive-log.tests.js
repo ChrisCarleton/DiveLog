@@ -48,7 +48,7 @@ describe('Dive log routes:', () => {
 			.then(res => {
 				adminCookie = res.headers['set-cookie'];
 				return adminCookie;
-			});		
+			});
 	}
 
 	before(done => {
@@ -521,7 +521,7 @@ describe('Dive log routes:', () => {
 			purgeTable(DiveLogs, 'logId')
 				.then(() => {
 					return DiveLogs.createAsync(records);
-				})			
+				})
 				.then(() => {
 					records = _.orderBy(
 						_.map(records, rec => {
@@ -535,7 +535,7 @@ describe('Dive log routes:', () => {
 									'location',
 									'site',
 									'depth'
-								])
+								]);
 						}),
 						['entryTime'],
 						['desc']);
