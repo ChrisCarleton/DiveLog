@@ -316,7 +316,14 @@ describe('Dive log helpers', () => {
 				.then(() => {
 					records = _.orderBy(
 						_.map(records, rec => {
-							return _.pick(rec, ['ownerId', 'entryTime', 'logId', 'diveNumber', 'location', 'site', 'depth'])
+							return _.pick(rec, [
+								'ownerId',
+								'entryTime',
+								'logId',
+								'diveNumber',
+								'location',
+								'site',
+								'depth'])
 						}),
 						['entryTime'],
 						['desc']);
@@ -371,6 +378,20 @@ describe('Dive log helpers', () => {
 					done();
 				})
 				.catch(done);
+		});
+
+		it('will return 400 if both before and after parameters are supplied', done => {
+			doListLogs(logOwner.userId, {
+					after: records[99].entryTime,
+					before: records[200].entryTime
+				})
+				.then(() => {
+					done('should not have succeeded');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('ValidationError');
+					done();
+				});
 		});
 
 		it('will retrieve more results if requested in ascending order', done => {

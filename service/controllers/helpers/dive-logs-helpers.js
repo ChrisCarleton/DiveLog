@@ -51,6 +51,12 @@ export function doListLogs(ownerId, options) {
 	options.limit = options.limit || 100;
 	options.order = options.order || 'desc';
 
+	if (options.before && options.after) {
+		return Bluebird.reject(
+			new ValidationError(
+				'"before" and "after" parameters cannot be supplied at the same time.'));
+	}
+
 	let baseQuery = DiveLogs
 		.query(ownerId)
 		.usingIndex('OwnerIndex')

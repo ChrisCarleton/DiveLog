@@ -13,9 +13,13 @@ const request = supertest(app);
 
 describe('Dive log routes:', () => {
 
-	let user1, user2, adminUser, testLog;
+	let user1, user2, adminUser, testLog, user1Cookie, adminCookie;
 
 	function loginUser1() {
+		if (user1Cookie) {
+			return Bluebird.resolve(user1Cookie);
+		}
+
 		return request
 			.post('/api/auth/login/')
 			.send({
@@ -24,11 +28,16 @@ describe('Dive log routes:', () => {
 			})
 			.expect(200)
 			.then(res => {
-				return res.headers['set-cookie'];
+				user1Cookie = res.headers['set-cookie'];
+				return user1Cookie;
 			});
 	}
 
 	function loginAdmin() {
+		if (adminCookie) {
+			return Bluebird.resolve(adminCookie);
+		}
+
 		return request
 			.post('/api/auth/login/')
 			.send({
@@ -37,7 +46,8 @@ describe('Dive log routes:', () => {
 			})
 			.expect(200)
 			.then(res => {
-				return res.headers['set-cookie'];
+				adminCookie = res.headers['set-cookie'];
+				return adminCookie;
 			});		
 	}
 
@@ -68,84 +78,6 @@ describe('Dive log routes:', () => {
 	beforeEach(() => {
 		testLog = generator.generateDiveLogEntry();
 		testLog.ownerId = undefined;
-	});
-
-	describe('allow edit middleware', () => {
-		it('returns 404 if user name does not exist', done => {
-			loginUser1()
-				.then(cookie => {
-					return request
-						.post('/api/logs/NotAUser/')
-						.send(testLog)
-						.set('cookie', cookie)
-						.expect('Content-Type', /json/)
-						.expect(404);
-				})
-				.then(res => {
-					expect(res.body.errorId).to.equal(2100);
-					done();
-				})
-				.catch(done);
-		});
-
-		it('returns 401 if user is unauthenticated', done => {
-			request
-				.post(`/api/logs/${user2.userName}/`)
-				.send(testLog)
-				.expect('Content-Type', /json/)
-				.expect(401)
-				.then(res => {
-					expect(res.body.errorId).to.equal(3100);
-					done();
-				})
-				.catch(done);
-		});
-
-		it('returns 401 if trying to create a log under another user\'s profile', done => {
-			loginUser1()
-				.then(cookie => {
-					return request
-						.post(`/api/logs/${user2.userName}/`)
-						.send(testLog)
-						.set('cookie', cookie)
-						.expect('Content-Type', /json/)
-						.expect(401);
-				})
-				.then(res => {
-					expect(res.body.errorId).to.equal(3100);
-					done();
-				})
-				.catch(done);
-		});
-
-		it('will allow admins to create entries under other users\' accounts', done => {
-			loginAdmin()
-				.then(cookie => {
-					return request
-						.post(`/api/logs/${user1.userName}/`)
-						.send(testLog)
-						.set('cookie', cookie)
-						.expect('Content-Type', /json/)
-						.expect(200);
-				})
-				.then(res => {
-					expect(res.body.logId).to.exist;
-					expect(res.body.createdAt).to.exist;
-
-					const expected = Object.assign(
-						{},
-						testLog,
-						{
-							logId: res.body.logId,
-							ownerId: user1.userId,
-							createdAt: res.body.createdAt
-						});
-					expect(res.body).to.eql(expected);
-					done();
-				})
-				.catch(done);
-		});
-
 	});
 
 	describe('create log route', () => {
@@ -216,6 +148,23 @@ describe('Dive log routes:', () => {
 				.catch(done);
 		});
 
+		it('will return 404 if user does not exist', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.post(`/api/logs/NotARealUser/`)
+						.send(testLog)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
 	});
 
 	describe('get log route', () => {
@@ -254,6 +203,28 @@ describe('Dive log routes:', () => {
 				.then(cookie => {
 					return request
 						.get(`/api/logs/${user1.userName}/${uuid()}`)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if user does not exist', done => {
+			let logId;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginAdmin();
+				})
+				.then(cookie => {
+					return request
+						.get(`/api/logs/NotARealUser/${logId}`)
 						.set('cookie', cookie)
 						.expect(404);
 				})
@@ -454,6 +425,40 @@ describe('Dive log routes:', () => {
 				.catch(done);
 		});
 
+		it('will return 404 if user does not exist', done => {
+			const newValue = generator.generateDiveLogEntry(user1.userId);
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.put(`/api/logs/NotARealUser/${uuid()}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if log entry does not exist', done => {
+			const newValue = generator.generateDiveLogEntry(user1.userId);
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.put(`/api/logs/${user1.userName}/${uuid()}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
 		it('will return 401 if user is not authorized to update log entry', done => {
 			const newValue = generator.generateDiveLogEntry(user2.userId);
 			let logId;
@@ -611,6 +616,26 @@ describe('Dive log routes:', () => {
 				.catch(done);
 		});
 
+		it('will return 400 if "before" and "after" params are supplied at the same time', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.query({
+							before: '2017-01-01T00:00:00.000Z',
+							after: '2016-01-01T00:00:00.000Z'
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
 		it('will return 401 if user is unauthenticated', done => {
 			request
 				.get(`/api/logs/${user1.userName}/`)
@@ -639,6 +664,22 @@ describe('Dive log routes:', () => {
 				})
 				.then(res => {
 					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if user does not exist', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/NotARealUser/`)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
 					done();
 				})
 				.catch(done);

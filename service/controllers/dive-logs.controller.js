@@ -22,7 +22,7 @@ const listLogsQueryValidation = Joi.object().keys({
 	order: Joi.string().regex(/^(asc|desc)$/i),
 	before: Joi.string().isoDate(),
 	after: Joi.string().isoDate()
-});
+}).nand('before', 'after');
 
 export function listLogs(req, res) {
 	const validation = Joi.validate(req.query, listLogsQueryValidation);
@@ -54,7 +54,7 @@ export function createLog(req, res) {
 			if (err.name === 'ForbiddenActionError') {
 				log.warn(
 					'An attempt was made at a forbidden action. User:',
-					req.user,
+					req.user.userName,
 					'Details:',
 					err.message);
 				return forbiddenActionResponse(res, err.message);
@@ -81,7 +81,11 @@ export function editLog(req, res) {
 			}
 
 			if (err.name === 'ForbiddenActionError') {
-				log.warn('User attempted a forbidden action:', err);
+				log.warn(
+					'An attempt was made at a forbidden action. User:',
+					req.user.userName,
+					'Details:',
+					err.message);
 				return forbiddenActionResponse(res, err.message);
 			}
 
