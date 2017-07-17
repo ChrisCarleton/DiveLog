@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import Bluebird from 'bluebird';
 import DiveLogs, { createSchema, updateSchema } from '../../data/dive-logs.table';
 import { ForbiddenActionError, ValidationError } from '../../utils/exceptions';
@@ -42,6 +43,43 @@ export function doGetLog(logId) {
 			}
 
 			return null;
+		});
+}
+
+export function doListLogs(ownerId, options) {
+	options = options || {};
+	options.limit = options.limit || 100;
+	options.order = options.order || 'desc';
+
+	if (options.before && options.after) {
+		return Bluebird.reject(
+			new ValidationError(
+				'"before" and "after" parameters cannot be supplied at the same time.'));
+	}
+
+	let baseQuery = DiveLogs
+		.query(ownerId)
+		.usingIndex('OwnerIndex')
+		.limit(options.limit);
+
+	baseQuery = (options.order === 'asc')
+		? baseQuery.ascending()
+		: baseQuery.descending();
+
+	if (options.before) {
+		baseQuery = baseQuery.where('entryTime').lt(options.before);
+	}
+
+	if (options.after) {
+		baseQuery = baseQuery.where('entryTime').gt(options.after);
+	}
+
+	return baseQuery
+		.execAsync()
+		.then(result => {
+			return _.map(result.Items, item => {
+				return item.attrs;
+			});
 		});
 }
 

@@ -139,7 +139,11 @@ const DiveLogs = db.define(
 				hashKey: 'ownerId',
 				rangeKey: 'entryTime',
 				name: 'OwnerIndex',
-				type: 'global'
+				type: 'global',
+				projection: {
+					ProjectionType: 'INCLUDE',
+					NonKeyAttributes: ['logId', 'diveNumber', 'location', 'site', 'depth']
+				}
 			}
 		]
 	});

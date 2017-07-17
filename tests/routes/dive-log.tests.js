@@ -1,10 +1,10 @@
+import _ from 'lodash';
 import { app } from '../../service/server';
 import Bluebird from 'bluebird';
 import { createUser, purgeTable } from '../test-utils';
 import DiveLogs from '../../service/data/dive-logs.table';
 import { expect } from 'chai';
 import generator from '../generator';
-import geolib from 'geolib';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
@@ -13,9 +13,13 @@ const request = supertest(app);
 
 describe('Dive log routes:', () => {
 
-	let user1, user2, adminUser, testLog;
+	let user1, user2, adminUser, testLog, user1Cookie, adminCookie;
 
 	function loginUser1() {
+		if (user1Cookie) {
+			return Bluebird.resolve(user1Cookie);
+		}
+
 		return request
 			.post('/api/auth/login/')
 			.send({
@@ -24,11 +28,16 @@ describe('Dive log routes:', () => {
 			})
 			.expect(200)
 			.then(res => {
-				return res.headers['set-cookie'];
+				user1Cookie = res.headers['set-cookie'];
+				return user1Cookie;
 			});
 	}
 
 	function loginAdmin() {
+		if (adminCookie) {
+			return Bluebird.resolve(adminCookie);
+		}
+
 		return request
 			.post('/api/auth/login/')
 			.send({
@@ -37,8 +46,9 @@ describe('Dive log routes:', () => {
 			})
 			.expect(200)
 			.then(res => {
-				return res.headers['set-cookie'];
-			});
+				adminCookie = res.headers['set-cookie'];
+				return adminCookie;
+			});		
 	}
 
 	before(done => {
@@ -66,152 +76,8 @@ describe('Dive log routes:', () => {
 	});
 
 	beforeEach(() => {
-		testLog = {
-			entryTime: '2017-02-01T20:26:00.000Z',
-			diveNumber: 40,
-			diveTime: {
-				exitTime: '2017-02-01T21:16:00.000Z',
-				surfaceInterval: 53,
-				bottomTime: 45,
-				decoStops: [
-					{
-						depth: 15,
-						duration: 3
-					}
-				]
-			},
-			location: 'Cozumel, MX',
-			site: 'Paso de Cedral',
-			gps: {
-				latitude: geolib.useDecimal('20° 21\' 15.420" N'),
-				longitude: geolib.useDecimal('87° 1\' 41.760" W')
-			},
-			cnsO2Percent: 20,
-			cylinders: [
-				{
-					gas: {
-						o2Percent: 31,
-						startPressure: 2900,
-						endPressure: 1000
-					},
-					volume: 80,
-					type: 'aluminum',
-					number: 1
-				}
-			],
-			depth: {
-				average: 38,
-				max: 55
-			},
-			temperature: {
-				surface: 90,
-				water: 81
-			},
-			exposure: {
-				body: 'full',
-				thickness: 3,
-				boots: true
-			},
-			equipment: {
-				computer: true,
-				light: true,
-				surfaceMarker: true
-			},
-			diveType: {
-				boat: true,
-				drift: true,
-				reef: true,
-				saltWater: true
-			},
-			visibility: 101,
-			current: 90,
-			surfaceConditions: 'calm',
-			mood: 'great',
-			weight: {
-				amount: 16,
-				correctness: 'good',
-				trim: 'good'
-			},
-			notes: 'Amazing dive!!'
-		};
-	});
-
-	describe('allow edit middleware', () => {
-		it('returns 404 if user name does not exist', done => {
-			loginUser1()
-				.then(cookie => {
-					return request
-						.post('/api/logs/NotAUser/')
-						.send(testLog)
-						.set('cookie', cookie)
-						.expect('Content-Type', /json/)
-						.expect(404);
-				})
-				.then(res => {
-					expect(res.body.errorId).to.equal(2100);
-					done();
-				})
-				.catch(done);
-		});
-
-		it('returns 401 if user is unauthenticated', done => {
-			request
-				.post(`/api/logs/${user2.userName}/`)
-				.send(testLog)
-				.expect('Content-Type', /json/)
-				.expect(401)
-				.then(res => {
-					expect(res.body.errorId).to.equal(3100);
-					done();
-				})
-				.catch(done);
-		});
-
-		it('returns 401 if trying to create a log under another user\'s profile', done => {
-			loginUser1()
-				.then(cookie => {
-					return request
-						.post(`/api/logs/${user2.userName}/`)
-						.send(testLog)
-						.set('cookie', cookie)
-						.expect('Content-Type', /json/)
-						.expect(401);
-				})
-				.then(res => {
-					expect(res.body.errorId).to.equal(3100);
-					done();
-				})
-				.catch(done);
-		});
-
-		it('will allow admins to create entries under other users\' accounts', done => {
-			loginAdmin()
-				.then(cookie => {
-					return request
-						.post(`/api/logs/${user1.userName}/`)
-						.send(testLog)
-						.set('cookie', cookie)
-						.expect('Content-Type', /json/)
-						.expect(200);
-				})
-				.then(res => {
-					expect(res.body.logId).to.exist;
-					expect(res.body.createdAt).to.exist;
-
-					const expected = Object.assign(
-						{},
-						testLog,
-						{
-							logId: res.body.logId,
-							ownerId: user1.userId,
-							createdAt: res.body.createdAt
-						});
-					expect(res.body).to.eql(expected);
-					done();
-				})
-				.catch(done);
-		});
-
+		testLog = generator.generateDiveLogEntry();
+		testLog.ownerId = undefined;
 	});
 
 	describe('create log route', () => {
@@ -282,6 +148,23 @@ describe('Dive log routes:', () => {
 				.catch(done);
 		});
 
+		it('will return 404 if user does not exist', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.post(`/api/logs/NotARealUser/`)
+						.send(testLog)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
 	});
 
 	describe('get log route', () => {
@@ -320,6 +203,28 @@ describe('Dive log routes:', () => {
 				.then(cookie => {
 					return request
 						.get(`/api/logs/${user1.userName}/${uuid()}`)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if user does not exist', done => {
+			let logId;
+			testLog.ownerId = user1.userId;
+			DiveLogs
+				.createAsync(testLog)
+				.then(result => {
+					logId = result.get('logId');
+					return loginAdmin();
+				})
+				.then(cookie => {
+					return request
+						.get(`/api/logs/NotARealUser/${logId}`)
 						.set('cookie', cookie)
 						.expect(404);
 				})
@@ -520,6 +425,40 @@ describe('Dive log routes:', () => {
 				.catch(done);
 		});
 
+		it('will return 404 if user does not exist', done => {
+			const newValue = generator.generateDiveLogEntry(user1.userId);
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.put(`/api/logs/NotARealUser/${uuid()}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if log entry does not exist', done => {
+			const newValue = generator.generateDiveLogEntry(user1.userId);
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.put(`/api/logs/${user1.userName}/${uuid()}/`)
+						.send(newValue)
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
 		it('will return 401 if user is not authorized to update log entry', done => {
 			const newValue = generator.generateDiveLogEntry(user2.userId);
 			let logId;
@@ -565,6 +504,202 @@ describe('Dive log routes:', () => {
 				})
 				.then(result => {
 					expect(result.body.errorId).to.equal(3200);
+					done();
+				})
+				.catch(done);
+		});
+	});
+
+	describe('list logs route', () => {
+		let records = [];
+
+		before(done => {
+			for (let i = 0; i < 220; i++) {
+				records.push(generator.generateDiveLogEntry(user1.userId));
+			}
+
+			purgeTable(DiveLogs, 'logId')
+				.then(() => {
+					return DiveLogs.createAsync(records);
+				})			
+				.then(() => {
+					records = _.orderBy(
+						_.map(records, rec => {
+							return _.pick(
+								rec,
+								[
+									'ownerId',
+									'entryTime',
+									'logId',
+									'diveNumber',
+									'location',
+									'site',
+									'depth'
+								])
+						}),
+						['entryTime'],
+						['desc']);
+					done();
+				})
+				.catch(done);
+		});
+
+		after(done => {
+			purgeTable(DiveLogs, 'logId')
+				.then(() => done())
+				.catch(done);
+		});
+
+		it('will retrieve a list of dive log entries', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body).to.have.length(100);
+					for (let i = 0; i < res.body.length; i++) {
+						records[i].logId = res.body[i].logId;
+						expect(res.body[i]).to.eql(records[i]);
+					}
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will accept query string params to change the behaviour', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.query({
+							order: 'asc',
+							after: records[100].entryTime,
+							limit: 20
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body).to.have.length(20);
+					for (let i = 0; i < 20; i++) {
+						records[99 - i].logId = res.body[i].logId;
+						expect(res.body[i]).to.eql(records[99 - i]);
+					}
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if query string params are invalid', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.query({
+							order: 'not-valid',
+							limit: 20,
+							wat: true
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if "before" and "after" params are supplied at the same time', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.query({
+							before: '2017-01-01T00:00:00.000Z',
+							after: '2016-01-01T00:00:00.000Z'
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is unauthenticated', done => {
+			request
+				.get(`/api/logs/${user1.userName}/`)
+				.expect('Content-Type', /json/)
+				.expect(401)
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user does not have permission to view log entries', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user2.userName}/`)
+						.query({
+							order: 'desc',
+							before: records[100].entryTime,
+							limit: 500
+						})
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if user does not exist', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/NotARealUser/`)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('admins can view other users\' private logs', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get(`/api/logs/${user1.userName}/`)
+						.set('cookie', cookie)
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body).to.have.length(100);
+					for (let i = 0; i < res.body.length; i++) {
+						records[i].logId = res.body[i].logId;
+						expect(res.body[i]).to.eql(records[i]);
+					}
 					done();
 				})
 				.catch(done);

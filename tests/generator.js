@@ -50,8 +50,8 @@ function generateDiveLogEntry(ownerIds) {
 		location: faker.fake('{{address.cityPrefix}} {{name.firstName}}{{address.citySuffix}}, {{address.countryCode}}'),
 		site: faker.fake('{{name.lastName}} {{address.cityPrefix}}'),
 		gps: {
-			latitude: faker.address.latitude(),
-			longitude: faker.address.longitude()
+			latitude: Number.parseFloat(faker.address.latitude()),
+			longitude: Number.parseFloat(faker.address.longitude())
 		},
 
 		cnsO2Percent: faker.random.number({ min: 5, max: 80 }),
