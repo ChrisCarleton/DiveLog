@@ -148,13 +148,7 @@ Resources:
               AttributeName: "userName"
               KeyType: "HASH"
           Projection:
-            NonKeyAttributes:
-              - "userId"
-              - "email"
-              - "displayName"
-              - "passwordHash"
-              - "role"
-            ProjectionType: "INCLUDE"
+            ProjectionType: "ALL"
           ProvisionedThroughput:
             ReadCapacityUnits:
               Ref: UsersReadCapacity
@@ -167,13 +161,7 @@ Resources:
               AttributeName: "email"
               KeyType: "HASH"
           Projection:
-            NonKeyAttributes:
-              - "userId"
-              - "userName"
-              - "displayName"
-              - "passwordHash"
-              - "role"
-            ProjectionType: "INCLUDE"
+            ProjectionType: "ALL"
           ProvisionedThroughput:
             ReadCapacityUnits:
               Ref: UsersReadCapacity
@@ -202,6 +190,58 @@ Resources:
         -
           AttributeName: "id"
           KeyType: "HASH"
+
+  DiveLogsTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Fn::Join:
+          - '-'
+          - - divelog
+            - Ref: NodeEnv
+            - divelogs
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: DiveLogsReadCapacity
+        WriteCapacityUnits:
+          Ref: DiveLogsWriteCapacity
+      AttributeDefinitions:
+        -
+          AttributeName: "logId"
+          AttributeType: "S"
+        -
+          AttributeName: "ownerId"
+          AttributeType: "S"
+        -
+          AttributeName: "entryTime"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "logId"
+          KeyType: "HASH"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "OwnerIndex"
+          KeySchema:
+            -
+              AttributeName: "ownerId"
+              KeyType: "HASH"
+            -
+              AttributeName: "entryTime"
+              KeyType: "RANGE"
+          Projection:
+            NonKeyAttributes:
+              - "logId"
+              - "diveNumber"
+              - "location"
+              - "site"
+              - "depth"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput:
+            ReadCapacityUnits:
+              Ref: DiveLogsReadCapacity
+            WriteCapacityUnits:
+              Ref: DiveLogsWriteCapacity
 
   ECSCluster:
     Type: AWS::ECS::Cluster

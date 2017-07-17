@@ -1,5 +1,7 @@
 import _ from 'lodash';
+import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
+import Users from '../service/data/users.table';
 
 export function purgeTable(table, hashKey, rangeKey) {
 	return table
@@ -22,3 +24,20 @@ export function purgeTable(table, hashKey, rangeKey) {
 			return Bluebird.all(promises);
 		});
 }
+
+export function createUser(userName, email, password, isAdmin) {
+	const salt = bcrypt.genSaltSync(10);
+	const hash = bcrypt.hashSync(password, salt);
+
+	return Users
+		.createAsync({
+			userName: userName,
+			email: email,
+			passwordHash: hash,
+			role: isAdmin ? 'admin' : 'user'
+		})
+		.then(result => {
+			return result.attrs;
+		});
+}
+
