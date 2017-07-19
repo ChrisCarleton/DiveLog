@@ -7,6 +7,14 @@ Parameters:
     Type: String
     Description: The Docker image to deploy on the ECS instances.
     Default: '961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest'
+  HttpCidrIP:
+    Type: String
+    Description: The CIDR filter used to restrict HTTP access to certain subnets.
+    Default: 0.0.0.0/0
+  SshCidrIP:
+    Type: String
+    Description: The CIDR filter used to restrict HTTP access to certain subnets.
+    Default: 23.233.5.150/32
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: Select a VPC that allows instances access to the Internet.
@@ -261,7 +269,7 @@ Resources:
       IpProtocol: tcp
       FromPort: '80'
       ToPort: '80'
-      CidrIp: 0.0.0.0/0
+      CidrIp: !Ref 'HttpCidrIP'
   EcsSecurityGroupHTTPSinbound:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -269,7 +277,7 @@ Resources:
       IpProtocol: tcp
       FromPort: '443'
       ToPort: '443'
-      CidrIp: 0.0.0.0/0
+      CidrIp: !Ref 'HttpCidrIP'
   EcsSecurityGroupSSHinbound:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -277,7 +285,7 @@ Resources:
       IpProtocol: tcp
       FromPort: '22'
       ToPort: '22'
-      CidrIp: 0.0.0.0/0
+      CidrIp: !Ref 'SshCidrIP'
   EcsSecurityGroupALBports:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
