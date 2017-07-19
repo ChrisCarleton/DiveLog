@@ -13,6 +13,11 @@ import pug from 'pug';
 import session from 'express-session';
 import SessionStore from './session-store';
 
+process.on('uncaughtException', exception => {
+	log.fatal('A fatal, uncaught exception has occured:', exception);
+	process.exit(1);
+});
+
 const app = express();
 
 app.use(cookieParser());
