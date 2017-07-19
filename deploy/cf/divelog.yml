@@ -3,6 +3,10 @@ Parameters:
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.
+  DockerImage:
+    Type: String
+    Description: The Docker image to deploy on the ECS instances.
+    Default: '961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest'
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: Select a VPC that allows instances access to the Internet.
@@ -295,7 +299,7 @@ Resources:
       - Name: divelog-web
         Cpu: '10'
         Essential: 'true'
-        Image: 961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest
+        Image: !Ref DockerImage
         Environment:
           - Name: NODE_ENV
             Value: !Ref NodeEnv
