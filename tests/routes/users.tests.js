@@ -256,7 +256,8 @@ describe('User routes', () => {
 								pattern: {},
 								value: 'TooWeak'
 							},
-							message: '"password" with value "TooWeak" fails to match the required pattern: ' + /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?+)(&.-=/\\\][~`]).*$/.toString(),
+							message: '"password" with value "TooWeak" fails to match the required pattern: '
+								+ /(?=^[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]{7,}$)(?=([!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*\W+){1,})[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*$/.toString(),
 							path: 'password',
 							type: 'string.regex.base'
 						}

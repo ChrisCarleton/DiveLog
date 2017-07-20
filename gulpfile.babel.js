@@ -15,7 +15,13 @@ const isparta = require('isparta');
 
 gulp.task('lint', () => {
 	return gulp
-		.src(['service/**/*.js', 'web/**/*.js', 'web/**/*.jsx', 'tests/**/*.js', 'gulpfile.babel.js'])
+		.src([
+			'service/**/*.js',
+			'web/**/*.js',
+			'web/**/*.jsx',
+			'tests/**/*.js',
+			'ui-tests/**/*.js',
+			'gulpfile.babel.js'])
 		.pipe(eslint())
 		.pipe(eslint.format())
 		.pipe(eslint.failAfterError());
@@ -73,6 +79,19 @@ gulp.task('report-coverage', ['test'], () => {
 	return gulp
 		.src('coverage/lcov.info')
 		.pipe(coveralls());
+});
+
+gulp.task('test-ui', ['lint', 'bundle-dev'], () => {
+	process.env.DIVELOG_LOG_LEVEL = 'trace';
+	process.env.DIVELOG_LOG_FILE = path.resolve(__dirname, 'logs/tests.log');
+
+	return gulp
+		.src('ui-tests/**/*.tests.js')
+		.pipe(mocha({
+			compilers: ['js:babel-core/register'],
+			reporter: 'spec',
+			timeout: 12000
+		}));
 });
 
 function bundle(config, done) {
