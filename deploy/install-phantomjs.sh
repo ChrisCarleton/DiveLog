@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 mkdir phantom-temp/
 wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 -O phantom-temp/phantomjs.tar.bz2
