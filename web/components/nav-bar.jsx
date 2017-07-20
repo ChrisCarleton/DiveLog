@@ -57,12 +57,12 @@ class AppNavbar extends React.Component {
 						:
 						<Nav pullRight>
 							<LinkContainer to="/login">
-								<NavItem>Log In</NavItem>	
+								<NavItem>Log In</NavItem>
 							</LinkContainer>
 							<LinkContainer to="/signup">
 								<NavItem>Sign Up</NavItem>
 							</LinkContainer>
-						</Nav>							
+						</Nav>
 					}
 				</Navbar.Collapse>
 				<AlertBox />

@@ -15,7 +15,5 @@ deployment:
   staging:
     branch: master
     commands:
-      - $(aws ecr get-login --region us-east-1)
-      - docker tag divelog:latest 961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest
-      - docker push 961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest
-
+      - deploy/push-docker-image.sh Build$CIRCLE_BUILD_NUM
+      - deploy/run-blue-green.sh Build$CIRCLE_BUILD_NUM

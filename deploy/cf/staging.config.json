@@ -1,0 +1,22 @@
+{
+  "Parameters" : {
+    "AwsKeyId" : "AKIAI2EGEWBDKUX7SBBA",
+    "AwsSecretKey": "",
+    "HttpCidrIP": "23.233.5.150/32",
+    "KeyName": "ChrisLinuxMintLaptop",
+    "LogLevel": "debug",
+    "NodeEnv": "staging",
+    "SubnetId": "subnet-8f2710b3,subnet-4f981943,subnet-8ecac2eb,subnet-3121911d,subnet-0db01857,subnet-4a680102",
+    "VpcId": "vpc-f2e0518b"
+  },
+  "StackPolicy" : {
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "NotAction" : "Update:Delete",
+        "Principal": "*",
+        "Resource" : "*"
+      }
+    ]
+  }
+}

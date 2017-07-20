@@ -1,0 +1,553 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.
+  DockerImage:
+    Type: String
+    Description: The Docker image to deploy on the ECS instances.
+    Default: '961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:latest'
+  HttpCidrIP:
+    Type: String
+    Description: The CIDR filter used to restrict HTTP access to certain subnets.
+    Default: 0.0.0.0/0
+  SshCidrIP:
+    Type: String
+    Description: The CIDR filter used to restrict HTTP access to certain subnets.
+    Default: 23.233.5.150/32
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Select a VPC that allows instances access to the Internet.
+  SubnetId:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Select at two subnets in your selected VPC.
+  DesiredCapacity:
+    Type: Number
+    Default: '1'
+    Description: Number of instances to launch in your ECS cluster.
+  MaxSize:
+    Type: Number
+    Default: '1'
+    Description: Maximum number of instances that can be launched in your ECS cluster.
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues: [t2.micro, t2.small, t2.medium, t2.large, m3.medium, m3.large,
+      m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge,
+      c4.large, c4.xlarge, c4.2xlarge, c4.4xlarge, c4.8xlarge, c3.large, c3.xlarge,
+      c3.2xlarge, c3.4xlarge, c3.8xlarge, r3.large, r3.xlarge, r3.2xlarge, r3.4xlarge,
+      r3.8xlarge, i2.xlarge, i2.2xlarge, i2.4xlarge, i2.8xlarge]
+    ConstraintDescription: Please choose a valid instance type.
+  NodeEnv:
+    Description: Value for the NODE_ENV environment variable
+    Type: String
+    Default: production
+  LogLevel:
+    Description: Log output verbosity
+    Type: String
+    Default: info
+    AllowedValues: [trace, debug, info, warn, error, fatal]
+    ConstraintDescription: Please choose one of the recognized log levels.
+  AwsKeyId:
+    Description: AWS API key Id
+    Type: String
+  AwsSecretKey:
+    Description: AWS API secret key
+    Type: String
+  UsersReadCapacity:
+    Description: Users table read capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+  UsersWriteCapacity:
+    Description: Users table write capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+  OAuthReadCapacity:
+    Description: OAuth table read capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+  OAuthWriteCapacity:
+    Description: OAuth table write capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+  SessionsReadCapacity:
+    Description: Sessions table read capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+  SessionsWriteCapacity:
+    Description: Sessions table write capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+  DiveLogsReadCapacity:
+    Description: Dive logs table read capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+  DiveLogsWriteCapacity:
+    Description: Dive logs table write capcity units
+    Type: Number
+    Default: 1
+    MinValue: 1
+    ConstraintDescription: Must be at least one.
+Mappings:
+  AWSRegionToAMI:
+    us-east-1:
+      AMIID: ami-eca289fb
+    us-east-2:
+      AMIID: ami-446f3521
+    us-west-1:
+      AMIID: ami-9fadf8ff
+    us-west-2:
+      AMIID: ami-7abc111a
+    eu-west-1:
+      AMIID: ami-a1491ad2
+    eu-central-1:
+      AMIID: ami-54f5303b
+    ap-northeast-1:
+      AMIID: ami-9cd57ffd
+    ap-southeast-1:
+      AMIID: ami-a900a3ca
+    ap-southeast-2:
+      AMIID: ami-5781be34
+Resources:
+  UsersTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Fn::Join:
+          - '-'
+          - - divelog
+            - Ref: NodeEnv
+            - users
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: UsersReadCapacity
+        WriteCapacityUnits:
+          Ref: UsersWriteCapacity
+      AttributeDefinitions:
+        -
+          AttributeName: "userId"
+          AttributeType: "S"
+        -
+          AttributeName: "userName"
+          AttributeType: "S"
+        -
+          AttributeName: "email"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "userId"
+          KeyType: "HASH"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "UserNameIndex"
+          KeySchema:
+            -
+              AttributeName: "userName"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits:
+              Ref: UsersReadCapacity
+            WriteCapacityUnits:
+              Ref: UsersWriteCapacity
+        -
+          IndexName: "EmailIndex"
+          KeySchema:
+            -
+              AttributeName: "email"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits:
+              Ref: UsersReadCapacity
+            WriteCapacityUnits:
+              Ref: UsersWriteCapacity
+
+  SessionsTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Fn::Join:
+          - '-'
+          - - divelog
+            - Ref: NodeEnv
+            - sessions
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: SessionsReadCapacity
+        WriteCapacityUnits:
+          Ref: SessionsWriteCapacity
+      AttributeDefinitions:
+        -
+          AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "id"
+          KeyType: "HASH"
+
+  DiveLogsTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Fn::Join:
+          - '-'
+          - - divelog
+            - Ref: NodeEnv
+            - divelogs
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: DiveLogsReadCapacity
+        WriteCapacityUnits:
+          Ref: DiveLogsWriteCapacity
+      AttributeDefinitions:
+        -
+          AttributeName: "logId"
+          AttributeType: "S"
+        -
+          AttributeName: "ownerId"
+          AttributeType: "S"
+        -
+          AttributeName: "entryTime"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "logId"
+          KeyType: "HASH"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "OwnerIndex"
+          KeySchema:
+            -
+              AttributeName: "ownerId"
+              KeyType: "HASH"
+            -
+              AttributeName: "entryTime"
+              KeyType: "RANGE"
+          Projection:
+            NonKeyAttributes:
+              - "logId"
+              - "diveNumber"
+              - "location"
+              - "site"
+              - "depth"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput:
+            ReadCapacityUnits:
+              Ref: DiveLogsReadCapacity
+            WriteCapacityUnits:
+              Ref: DiveLogsWriteCapacity
+
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+  EcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Security Group
+      VpcId: !Ref 'VpcId'
+  EcsSecurityGroupHTTPinbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'EcsSecurityGroup'
+      IpProtocol: tcp
+      FromPort: '80'
+      ToPort: '80'
+      CidrIp: !Ref 'HttpCidrIP'
+  EcsSecurityGroupHTTPSinbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'EcsSecurityGroup'
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      CidrIp: !Ref 'HttpCidrIP'
+  EcsSecurityGroupSSHinbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'EcsSecurityGroup'
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: !Ref 'SshCidrIP'
+  EcsSecurityGroupALBports:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'EcsSecurityGroup'
+      IpProtocol: tcp
+      FromPort: '31000'
+      ToPort: '61000'
+      SourceSecurityGroupId: !Ref 'EcsSecurityGroup'
+  CloudwatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ['-', [ECSLogGroup, !Ref 'AWS::StackName']]
+      RetentionInDays: 14
+  taskdefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Join ['', [!Ref 'AWS::StackName', -divelog]]
+      ContainerDefinitions:
+      - Name: divelog-web
+        Cpu: '10'
+        Essential: 'true'
+        Image: !Ref DockerImage
+        Environment:
+          - Name: NODE_ENV
+            Value: !Ref NodeEnv
+          - Name: DIVELOG_LOG_LEVEL
+            Value: !Ref LogLevel
+          - Name: DIVELOG_AWS_KEY_ID
+            Value: !Ref AwsKeyId
+          - Name: DIVELOG_AWS_SECRET_KEY
+            Value: !Ref AwsSecretKey
+          - Name: DIVELOG_AWS_REGION
+            Value: !Ref AWS::Region
+          - Name: DIVELOG_FORCE_SSL
+            Value: true
+        Memory: '300'
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref 'CloudwatchLogsGroup'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: ecs-demo-app
+        PortMappings:
+        - ContainerPort: 8100
+  ECSALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: ECSALB
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+      - Key: idle_timeout.timeout_seconds
+        Value: '30'
+      Subnets: !Ref 'SubnetId'
+      SecurityGroups: [!Ref 'EcsSecurityGroup']
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: ECSServiceRole
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      LoadBalancerArn: !Ref 'ECSALB'
+      Port: '80'
+      Protocol: HTTP
+  ALBListenerHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: ECSServiceRole
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      LoadBalancerArn: !Ref 'ECSALB'
+      Port: '443'
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: arn:aws:acm:us-east-1:961445962603:certificate/aa379366-6422-4af3-9ca4-01f0724a7394
+  ECSALBListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    DependsOn: ALBListener
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      Conditions:
+      - Field: path-pattern
+        Values: [/]
+      ListenerArn: !Ref 'ALBListener'
+      Priority: 1
+  ECSALBListenerRuleHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    DependsOn: ALBListenerHTTPS
+    Properties:
+      Actions:
+      - Type: forward
+        TargetGroupArn: !Ref 'ECSTG'
+      Conditions:
+      - Field: path-pattern
+        Values: [/]
+      ListenerArn: !Ref 'ALBListener'
+      Priority: 1
+  ECSTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ECSALB
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /api/health/
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Name: ECSTG
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'VpcId'
+  ECSAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier: !Ref 'SubnetId'
+      LaunchConfigurationName: !Ref 'ContainerInstances'
+      MinSize: '1'
+      MaxSize: !Ref 'MaxSize'
+      DesiredCapacity: !Ref 'DesiredCapacity'
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+    UpdatePolicy:
+      AutoScalingReplacingUpdate:
+        WillReplace: 'true'
+  ContainerInstances:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID]
+      SecurityGroups: [!Ref 'EcsSecurityGroup']
+      InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref 'EC2InstanceProfile'
+      KeyName: !Ref 'KeyName'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+          yum install -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
+  service:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListener
+    Properties:
+      Cluster: !Ref 'ECSCluster'
+      DesiredCount: '1'
+      LoadBalancers:
+      - ContainerName: divelog-web
+        ContainerPort: '8100'
+        TargetGroupArn: !Ref 'ECSTG'
+      Role: !Ref 'ECSServiceRole'
+      TaskDefinition: !Ref 'taskdefinition'
+  ECSServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['elasticloadbalancing:DeregisterInstancesFromLoadBalancer', 'elasticloadbalancing:DeregisterTargets',
+              'elasticloadbalancing:Describe*', 'elasticloadbalancing:RegisterInstancesWithLoadBalancer',
+              'elasticloadbalancing:RegisterTargets', 'ec2:Describe*', 'ec2:AuthorizeSecurityGroupIngress']
+            Resource: '*'
+  ServiceScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: service
+    Properties:
+      MaxCapacity: 2
+      MinCapacity: 1
+      ResourceId: !Join ['', [service/, !Ref 'ECSCluster', /, !GetAtt [service, Name]]]
+      RoleARN: !GetAtt [AutoscalingRole, Arn]
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+  ServiceScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: AStepPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref 'ServiceScalingTarget'
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+        - MetricIntervalLowerBound: 0
+          ScalingAdjustment: 200
+  ALB500sAlarmScaleUp:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '1'
+      Statistic: Average
+      Threshold: '10'
+      AlarmDescription: Alarm if our ALB generates too many HTTP 500s.
+      Period: '60'
+      AlarmActions: [!Ref 'ServiceScalingPolicy']
+      Namespace: AWS/ApplicationELB
+      Dimensions:
+      - Name: ECSService
+        Value: !Ref 'service'
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: HTTPCode_ELB_5XX_Count
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['ecs:CreateCluster', 'ecs:DeregisterContainerInstance', 'ecs:DiscoverPollEndpoint',
+              'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession',
+              'ecs:Submit*', 'logs:CreateLogStream', 'logs:PutLogEvents', 'ecr:GetAuthorizationToken',
+              'ecr:BatchCheckLayerAvailability', 'ecr:GetDownloadUrlForLayer', 'ecr:GetRepositoryPolicy',
+              'ecr:DescribeRepositories', 'ecr:ListImages', 'ecr:DescribeImages', 'ecr:BatchGetImage']
+            Resource: '*'
+  AutoscalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [application-autoscaling.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: service-autoscaling
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['application-autoscaling:*', 'cloudwatch:DescribeAlarms', 'cloudwatch:PutMetricAlarm',
+              'ecs:DescribeServices', 'ecs:UpdateService']
+            Resource: '*'
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: [!Ref 'EC2Role']
+Outputs:
+  ecsservice:
+    Value: !Ref 'service'
+  ecscluster:
+    Value: !Ref 'ECSCluster'
+  ECSALB:
+    Description: Your ALB DNS URL
+    Value: !Join ['', [!GetAtt [ECSALB, DNSName]]]
+  taskdef:
+    Value: !Ref 'taskdefinition'

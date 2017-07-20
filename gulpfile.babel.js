@@ -66,7 +66,7 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 		.pipe(mocha({
 			compilers: ['js:babel-core/register'],
 			reporter: 'spec',
-			timeout: 4000
+			timeout: 12000
 		}))
 		.on('error', process.exit.bind(process, 1))
 		.pipe(istanbul.writeReports({
@@ -105,7 +105,7 @@ function bundle(config, done) {
 			util.log('[webpack]', stats.toString());
 
 			done();
-		});	
+		});
 }
 
 gulp.task('bundle-dev', done => {
@@ -136,7 +136,7 @@ gulp.task('webpack-server', done => {
 gulp.task('dev-server', ['ensure-log-directory', 'ensure-dynamo-tables', 'webpack-server'], () => {
 	const server = gls(
 		'service/index.js',
-		{ env: 
+		{ env:
 			{
 				NODE_ENV: 'dev-server',
 				DIVELOG_PORT: 3000,
