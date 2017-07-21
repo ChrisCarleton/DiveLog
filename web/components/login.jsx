@@ -1,5 +1,6 @@
 import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
+import PageHeader from './controls/page-header.jsx';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import TextBox from './controls/text-box.jsx';
@@ -10,9 +11,10 @@ import {
 	Col,
 	Button,
 	Grid,
-	Row,
-	PageHeader
+	Row
 } from 'react-bootstrap';
+
+const ALERT_KEY = 'login';
 
 class LogIn extends React.Component {
 	constructor() {
@@ -40,7 +42,7 @@ class LogIn extends React.Component {
 	}
 
 	submit(model) {
-		AlertActions.dismissAlert();
+		AlertActions.dismissAlert(ALERT_KEY);
 		UserActions.loginUser(model);
 	}
 
@@ -51,7 +53,7 @@ class LogIn extends React.Component {
 
 		return (
 		<div>
-			<PageHeader>Log In</PageHeader>
+			<PageHeader heading="Log In" alertKey={ ALERT_KEY } />
 			<Grid>
 				<Row>
 					<Col md={5}>

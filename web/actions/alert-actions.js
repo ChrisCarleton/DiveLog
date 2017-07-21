@@ -1,40 +1,45 @@
 import alt from '../alt';
 
 class AlertActions {
-	showInfo(title, description) {
+	showInfo(alertKey, title, description) {
 		return {
+			key: alertKey,
 			alertStyle: 'info',
 			title: title,
 			description: description
 		};
 	}
 
-	showSuccess(title, description) {
+	showSuccess(alertKey, title, description) {
 		return {
+			key: alertKey,
 			alertStyle: 'success',
 			title: title,
 			description: description
 		};
 	}
 
-	showWarning(title, description) {
+	showWarning(alertKey, title, description) {
 		return {
+			key: alertKey,
 			alertStyle: 'warning',
 			title: title,
 			description: description
 		};
 	}
 
-	showError(title, description) {
+	showError(alertKey, title, description) {
 		return {
+			key: alertKey,
 			alertStyle: 'danger',
 			title: title,
 			description: description
 		};
 	}
 
-	handleErrorResponse(res) {
+	handleErrorResponse(alertKey, res) {
 		const state = {
+			key: alertKey,
 			alertStyle: 'danger'
 		};
 
@@ -54,8 +59,8 @@ class AlertActions {
 		return state;
 	}
 
-	dismissAlert() {
-		return {};
+	dismissAlert(alertKey) {
+		return alertKey;
 	}
 }
 
