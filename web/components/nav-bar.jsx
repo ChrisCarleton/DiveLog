@@ -1,4 +1,3 @@
-import AlertBox from './controls/alert-box.jsx';
 import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
 import React from 'react';
 import UserActions from '../actions/user-actions';
@@ -65,7 +64,6 @@ class AppNavbar extends React.Component {
 						</Nav>
 					}
 				</Navbar.Collapse>
-				<AlertBox />
 			</Navbar>);
 	}
 }
