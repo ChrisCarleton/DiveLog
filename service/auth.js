@@ -26,21 +26,13 @@ export default function(app) {
 
 						const result = response.Items[0];
 
+						log.debug('User:', result.attrs);
 						if (!bcrypt.compareSync(password, result.get('passwordHash'))) {
 							log.info('Could not log in user "', username, '". Password was invalid.');
 							return done(null, null);
 						}
 
-						done(
-							null,
-							{
-								userId: result.get('userId'),
-								userName: result.get('userName'),
-								email: result.get('email'),
-								displayName: result.get('displayName'),
-								role: result.get('role'),
-								createdAt: result.get('createdAt')
-							});
+						done(null, result.attrs);
 					})
 					.catch(done);
 			}));
