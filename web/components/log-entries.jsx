@@ -8,7 +8,10 @@ import PropTypes from 'prop-types';
 import Spinner from './controls/spinner.jsx';
 
 import {
+	Alert,
+	Button,
 	Col,
+	Glyphicon,
 	Grid,
 	ListGroup,
 	ListGroupItem,
@@ -23,6 +26,7 @@ class LogEntries extends React.Component {
 			isLoading: true
 		};
 		this.onLogsRetrieved = this.onLogsRetrieved.bind(this);
+		this.onLoadMoreClicked = this.onLoadMoreClicked.bind(this);
 	}
 
 	componentDidMount() {
@@ -36,6 +40,13 @@ class LogEntries extends React.Component {
 
 	onLogsRetrieved() {
 		this.setState(DiveLogStore.getState());
+	}
+
+	onLoadMoreClicked() {
+		DiveLogActions.fetchMoreLogEntries(
+			this.props.match.params.userName,
+			'desc',
+			this.state.lastEntry);
 	}
 
 	formatDepth(depth) {
@@ -90,7 +101,11 @@ class LogEntries extends React.Component {
 				<ListGroup>
 					{ entries }
 				</ListGroup>
-				{ this.state.isLoading ? <Spinner message="Loading..." /> : null }
+				{ this.state.isLoading 
+					? <Spinner message="Loading..." />
+					: this.state.endOfStream
+						? <Alert bsStyle="info"><Glyphicon glyph="exclamation-sign" /> No more items to show.</Alert>
+						: <Button onClick={ this.onLoadMoreClicked }>Load More</Button> }
 			</div>);
 	}
 }

@@ -7,6 +7,10 @@ class DiveLogActions {
 		return true;
 	}
 
+	cancelLoading() {
+		return false;
+	}
+
 	fetchLogEntries(userName, sortOrder = 'desc') {
 		return dispatch => {
 			dispatch();
@@ -20,6 +24,7 @@ class DiveLogActions {
 				})
 				.catch(err => {
 					console.error(err);
+					this.cancelLoading();
 					AlertActions.handleErrorResponse('log-book', err);
 				});
 		};
@@ -28,6 +33,7 @@ class DiveLogActions {
 	fetchMoreLogEntries(userName, sortOrder = 'desc', startingAt) {
 		return dispatch => {
 			dispatch();
+			this.startLoading();
 
 			const options = { order: sortOrder };
 			if (sortOrder === 'asc') {
@@ -43,6 +49,8 @@ class DiveLogActions {
 					this.fetchMoreEntriesSucceeded(res.body);
 				})
 				.catch(err => {
+					console.error(err);
+					this.cancelLoading();
 					AlertActions.handleErrorResponse('log-book', err);
 				});
 		};
