@@ -1,5 +1,6 @@
 import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
+import PageHeader from './controls/page-header.jsx';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import TextBox from './controls/text-box.jsx';
@@ -10,9 +11,10 @@ import {
 	Button,
 	Col,
 	Row,
-	Grid,
-	PageHeader
+	Grid
 } from 'react-bootstrap';
+
+const ALERT_KEY = 'sign-up';
 
 class SignUp extends React.Component {
 	constructor() {
@@ -50,7 +52,7 @@ class SignUp extends React.Component {
 	}
 
 	submit(model) {
-		AlertActions.dismissAlert();
+		AlertActions.dismissAlert(ALERT_KEY);
 		UserActions.signUpUser(model);
 	}
 
@@ -61,7 +63,7 @@ class SignUp extends React.Component {
 
 		return (
 			<div>
-				<PageHeader>Sign Up</PageHeader>
+				<PageHeader heading="Sign Up" alertKey={ ALERT_KEY } />
 				<Grid>
 					<Row>
 						<Col md={5}>

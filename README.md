@@ -51,11 +51,7 @@ To stop and remove the previously created Docker containers run
 
 #### Run the dev server (see below for more information):
 
-``` gulp dev-server ```
-
-This is also aliased by the default task in `gulpfile.babel.js` so you can, optionally, just run
-
-``` gulp ```
+``` npm run dev ```
 
 ### Dev Server
 

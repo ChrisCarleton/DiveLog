@@ -12,7 +12,9 @@ class UserActions {
 				.then(res => {
 					this.signInSucceeded(res.body);
 				})
-				.catch(AlertActions.handleErrorResponse);
+				.catch(err => {
+					AlertActions.handleErrorResponse('login', err);
+				});
 		};
 	}
 
@@ -26,7 +28,9 @@ class UserActions {
 				.then(res => {
 					this.signInSucceeded(res.body);
 				})
-				.catch(AlertActions.handleErrorResponse);
+				.catch(err => {
+					AlertActions.handleErrorResponse('sign-up', err);
+				});
 		};
 	}
 
@@ -38,7 +42,9 @@ class UserActions {
 				.then(() => {
 					this.signOutSucceeded();
 				})
-				.catch(AlertActions.handleErrorResponse);
+				.catch(err => {
+					AlertActions.handleErrorResponse('global', err);
+				});
 		};
 	}
 

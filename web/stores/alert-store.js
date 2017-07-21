@@ -3,11 +3,6 @@ import alt from '../alt';
 
 class AlertStore {
 	constructor() {
-		this.alertVisible = false;
-		this.alertStyle = 'danger';
-		this.title = null;
-		this.description = null;
-
 		this.bindListeners({
 			onShow: [
 				AlertActions.SHOW_INFO,
@@ -18,18 +13,27 @@ class AlertStore {
 			],
 			onDismiss: AlertActions.DISMISS_ALERT
 		});
+
+		this.onShow = this.onShow.bind(this);
+		this.onDismiss = this.onDismiss.bind(this);
 	}
 
 	onShow(alertState) {
-		this.alertVisible = true;
-		this.alertStyle = alertState.alertStyle;
-		this.title = alertState.title;
-		this.description = alertState.description;
+		this[alertState.key] = {
+			alertVisible: true,
+			alertStyle: alertState.alertStyle,
+			alertTitle: alertState.title,
+			alertDescription: alertState.description
+		};
 	}
 
-	onDismiss() {
-		this.alertVisible = false;
+	onDismiss(alertKey) {
+		this[alertKey] = {
+			alertVisible: false
+		};
 	}
 }
+
+AlertStore.alerts = {};
 
 export default alt.createStore(AlertStore, 'AlertStore');
