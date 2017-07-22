@@ -4,12 +4,12 @@ import moment from 'moment';
 
 const salt = bcrypt.genSaltSync(10);
 
-function generateUser() {
+function generateUser(password) {
 	return {
 		userName: faker.internet.userName(),
 		displayName: faker.name.findName(),
 		email: faker.internet.email(),
-		passwordHash: bcrypt.hashSync(faker.internet.password(9), salt),
+		passwordHash: bcrypt.hashSync(password || faker.internet.password(9), salt),
 		role: 'user'
 	};
 }

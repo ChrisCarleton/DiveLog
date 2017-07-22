@@ -1,7 +1,9 @@
 import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
+import PropTypes from 'prop-types';
 import React from 'react';
 import UserActions from '../actions/user-actions';
 import UserStore from '../stores/user-store';
+import { withRouter } from 'react-router';
 
 import {
 	MenuItem, Nav, Navbar, NavDropdown, NavItem
@@ -14,6 +16,8 @@ class AppNavbar extends React.Component {
 			user: UserStore.getState().currentUser
 		};
 		this.onUserChanged = this.onUserChanged.bind(this);
+		this.onLogOutClicked = this.onLogOutClicked.bind(this);
+		this.renderUserNav = this.renderUserNav.bind(this);
 	}
 
 	componentDidMount() {
@@ -27,6 +31,22 @@ class AppNavbar extends React.Component {
 	onUserChanged(userInfo) {
 		const state = Object.assign({}, this.state, { user: userInfo.currentUser });
 		this.setState(state);
+	}
+
+	onLogOutClicked() {
+		UserActions.signOutUser();
+		this.props.history.push('/');
+	}
+
+	renderUserNav() {
+		if (!this.state.user) {
+			return null;
+		}
+
+		return (
+			<LinkContainer to={ `/logbook/${this.state.user.userName}` }>
+				<NavItem>Log Book</NavItem>
+			</LinkContainer>);
 	}
 
 	render() {
@@ -45,12 +65,13 @@ class AppNavbar extends React.Component {
 						<IndexLinkContainer to="/">
 							<NavItem>Home</NavItem>
 						</IndexLinkContainer>
+						{ this.renderUserNav() }
 					</Nav>
 					{ this.state.user ?
 						<Nav pullRight>
 							<NavDropdown id="user-nav" title={ this.state.user.displayName || this.state.user.userName }>
 								<MenuItem divider />
-								<MenuItem onClick={ UserActions.signOutUser }>Log Out</MenuItem>
+								<MenuItem onClick={ this.onLogOutClicked }>Log Out</MenuItem>
 							</NavDropdown>
 						</Nav>
 						:
@@ -68,4 +89,8 @@ class AppNavbar extends React.Component {
 	}
 }
 
-export default AppNavbar;
+AppNavbar.propTypes = {
+	history: PropTypes.object.isRequired
+};
+
+export default withRouter(AppNavbar);
