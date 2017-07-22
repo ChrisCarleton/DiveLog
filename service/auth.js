@@ -26,7 +26,6 @@ export default function(app) {
 
 						const result = response.Items[0];
 
-						log.debug('User:', result.attrs);
 						if (!bcrypt.compareSync(password, result.get('passwordHash'))) {
 							log.info('Could not log in user "', username, '". Password was invalid.');
 							return done(null, null);
