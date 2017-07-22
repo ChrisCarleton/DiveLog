@@ -70,3 +70,14 @@ to immediately show front-end changes in the browser.
 To start the dev server you can run
 
 ``` npm run dev ```
+
+#### Generating Test Data
+
+Run the following command
+
+```
+npm run test-data
+```
+
+To generate some random test data and inject it into the dev server database. You will get
+several users (including one admin user) and roughly 1000 dive log entries.

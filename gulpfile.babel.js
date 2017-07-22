@@ -21,7 +21,7 @@ gulp.task('lint', () => {
 			'web/**/*.jsx',
 			'tests/**/*.js',
 			'ui-tests/**/*.js',
-			'gulpfile.babel.js'])
+			'*.js'])
 		.pipe(eslint())
 		.pipe(eslint.format())
 		.pipe(eslint.failAfterError());
@@ -157,6 +157,24 @@ gulp.task('dev-server', ['ensure-log-directory', 'ensure-dynamo-tables', 'webpac
 		util.colors.yellow('./logs/dev.log'));
 	server.start();
 
+});
+
+gulp.task('test-data', ['ensure-dynamo-tables'], done => {
+	util.log('Creating test data...');
+	require('./create-test-data')(util)
+		.then(users => {
+			util.log('Test data has been created.');
+			util.log('The following user accounts have been created:', users);
+			util.log('The default password is "divelogs" for all accounts.');
+			util.log('Additionally, an administrative account has been added:');
+			util.log('\tusername: "TestAdmin"');
+			util.log('\tpassword: "adm!n"\n');
+			util.log('Enjoy!');
+			done();
+		})
+		.catch(err => {
+			done(new util.PluginError('test data generator', err));
+		});
 });
 
 gulp.task('default', ['dev-server']);
