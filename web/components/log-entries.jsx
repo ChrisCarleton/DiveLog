@@ -15,6 +15,8 @@ import {
 	Grid,
 	ListGroup,
 	ListGroupItem,
+	Nav,
+	NavItem,
 	Row
 } from 'react-bootstrap';
 
@@ -23,15 +25,19 @@ class LogEntries extends React.Component {
 		super();
 		this.state = {
 			logs: [],
-			isLoading: true
+			isLoading: true,
+			sortOrder: 'desc'
 		};
 		this.onLogsRetrieved = this.onLogsRetrieved.bind(this);
 		this.onLoadMoreClicked = this.onLoadMoreClicked.bind(this);
+		this.onSortOrderChanged = this.onSortOrderChanged.bind(this);
 	}
 
 	componentDidMount() {
 		DiveLogStore.listen(this.onLogsRetrieved);
-		DiveLogActions.fetchLogEntries(this.props.match.params.userName);
+		DiveLogActions.fetchLogEntries(
+			this.props.match.params.userName,
+			this.state.sortOrder);
 	}
 
 	componentWillUnmount() {
@@ -45,8 +51,18 @@ class LogEntries extends React.Component {
 	onLoadMoreClicked() {
 		DiveLogActions.fetchMoreLogEntries(
 			this.props.match.params.userName,
-			'desc',
+			this.state.sortOrder,
 			this.state.lastEntry);
+	}
+
+	onSortOrderChanged(key) {
+		const sortOrder = (key === 2) ? 'asc' : 'desc';
+		if (sortOrder === this.state.sortOrder) return;
+
+		DiveLogActions.setSortOrder(sortOrder);
+		DiveLogActions.fetchLogEntries(
+			this.props.match.params.userName,
+			sortOrder);
 	}
 
 	formatDepth(depth) {
@@ -87,7 +103,6 @@ class LogEntries extends React.Component {
 						</Col>
 					</Row>
 				</Grid>
-
 			</ListGroupItem>);
 	}
 
@@ -98,10 +113,14 @@ class LogEntries extends React.Component {
 			<div>
 				<PageHeader heading="Log Book" alertKey="log-book" />
 				<p>Showing <strong>{ this.state.logs.length }</strong> log entries.</p>
+				<Nav bsStyle="tabs" activeKey={ this.state.sortOrder === 'asc' ? 2 : 1 } onSelect={ this.onSortOrderChanged }>
+					<NavItem eventKey={1}>Latest to Earliest</NavItem>
+					<NavItem eventKey={2}>Earliest to Latest</NavItem>
+				</Nav>
 				<ListGroup>
 					{ entries }
 				</ListGroup>
-				{ this.state.isLoading 
+				{ this.state.isLoading
 					? <Spinner message="Loading..." />
 					: this.state.endOfStream
 						? <Alert bsStyle="info"><Glyphicon glyph="exclamation-sign" /> No more items to show.</Alert>

@@ -8,10 +8,12 @@ class DiveLogStore {
 		this.logs = [];
 		this.endOfStream = false;
 		this.lastEntry = null;
+		this.sortOrder = 'desc';
 
 		this.bindListeners({
 			loading: DiveLogActions.START_LOADING,
 			stopLoading: DiveLogActions.CANCEL_LOADING,
+			setSortOrder: DiveLogActions.SET_SORT_ORDER,
 			fetchLogs: DiveLogActions.FETCH_ENTRIES_SUCCEEDED,
 			fetchMoreLogs: DiveLogActions.FETCH_MORE_ENTRIES_SUCCEEDED
 		});
@@ -27,6 +29,14 @@ class DiveLogStore {
 
 	stopLoading() {
 		this.isLoading = false;
+	}
+
+	setSortOrder(order) {
+		this.sortOrder = order;
+		this.isLoading = true;
+		this.logs = [];
+		this.lastEntry = null;
+		this.endOfStream = false;
 	}
 
 	fetchLogs(logs) {

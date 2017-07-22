@@ -11,6 +11,10 @@ class DiveLogActions {
 		return false;
 	}
 
+	setSortOrder(order) {
+		return order;
+	}
+
 	fetchLogEntries(userName, sortOrder = 'desc') {
 		return dispatch => {
 			dispatch();
@@ -23,7 +27,6 @@ class DiveLogActions {
 					this.fetchEntriesSucceeded(res.body);
 				})
 				.catch(err => {
-					console.error(err);
 					this.cancelLoading();
 					AlertActions.handleErrorResponse('log-book', err);
 				});
@@ -49,7 +52,6 @@ class DiveLogActions {
 					this.fetchMoreEntriesSucceeded(res.body);
 				})
 				.catch(err => {
-					console.error(err);
 					this.cancelLoading();
 					AlertActions.handleErrorResponse('log-book', err);
 				});
