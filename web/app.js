@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Chrome from './components/chrome.jsx';
 import Home from './components/home.jsx';
 import LogEntries from './components/log-entries.jsx';
+import LogEntry from './components/log-entry.jsx';
 import LogIn from './components/login.jsx';
 import NotFound from './components/errors/not-found.jsx';
 import React from 'react';
@@ -21,6 +22,7 @@ class AppRouter extends React.Component {
 						<Route exact path="/login" component={ LogIn } />
 						<Route exact path="/signup" component={ SignUp } />
 						<Route exact path="/logbook/:userName" component={ LogEntries } />
+						<Route exact path="/logbook/:userName/:logId" component={ LogEntry } />
 						<Route component={ NotFound } />
 					</Switch>
 				</Chrome>

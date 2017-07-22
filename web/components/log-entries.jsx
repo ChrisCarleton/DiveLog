@@ -78,8 +78,7 @@ class LogEntries extends React.Component {
 		return (
 			<ListGroupItem
 				key={ item.entryTime }
-				href={ `/logbook/${this.props.match.params.userName}/${item.logId}/` }
-				disabled>
+				href={ `/logbook/${this.props.match.params.userName}/${item.logId}/` }>
 				<h3>{ dateString } { item.diveNumber ? <small>(Dive #{ item.diveNumber })</small> : null }</h3>
 				<Grid>
 					<Row>
