@@ -5,6 +5,7 @@ import { IndexLinkContainer } from 'react-router-bootstrap';
 import DiveLocation from './logentry/location.jsx';
 import DiveTime from './logentry/dive-time.jsx';
 import PageHeader from './controls/page-header.jsx';
+import PropTypes from 'prop-types';
 import React from 'react';
 import SiteMap from './logentry/site-map.jsx';
 
@@ -93,5 +94,9 @@ class LogEntry extends React.Component {
 			</div>);
 	}
 }
+
+LogEntry.propTypes = {
+	match: PropTypes.object.isRequired
+};
 
 export default LogEntry;

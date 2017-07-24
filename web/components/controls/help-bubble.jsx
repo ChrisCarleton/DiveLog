@@ -9,7 +9,7 @@ import {
 
 class HelpBubble extends React.Component {
 	render() {
-		const tooltip = <Tooltip id={this.props.id}>{ this.props.children }</Tooltip>
+		const tooltip = <Tooltip id={this.props.id}>{ this.props.children }</Tooltip>;
 
 		return (
 			<OverlayTrigger placement="right" overlay={tooltip}>

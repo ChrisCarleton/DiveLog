@@ -25,9 +25,9 @@ Formsy.addValidationRule('isBetween', (values, value, bounds) => {
 	return (value >= bounds.min && value <= bounds.max);
 });
 
-Formsy.addValidationRule('isDate', (values, value) => {
-	return true;
-});
+// Formsy.addValidationRule('isDate', (values, value) => {
+// 	return true;
+// });
 
 function isGps(value, bounds) {
 	if (!value) return true;

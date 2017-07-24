@@ -60,7 +60,15 @@ class FormsyDatePicker extends React.Component {
 }
 
 FormsyDatePicker.propTypes = {
-	label: PropTypes.string.isRequired
+	controlId: PropTypes.string.isRequired,
+	getErrorMessage: PropTypes.func.isRequired,
+	getValue: PropTypes.func.isRequired,
+	isPristine: PropTypes.func.isRequired,
+	isValid: PropTypes.func.isRequired,
+	label: PropTypes.string.isRequired,
+	onChange: PropTypes.func,
+	required: PropTypes.bool,
+	setValue: PropTypes.func.isRequired
 };
 
 export default HOC(FormsyDatePicker);

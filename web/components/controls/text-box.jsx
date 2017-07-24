@@ -82,7 +82,8 @@ TextBox.propTypes = {
 	setValue: PropTypes.func,
 	showError: PropTypes.func,
 	showRequired: PropTypes.func,
-	onChange: PropTypes.func
+	onChange: PropTypes.func,
+	required: PropTypes.bool
 };
 
 export default HOC(TextBox);

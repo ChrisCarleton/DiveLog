@@ -1,4 +1,5 @@
 import { GoogleMap, Marker, withGoogleMap } from 'react-google-maps';
+import PropTypes from 'prop-types';
 import React from 'react';
 
 class SiteMap extends React.Component {
@@ -17,5 +18,10 @@ class SiteMap extends React.Component {
 			</GoogleMap>);
 	}
 }
+
+SiteMap.propTypes = {
+	onMapClick: PropTypes.func,
+	onMapLoad: PropTypes.func
+};
 
 export default withGoogleMap(SiteMap);

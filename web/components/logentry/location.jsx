@@ -1,4 +1,3 @@
-import CurrentEntryStore from '../../stores/current-entry-store';
 import HelpBubble from '../controls/help-bubble.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -37,8 +36,15 @@ class Location extends React.Component {
 						GPS Coordinates{' '}
 						<HelpBubble id="gps-help">
 							<span>
-								Specify GPS coordinates in either decimal <em>(e.g. -19.3097)</em> or
-								sexagesimal <em>(e.g. 51° 29' 46.000" N)</em> format.
+								{"Specify GPS coordinates in either decimal "}
+								<em>
+									{"(e.g. -19.3097)"}
+								</em>
+								{" or sexagesimal "}
+								<em>
+									{"(e.g. 51° 29' 46.000\" N)"}
+								</em>
+								{" format."}
 							</span>
 						</HelpBubble>
 					</h5>

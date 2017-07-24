@@ -1,12 +1,11 @@
 import CurrentEntryStore from '../../stores/current-entry-store';
 import DatePicker from '../controls/date-picker.jsx';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
 import TextBox from '../controls/text-box.jsx';
 
 class DiveTime extends React.Component {
-	constructor(props) {
+	constructor() {
 		super();
 		this.state = {};
 		this.onStateChanged = this.onStateChanged.bind(this);
@@ -103,7 +102,7 @@ class DiveTime extends React.Component {
 }
 
 DiveTime.propTypes = {
- 	entry: PropTypes.object.isRequired
+	entry: PropTypes.object.isRequired
 };
 
 export default DiveTime;
