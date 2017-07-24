@@ -10,7 +10,7 @@ const baseSchema = {
 
 	diveNumber: Joi.number().integer().min(1),
 	diveTime: Joi.object().keys({
-		exitTime: Joi.string().isoDate(),
+		diveLength: Joi.number().integer().positive().required(),
 		surfaceInterval: Joi.number().integer().positive(),
 		bottomTime: Joi.number().integer().positive(),
 		decoStops: Joi.array().items(

@@ -11,6 +11,8 @@ const config = {
 	awsRegion: process.env.DIVELOG_AWS_REGION || 'us-east-1',
 	awsDynamoEndpoint: process.env.DIVELOG_AWS_DYNAMO_ENDPOINT,
 
+	googleApiKey: process.env.DIVELOG_GOOGLE_API_KEY || 'AIzaSyBkpDUFJPSByPx_syxE7CZ1_LztzZear7I',
+
 	auth: {
 		google: {
 			consumerId: process.env.DIVELOG_GOOGLE_CONSUMER_ID || 'google-id',

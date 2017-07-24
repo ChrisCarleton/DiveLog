@@ -1,8 +1,10 @@
+import HelpBubble from './help-bubble.jsx';
 import { HOC } from 'formsy-react';
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
+	Col,
 	ControlLabel,
 	FormControl,
 	FormGroup,
@@ -10,60 +12,59 @@ import {
 } from 'react-bootstrap';
 
 class TextBox extends React.Component {
-	constructor(props) {
+	constructor() {
 		super();
-		this.state = {
-			validationState: null,
-			value: props.value || ''
-		};
 		this.onTextChanged = this.onTextChanged.bind(this);
-		this.onLostFocus = this.onLostFocus.bind(this);
 	}
 
 	onTextChanged(e) {
 		this.props.setValue(e.target.value);
-		const validationState = this.props.isValid() ? 'success' : 'error';
-		this.setState(Object.assign(
-			{},
-			this.state,
-			{
-				value: e.target.value,
-				validationState: validationState
-			}));
-	}
-
-	onLostFocus() {
-		this.props.setValue(this.state.value);
-		const validationState = this.props.isValid() ? 'success' : 'error';
-		this.setState(Object.assign({}, this.state, { validationState: validationState }));
 	}
 
 	render() {
+		const isValid = this.props.isValid();
+		let value = this.props.getValue() || '';
+		let validationState, errorMessage;
+
+		if (this.props.isPristine()) {
+			validationState = null;
+			errorMessage = null;
+		} else if (!this.props.showRequired() && value === '') {
+			validationState = null;
+			errorMessage = null;
+		} else if (this.props.showRequired()) {
+			validationState = 'error';
+			errorMessage = this.props.label + ' is required.';
+		} else {
+			validationState = isValid ? 'success' : 'error';
+			errorMessage = isValid ? null : this.props.getErrorMessage();
+		}
+
 		return (
-			<FormGroup controlId={this.props.controlId} validationState={this.state.validationState}>
-				<ControlLabel>{this.props.label}{":"}</ControlLabel>
-				<FormControl
-					type={this.props.isPassword ? 'password' : 'text'}
-					value={this.state.value}
-					placeholder={this.props.placeholder}
-					onChange={this.onTextChanged}
-					onBlur={this.onLostFocus} />
-				<FormControl.Feedback />
-				<HelpBlock>
-					{
-						this.props.showError()
-						? this.props.getErrorMessage()
-						: null
-					}
-				</HelpBlock>
-				<HelpBlock>
-					{
-						(!this.props.isPristine() && this.props.showRequired())
-						? this.props.label + ' is required.'
-						: null
-					}
-				</HelpBlock>
-				<HelpBlock>{this.props.helpText}</HelpBlock>
+			<FormGroup bsSize="small" controlId={this.props.controlId} validationState={validationState}>
+				<Col sm={4}>
+					<ControlLabel>
+						<span className="text-right">
+							{this.props.label}
+							{this.props.required ? <span className="text-danger"> * </span> : null}
+							{":"}
+						</span>
+					</ControlLabel>
+				</Col>
+				<Col sm={7}>
+					<FormControl
+						type={this.props.isPassword ? 'password' : 'text'}
+						value={value || ''}
+						placeholder={this.props.placeholder}
+						onChange={this.props.onChange || this.onTextChanged} />
+					<FormControl.Feedback />
+					{ errorMessage ? <HelpBlock>{errorMessage}</HelpBlock> : null }
+				</Col>
+				<Col sm={1}>
+					{ this.props.helpText
+						? <HelpBubble id={this.props.controlId + "_help"}>{this.props.helpText}</HelpBubble>
+						: null }
+				</Col>
 			</FormGroup>);
 	}
 }
@@ -81,7 +82,7 @@ TextBox.propTypes = {
 	setValue: PropTypes.func,
 	showError: PropTypes.func,
 	showRequired: PropTypes.func,
-	value: PropTypes.string
+	onChange: PropTypes.func
 };
 
 export default HOC(TextBox);

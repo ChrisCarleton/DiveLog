@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import faker from 'faker';
-import moment from 'moment';
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -36,7 +35,7 @@ function generateDiveLogEntry(ownerIds) {
 		entryTime: entryTime.toISOString(),
 		diveNumber: faker.random.number({ min: 1, max: 500 }),
 		diveTime: {
-			exitTime: moment(entryTime).add(diveTime, 'm').toISOString(),
+			diveLength: diveTime,
 			surfaceInterval: faker.random.number({ min: 15, max: 120}),
 			bottomTime: diveTime - 5,
 			decoStops: [

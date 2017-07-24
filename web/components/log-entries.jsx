@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import DiveLogActions from '../actions/dive-log-actions';
 import DiveLogStore from '../stores/dive-log-store';
+import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
 import moment from 'moment';
 import React from 'react';
 import PageHeader from './controls/page-header.jsx';
@@ -9,14 +10,15 @@ import Spinner from './controls/spinner.jsx';
 
 import {
 	Alert,
+	Breadcrumb,
 	Button,
+	ButtonGroup,
+	ButtonToolbar,
 	Col,
 	Glyphicon,
 	Grid,
 	ListGroup,
 	ListGroupItem,
-	Nav,
-	NavItem,
 	Row
 } from 'react-bootstrap';
 
@@ -31,6 +33,8 @@ class LogEntries extends React.Component {
 		this.onLogsRetrieved = this.onLogsRetrieved.bind(this);
 		this.onLoadMoreClicked = this.onLoadMoreClicked.bind(this);
 		this.onSortOrderChanged = this.onSortOrderChanged.bind(this);
+		this.setDescSortOrder = this.setDescSortOrder.bind(this);
+		this.setAscSortOder = this.setAscSortOder.bind(this);
 	}
 
 	componentDidMount() {
@@ -55,10 +59,16 @@ class LogEntries extends React.Component {
 			this.state.lastEntry);
 	}
 
-	onSortOrderChanged(key) {
-		const sortOrder = (key === 2) ? 'asc' : 'desc';
-		if (sortOrder === this.state.sortOrder) return;
+	setDescSortOrder() {
+		this.onSortOrderChanged('desc');
+	}
 
+	setAscSortOder() {
+		this.onSortOrderChanged('asc');
+	}
+
+	onSortOrderChanged(sortOrder) {
+		if (this.state.sortOrder === sortOrder) return;
 		DiveLogActions.setSortOrder(sortOrder);
 		DiveLogActions.fetchLogEntries(
 			this.props.match.params.userName,
@@ -110,12 +120,30 @@ class LogEntries extends React.Component {
 
 		return (
 			<div>
+				<Breadcrumb>
+					<IndexLinkContainer to="/">
+						<Breadcrumb.Item>Home</Breadcrumb.Item>
+					</IndexLinkContainer>
+					<Breadcrumb.Item active>Log Book</Breadcrumb.Item>
+				</Breadcrumb>
+
 				<PageHeader heading="Log Book" alertKey="log-book" />
 				<p>Showing <strong>{ this.state.logs.length }</strong> log entries.</p>
-				<Nav bsStyle="tabs" activeKey={ this.state.sortOrder === 'asc' ? 2 : 1 } onSelect={ this.onSortOrderChanged }>
-					<NavItem eventKey={1}>Latest to Earliest</NavItem>
-					<NavItem eventKey={2}>Earliest to Latest</NavItem>
-				</Nav>
+				<ButtonToolbar>
+					<ButtonGroup>
+						<LinkContainer to={ `/logbook/${this.props.match.params.userName}/new` }>
+							<Button bsStyle="primary">Create New Entry</Button>
+						</LinkContainer>
+					</ButtonGroup>
+					<ButtonGroup>
+						<Button active={ this.state.sortOrder !== 'asc' } onClick={ this.setDescSortOrder }>
+							Latest to Earliest
+						</Button>
+						<Button active={ this.state.sortOrder === 'asc' } onClick={ this.setAscSortOder }>
+							Earliest to Latest
+						</Button>
+					</ButtonGroup>
+				</ButtonToolbar>
 				<ListGroup>
 					{ entries }
 				</ListGroup>

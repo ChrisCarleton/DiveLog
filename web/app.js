@@ -10,6 +10,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import SignUp from './components/sign-up.jsx';
 
+require('./validations');
 require('./styles/divelog.less');
 
 class AppRouter extends React.Component {
@@ -22,6 +23,7 @@ class AppRouter extends React.Component {
 						<Route exact path="/login" component={ LogIn } />
 						<Route exact path="/signup" component={ SignUp } />
 						<Route exact path="/logbook/:userName" component={ LogEntries } />
+						<Route exact path="/logbook/:userName/new" component={ LogEntry } />
 						<Route exact path="/logbook/:userName/:logId" component={ LogEntry } />
 						<Route component={ NotFound } />
 					</Switch>

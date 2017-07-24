@@ -68,7 +68,7 @@ class SignUp extends React.Component {
 					<Row>
 						<Col md={5}>
 							<h4>Create an Account</h4>
-							<Formsy.Form onValidSubmit={ this.submit } onValid={ this.enableButton } onInvalid={ this.disableButton }>
+							<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit } onValid={ this.enableButton } onInvalid={ this.disableButton }>
 								<TextBox
 									label="User name"
 									controlId="userName"
@@ -114,7 +114,7 @@ class SignUp extends React.Component {
 									isPassword
 									required />
 								<TextBox
-									label="Confirm Password"
+									label="Retype Password"
 									controlId="confirmPassword"
 									name="confirmPassword"
 									isPassword
