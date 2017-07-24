@@ -26,6 +26,7 @@ class LogEntry extends React.Component {
 		};
 
 		this.onStateChanged = this.onStateChanged.bind(this);
+		this.submit = this.submit.bind(this);
 	}
 
 	componentDidMount() {
@@ -50,6 +51,8 @@ class LogEntry extends React.Component {
 			CurrentEntryStore.getState()));
 	}
 
+	submit(model) {}
+
 	render() {
 		return (
 			<div>
@@ -63,7 +66,7 @@ class LogEntry extends React.Component {
 					<Breadcrumb.Item active>{ this.state.title }</Breadcrumb.Item>
 				</Breadcrumb>
 				<PageHeader heading={ this.state.title } alertKey="log-entry" />
-				<Formsy.Form className="form-horizontal">
+				<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit }>
 					<Grid>
 						<Row>
 							<Col xs={12}>
@@ -87,8 +90,13 @@ class LogEntry extends React.Component {
 									} />
 							</Col>
 						</Row>
+						<Row>
+							<Col xs={12}>
+								<h3>Air and Weight</h3>
+							</Col>
+						</Row>
 					</Grid>
-					<Button bsStyle="primary">Save</Button>
+					<Button type="submit" bsStyle="primary">Save</Button>
 				</Formsy.Form>
 				<p>{ JSON.stringify(this.state.currentEntry, null, ' ') }</p>
 			</div>);

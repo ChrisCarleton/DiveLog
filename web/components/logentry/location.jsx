@@ -1,3 +1,4 @@
+import CurrentEntryActions from '../../actions/current-entry-actions';
 import HelpBubble from '../controls/help-bubble.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -11,6 +12,22 @@ class Location extends React.Component {
 		this.state = {};
 	}
 
+	onLocationChange(e) {
+		CurrentEntryActions.doPartialUpdate({ location: e.target.value });
+	}
+
+	onSiteChange(e) {
+		CurrentEntryActions.doPartialUpdate({ site: e.target.value });
+	}
+
+	onLatitudeChange(e) {
+		CurrentEntryActions.doPartialUpdate({ gps: { latitude: e.target.value } });
+	}
+
+	onLongitudeChange(e) {
+		CurrentEntryActions.doPartialUpdate({ gps: { longitude: e.target.value } });
+	}
+
 	render() {
 		const gps = this.props.entry.gps || {};
 
@@ -22,6 +39,7 @@ class Location extends React.Component {
 					label="Location"
 					placeholder="City or location of dive site"
 					value={ this.props.entry.location }
+					onChange={ this.onLocationChange }
 					required />
 				<TextBox
 					controlId="site"
@@ -29,6 +47,7 @@ class Location extends React.Component {
 					label="Site"
 					placeholder="Name of dive site"
 					value={ this.props.entry.site }
+					onSiteChange={ this.onSiteChange }
 					required />
 
 				<Row>
@@ -55,6 +74,7 @@ class Location extends React.Component {
 					name="latitude"
 					label="Latitude"
 					value={ gps.latitude }
+					onChange={ this.onLatitudeChange }
 					validations={{
 						isLatitude: true
 					}}
@@ -66,6 +86,7 @@ class Location extends React.Component {
 					name="longitude"
 					label="Longitude"
 					value={ gps.longitude }
+					onChange={ this.onLongitudeChange }
 					validations={{
 						isLongitude: true
 					}}

@@ -49,9 +49,15 @@ class DiveTime extends React.Component {
 					required />
 
 				<TextBox
-					controlId="diveTime"
-					name="diveTime"
-					label="Dive time"
+					controlId="entryTime"
+					name="entryTime"
+					label="Entry time"
+					required />
+
+				<TextBox
+					controlId="diveLength"
+					name="diveLength"
+					label="Dive length"
 					value={diveTime.diveLength}
 					placeholder="Total dive time in minutes"
 					validations={{
@@ -78,8 +84,7 @@ class DiveTime extends React.Component {
 						isInteger: 'Must be a whole number (no decimal places or seconds.)',
 						isPositive: 'Must be a positive number.'
 					}}
-					helpText="Bottom time is defined as the time span between the start of your descent to the start of your final ascent."
-					required />
+					helpText="Bottom time is defined as the time span between the start of your descent to the start of your final ascent." />
 
 				<TextBox
 					controlId="surfaceInterval"
@@ -94,9 +99,7 @@ class DiveTime extends React.Component {
 					validationErrors={{
 						isInteger: 'Must be a whole number (no decimal places or seconds.)',
 						isPositive: 'Must be a positive number.'
-					}}
-					required />
-
+					}} />
 			</div>);
 	}
 }
