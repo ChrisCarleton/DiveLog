@@ -55,6 +55,23 @@ Parameters:
   AwsSecretKey:
     Description: AWS API secret key
     Type: String
+
+  MailFromAddress:
+    Description: The email address from which messages will be sent.
+    Type: String
+    Default: "no-reply@bottomtime.ca"
+  MailHost:
+    Description: The SMTP host through which emails will be sent.
+    Type: String
+    Default: "email-smtp.us-east-1.amazonaws.com"
+  MailUserName:
+    Description: The user name to use when authenticating with the SMTP host.
+    Type: String
+    Default: "AKIAJNVGTSUAFBYYKEUQ"
+  MailPassword:
+    Description: The password to use when authenticating with the SMTP host.
+    Type: String
+
   UsersReadCapacity:
     Description: Users table read capcity units
     Type: Number
@@ -321,6 +338,14 @@ Resources:
             Value: !Ref AWS::Region
           - Name: DIVELOG_FORCE_SSL
             Value: true
+          - Name: DIVELOG_MAIL_FROM_ADDRES
+            Value: !Ref MailFromAddress
+          - Name: DIVELOG_MAIL_HOST
+            Value: !Ref MailHost
+          - Name: DIVELOG_MAIL_USERNAME
+            Value: !Ref MailUserName
+          - Name: DIVELOG_MAIL_PASSWORD
+            Value: !Ref MailPassword
         Memory: '300'
         LogConfiguration:
           LogDriver: awslogs

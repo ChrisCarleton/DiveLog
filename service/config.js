@@ -11,6 +11,13 @@ const config = {
 	awsRegion: process.env.DIVELOG_AWS_REGION || 'us-east-1',
 	awsDynamoEndpoint: process.env.DIVELOG_AWS_DYNAMO_ENDPOINT,
 
+	mail: {
+		fromAddress: process.env.DIVELOG_MAIL_FROM_ADDRESS || 'no-reply@bottomtime.ca',
+		host: process.env.DIVELOG_MAIL_HOST || 'email-smtp.us-east-1.amazonaws.com',
+		username: process.env.DIVELOG_MAIL_USERNAME || 'AKIAJNVGTSUAFBYYKEUQ',
+		password: process.env.DIVELOG_MAIL_PASSWORD
+	},
+
 	auth: {
 		google: {
 			consumerId: process.env.DIVELOG_GOOGLE_CONSUMER_ID || 'google-id',
