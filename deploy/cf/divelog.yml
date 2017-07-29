@@ -49,11 +49,22 @@ Parameters:
     Default: info
     AllowedValues: [trace, debug, info, warn, error, fatal]
     ConstraintDescription: Please choose one of the recognized log levels.
+  BaseUrl:
+    Description: The base URL for this instance of the application.
+    Type: String
+    Default: https://dev.bottomtime.ca/
   AwsKeyId:
     Description: AWS API key Id
     Type: String
   AwsSecretKey:
     Description: AWS API secret key
+    Type: String
+  GoogleClientId:
+    Description: Client ID for Google OAuth service.
+    Type: String
+    Default: 56580017263-brlremivtgkt9sa6dpcsifsmbl47rr85.apps.googleusercontent.com
+  GoogleClientSecret:
+    Description: Client Secret for Google OAuth service.
     Type: String
   UsersReadCapacity:
     Description: Users table read capcity units
@@ -179,6 +190,35 @@ Resources:
               Ref: UsersReadCapacity
             WriteCapacityUnits:
               Ref: UsersWriteCapacity
+
+  OAuthTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Fn::Join:
+          - '-'
+          - - divelog
+            - Ref: NodeEnv
+            - oauth
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: OAuthReadCapacity
+        WriteCapacityUnits:
+          Ref: OAuthWriteCapacity
+      AttributeDefinitions:
+        -
+          AttributeName: "providerId"
+          AttributeType: "S"
+        -
+          AttributeName: "provider"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "providerId"
+          KeyType: "HASH"
+        -
+          AttributeName: "provider"
+          KeyType: "RANGE"
 
   SessionsTable:
     Type: "AWS::DynamoDB::Table"
@@ -321,6 +361,12 @@ Resources:
             Value: !Ref AWS::Region
           - Name: DIVELOG_FORCE_SSL
             Value: true
+          - Name: DIVELOG_BASE_URL
+            Value: !Ref BaseUrl
+          - Name: DIVELOG_GOOGLE_CONSUMER_ID
+            Value: !Ref GoogleClientId
+          - Name: DIVELOG_GOOGLE_CONSUMER_SECRET
+            Value: !Ref GoogleClientSecret
         Memory: '300'
         LogConfiguration:
           LogDriver: awslogs

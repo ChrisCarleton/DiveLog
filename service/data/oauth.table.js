@@ -10,7 +10,8 @@ const OAuth = db.define(
 		schema: {
 			providerId: Joi.string(),
 			provider: Joi.string(),
-			userId: Joi.string()
+			userId: Joi.string().required(),
+			email: Joi.string().required()
 		},
 		tableName: `divelog-${config.env}-oauth`
 	}

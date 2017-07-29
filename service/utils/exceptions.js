@@ -25,3 +25,17 @@ export class ForbiddenActionError extends ExtendableError {
 		this.name = 'ForbiddenActionError';
 	}
 }
+
+export class EmailInUseError extends ExtendableError {
+	constructor(message) {
+		super(message);
+		this.name = 'EmailInUseError';
+	}
+}
+
+export class MissingEmailError extends ExtendableError {
+	constructor(message) {
+		super(message);
+		this.name = 'MissingEmailError';
+	}
+}

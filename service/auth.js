@@ -1,12 +1,13 @@
 import bcrypt from 'bcrypt';
 import config from './config';
+import { getOrCreateOAuthAccount } from './controllers/helpers/users-helpers';
 import log from './logger';
 import passport from 'passport';
 import url from 'url';
 import Users from './data/users.table';
 
 import { Strategy as LocalStrategy } from 'passport-local';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth';
+import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 import { Strategy as GithubStrategy } from 'passport-github';
 
 export default function(app) {
@@ -39,12 +40,16 @@ export default function(app) {
 	passport.use(
 		new GoogleStrategy(
 			{
-				consumerKey: config.auth.google.consumerId,
-				consumerSecret: config.auth.google.consumerSecret,
-				callbackURL: url.resolve(config.baseUrl, '/api/1.0/auth/google/callback')
+				clientID: config.auth.google.consumerId,
+				clientSecret: config.auth.google.consumerSecret,
+				callbackURL: url.resolve(config.baseUrl, '/auth/google/callback')
 			},
-			(token, tokenSecret, profile, done) => {
-				done();
+			(accessToken, refreshToken, profile, done) => {
+				getOrCreateOAuthAccount(profile)
+					.then(user => {
+						done(null, user);
+					})
+					.catch(done);
 			}));
 
 	passport.use(
@@ -52,10 +57,14 @@ export default function(app) {
 			{
 				clientID: config.auth.github.clientId,
 				clientSecret: config.auth.github.clientSecret,
-				callbackURL: url.resolve(config.baseUrl, '/api/1.0/auth/github/callback')
+				callbackURL: url.resolve(config.baseUrl, '/auth/github/callback')
 			},
 			(accessToken, refreshToken, profile, done) => {
-				return done();
+				getOrCreateOAuthAccount(profile)
+					.then(user => {
+						done(null, user);
+					})
+					.catch(done);
 			}));
 
 	passport.serializeUser((user, done) => {
