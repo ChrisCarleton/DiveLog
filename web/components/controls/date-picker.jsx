@@ -1,5 +1,6 @@
 import DatePicker from 'react-bootstrap-date-picker';
 import { HOC } from 'formsy-react';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -22,7 +23,7 @@ class FormsyDatePicker extends React.Component {
 
 	render() {
 		const isValid = this.props.isValid();
-		const value = this.props.getValue() || null;
+		const value = moment(this.props.getValue());
 		let validationState, errorMessage;
 
 		if (this.props.isPristine()) {
@@ -50,7 +51,7 @@ class FormsyDatePicker extends React.Component {
 				</Col>
 				<Col xs={7}>
 					<DatePicker
-						value={value}
+						value={value.local().format()}
 						onChange={this.props.onChange || this.onDateChanged}
 						showTodayButton />
 					{ errorMessage ? <HelpBlock>{errorMessage}</HelpBlock> : null }

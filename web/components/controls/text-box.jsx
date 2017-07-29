@@ -61,8 +61,9 @@ class TextBox extends React.Component {
 					{ errorMessage ? <HelpBlock>{errorMessage}</HelpBlock> : null }
 				</Col>
 				<Col sm={1}>
+					<span className="tb-unit">{ this.props.unit }</span>
 					{ this.props.helpText
-						? <HelpBubble id={this.props.controlId + "_help"}>{this.props.helpText}</HelpBubble>
+						? <div className="tb-help-bubble"><HelpBubble id={this.props.controlId + "_help"}>{this.props.helpText}</HelpBubble></div>
 						: null }
 				</Col>
 			</FormGroup>);
@@ -77,13 +78,14 @@ TextBox.propTypes = {
 	isPassword: PropTypes.bool,
 	isPristine: PropTypes.func,
 	isValid: PropTypes.func,
-	label: PropTypes.string.isRequired,
+	label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
 	placeholder: PropTypes.string,
 	setValue: PropTypes.func,
 	showError: PropTypes.func,
 	showRequired: PropTypes.func,
 	onChange: PropTypes.func,
-	required: PropTypes.bool
+	required: PropTypes.bool,
+	unit: PropTypes.string
 };
 
 export default HOC(TextBox);

@@ -1,13 +1,18 @@
+import Air from './logentry/air.jsx';
 import CurrentEntryActions from '../actions/current-entry-actions';
 import CurrentEntryStore from '../stores/current-entry-store';
 import Formsy from 'formsy-react';
 import { IndexLinkContainer } from 'react-router-bootstrap';
 import DiveLocation from './logentry/location.jsx';
 import DiveTime from './logentry/dive-time.jsx';
+import Nitrox from './logentry/nitrox.jsx';
+import Notes from './logentry/notes.jsx';
 import PageHeader from './controls/page-header.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
+import RequireAuth from './controls/require-auth.jsx';
 import SiteMap from './logentry/site-map.jsx';
+import Weight from './logentry/weight.jsx';
 
 import {
 	Breadcrumb,
@@ -51,11 +56,12 @@ class LogEntry extends React.Component {
 			CurrentEntryStore.getState()));
 	}
 
-	submit(model) {}
+	submit(/*model*/) {}
 
 	render() {
 		return (
 			<div>
+				<RequireAuth />
 				<Breadcrumb>
 					<IndexLinkContainer to="/">
 						<Breadcrumb.Item>Home</Breadcrumb.Item>
@@ -83,11 +89,12 @@ class LogEntry extends React.Component {
 							<Col xsHidden md={4}>
 								<SiteMap
 									containerElement={
-										<div style={{ height: '360px' }} />
+										<div style={{ height: '280px' }} />
 									}
 									mapElement={
 										<div style={{ height: '100%' }} />
-									} />
+									}
+									entry={ this.state.currentEntry } />
 							</Col>
 						</Row>
 						<Row>
@@ -95,6 +102,25 @@ class LogEntry extends React.Component {
 								<h3>Air and Weight</h3>
 							</Col>
 						</Row>
+						<Row>
+							<Col xs={12} md={4}>
+								<Weight entry={ this.state.currentEntry } />
+							</Col>
+							<Col xs={12} md={4}>
+								<Air entry={ this.state.currentEntry } />
+							</Col>
+							<Col xs={12} md={4}>
+								<Nitrox entry={ this.state.currentEntry } />
+							</Col>
+						</Row>
+						<Row>
+							<Col xs={12}>
+								<h3>Dive Info</h3>
+							</Col>
+						</Row>
+						<Notes
+							controlId="notes"
+							value={this.state.currentEntry.notes} />
 					</Grid>
 					<Button type="submit" bsStyle="primary">Save</Button>
 				</Formsy.Form>

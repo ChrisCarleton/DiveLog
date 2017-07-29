@@ -24,6 +24,13 @@ class CurrentEntryActions {
 	doPartialUpdate(update) {
 		return update;
 	}
+
+	updateCylinderInfo(index, cylinder) {
+		return {
+			index: index,
+			cylinder: cylinder
+		};
+	}
 }
 
 export default alt.createActions(CurrentEntryActions);

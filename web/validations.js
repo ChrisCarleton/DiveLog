@@ -22,12 +22,13 @@ Formsy.addValidationRule('isInteger', (values, value) => {
 });
 
 Formsy.addValidationRule('isBetween', (values, value, bounds) => {
-	return (value >= bounds.min && value <= bounds.max);
-});
+	if (!value) return true;
 
-// Formsy.addValidationRule('isDate', (values, value) => {
-// 	return true;
-// });
+	const number = Number.parseFloat(value);
+	if (Number.isNaN(number)) return false;
+
+	return (number >= bounds.min && number <= bounds.max);
+});
 
 function isGps(value, bounds) {
 	if (!value) return true;

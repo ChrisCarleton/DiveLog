@@ -1,19 +1,46 @@
+import geolib from 'geolib';
 import { GoogleMap, Marker, withGoogleMap } from 'react-google-maps';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 class SiteMap extends React.Component {
 	render() {
-		const position = {lat: 20.354289, lng: -87.028272};
+		// Paso de Cedral, Cozumel!
+		const defaultPosition = {lat: 20.354289, lng: -87.028272};
+
+		const gps = this.props.entry.gps || {};
+		let position, marker = null;
+
+		try {
+			if (gps.latitude && gps.longitude) {
+				position = {
+					lat: geolib.useDecimal(gps.latitude),
+					lng: geolib.useDecimal(gps.longitude)
+				};
+				marker =
+					<Marker
+						position={position}
+						key="dive site"
+						title={this.props.entry.site || 'dive site'}
+						defaultAnimation={2} />;
+			}
+		} catch(error) {
+			position = {};
+		}
+
+		if (!marker) {
+			position = defaultPosition;
+		}
 
 		return (
 			<GoogleMap
 				ref={this.props.onMapLoad}
-				defaultCenter={position}
+				defaultCenter={defaultPosition}
+				center={position}
 				defaultZoom={12}
 				onClick={this.props.onMapClick}>
 
-				<Marker position={position} key="Paso de Cedral" defaultAnimation={2} />
+				{marker}
 
 			</GoogleMap>);
 	}
@@ -21,7 +48,8 @@ class SiteMap extends React.Component {
 
 SiteMap.propTypes = {
 	onMapClick: PropTypes.func,
-	onMapLoad: PropTypes.func
+	onMapLoad: PropTypes.func,
+	entry: PropTypes.object.isRequired
 };
 
 export default withGoogleMap(SiteMap);

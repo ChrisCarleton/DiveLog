@@ -6,6 +6,7 @@ import moment from 'moment';
 import React from 'react';
 import PageHeader from './controls/page-header.jsx';
 import PropTypes from 'prop-types';
+import RequireAuth from './controls/require-auth.jsx';
 import Spinner from './controls/spinner.jsx';
 
 import {
@@ -120,6 +121,7 @@ class LogEntries extends React.Component {
 
 		return (
 			<div>
+				<RequireAuth />
 				<Breadcrumb>
 					<IndexLinkContainer to="/">
 						<Breadcrumb.Item>Home</Breadcrumb.Item>
