@@ -9,6 +9,8 @@ import Users from './data/users.table';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 import { Strategy as GithubStrategy } from 'passport-github';
+import { Strategy as TwitterStrategy } from 'passport-twitter';
+import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 export default function(app) {
 	passport.use(
@@ -58,6 +60,36 @@ export default function(app) {
 				clientID: config.auth.github.clientId,
 				clientSecret: config.auth.github.clientSecret,
 				callbackURL: url.resolve(config.baseUrl, '/auth/github/callback')
+			},
+			(accessToken, refreshToken, profile, done) => {
+				getOrCreateOAuthAccount(profile)
+					.then(user => {
+						done(null, user);
+					})
+					.catch(done);
+			}));
+
+	passport.use(
+		new TwitterStrategy(
+			{
+				consumerKey: config.auth.twitter.consumerKey,
+				consumerSecret: config.auth.twitter.consumerSecret,
+				callbackURL: url.resolve(config.baseUrl, '/auth/twitter/callback')
+			},
+			(token, tokenSecret, profile, done) => {
+				getOrCreateOAuthAccount(profile)
+					.then(user => {
+						done(null, user);
+					})
+					.catch(done);
+			}));
+
+	passport.use(
+		new FacebookStrategy(
+			{
+				clientID: config.auth.facebook.clientId,
+				clientSecret: config.auth.facebook.clientSecret,
+				callbackURL: url.resolve(config.baseUrl, '/auth/facebook/callback')
 			},
 			(accessToken, refreshToken, profile, done) => {
 				getOrCreateOAuthAccount(profile)
