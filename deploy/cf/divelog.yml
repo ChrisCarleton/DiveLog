@@ -66,6 +66,13 @@ Parameters:
   GoogleClientSecret:
     Description: Client Secret for Google OAuth service.
     Type: String
+  GitHubClientId:
+    Description: Client ID for GitHub OAuth service.
+    Type: String
+    Default: f53bc482f795f83a8520
+  GitHubClientSecret:
+    Description: Client Secret for GitHub OAuth service.
+    Type: String
   UsersReadCapacity:
     Description: Users table read capcity units
     Type: Number
@@ -367,6 +374,10 @@ Resources:
             Value: !Ref GoogleClientId
           - Name: DIVELOG_GOOGLE_CONSUMER_SECRET
             Value: !Ref GoogleClientSecret
+          - Name: DIVELOG_GITHUB_CLIENT_ID
+            Value: !Ref GitHubClientId
+          - Name: DIVELOG_GITHUB_CLIENT_SECRET
+            Value: !Ref GitHubClientSecret
         Memory: '300'
         LogConfiguration:
           LogDriver: awslogs
