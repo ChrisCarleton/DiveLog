@@ -62,7 +62,7 @@ Parameters:
   GoogleClientId:
     Description: Client ID for Google OAuth service.
     Type: String
-    Default: 56580017263-brlremivtgkt9sa6dpcsifsmbl47rr85.apps.googleusercontent.com
+    Default: 399113053541-k86gnd1eo92ochborjtuofikn6v37dja.apps.googleusercontent.com
   GoogleClientSecret:
     Description: Client Secret for Google OAuth service.
     Type: String
