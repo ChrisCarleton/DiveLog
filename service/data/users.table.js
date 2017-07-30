@@ -13,7 +13,8 @@ const Users = db.define(
 			email: Joi.string().email(),
 			displayName: Joi.string(),
 			passwordHash: Joi.string(),
-			role: Joi.string()
+			role: Joi.string(),
+			imageUrl: Joi.string()
 		},
 		tableName: `divelog-${config.env}-users`,
 		indexes: [
