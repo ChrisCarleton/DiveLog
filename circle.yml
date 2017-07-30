@@ -5,6 +5,7 @@ machine:
 dependencies:
   override:
     - deploy/setup-local.sh
+    - deploy/install-phantomjs.sh
     - docker build -t divelog .
 
 test:
