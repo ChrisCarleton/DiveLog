@@ -59,9 +59,20 @@ export default function(app) {
 			{
 				clientID: config.auth.github.clientId,
 				clientSecret: config.auth.github.clientSecret,
-				callbackURL: url.resolve(config.baseUrl, '/auth/github/callback')
+				callbackURL: url.resolve(config.baseUrl, '/auth/github/callback'),
+				scope: ['user:email']
 			},
 			(accessToken, refreshToken, profile, done) => {
+				if (!profile) return done(null, null);
+
+				// We need to do some transformation on the profile object here because the
+				// GitHub strategy does not present the profile using the schema prescribed
+				// in the Passport documentation.
+				if (!profile.displayName) profile.displayName = profile.username;
+				if (profile.photos && profile.photos.length > 0) {
+					profile.imageUrl = profile.photos[0].value;
+				}
+
 				getOrCreateOAuthAccount(profile)
 					.then(user => {
 						done(null, user);

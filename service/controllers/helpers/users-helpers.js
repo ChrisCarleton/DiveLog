@@ -49,7 +49,7 @@ const createNewOAuthAccount = (profile) => {
 			if (user) {
 				// Drat! This user will have to sign in using their existing credentials
 				// and connect their account to this OAuth provider.
-				throw new EmailInUseError(`E-mail address "${profile.emails[0].value} already in use.`);
+				throw new EmailInUseError(`E-mail address "${profile.emails[0].value}" is already in use.`);
 			}
 
 			let imageUrl = undefined;
