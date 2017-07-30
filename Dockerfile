@@ -8,7 +8,6 @@ RUN npm install --loglevel error
 
 COPY . .
 RUN gulp bundle
-COPY /usr/bin/phantomjs /usr/bin/phantomjs
 
 CMD ["npm", "run", "server"]
 EXPOSE 8100
