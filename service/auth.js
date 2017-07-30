@@ -9,7 +9,6 @@ import Users from './data/users.table';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 import { Strategy as GithubStrategy } from 'passport-github';
-import { Strategy as TwitterStrategy } from 'passport-twitter';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 export default function(app) {
@@ -73,21 +72,6 @@ export default function(app) {
 					profile.imageUrl = profile.photos[0].value;
 				}
 
-				getOrCreateOAuthAccount(profile)
-					.then(user => {
-						done(null, user);
-					})
-					.catch(done);
-			}));
-
-	passport.use(
-		new TwitterStrategy(
-			{
-				consumerKey: config.auth.twitter.consumerKey,
-				consumerSecret: config.auth.twitter.consumerSecret,
-				callbackURL: url.resolve(config.baseUrl, '/auth/twitter/callback')
-			},
-			(token, tokenSecret, profile, done) => {
 				getOrCreateOAuthAccount(profile)
 					.then(user => {
 						done(null, user);

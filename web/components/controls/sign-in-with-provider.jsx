@@ -25,14 +25,6 @@ class SignInWithProvider extends React.Component {
 				</Media>
 				<Media>
 					<Media.Left align="middle">
-						<Image src="/public/img/twitter_logo.png" rounded />
-					</Media.Left>
-					<Media.Body>
-						<a href="/auth/twitter"><Button>Sign In with Twitter</Button></a>
-					</Media.Body>
-				</Media>
-				<Media>
-					<Media.Left align="middle">
 						<Image src="/public/img/github_logo.png" rounded />
 					</Media.Left>
 					<Media.Body>

@@ -83,7 +83,6 @@
     "passport-github": "^1.1.0",
     "passport-google-oauth": "^1.0.0",
     "passport-local": "^1.0.0",
-    "passport-twitter": "^1.0.4",
     "prop-types": "^15.5.10",
     "pug": "^2.0.0-rc.2",
     "react": "^15.6.1",
