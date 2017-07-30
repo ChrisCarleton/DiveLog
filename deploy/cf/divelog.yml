@@ -49,11 +49,29 @@ Parameters:
     Default: info
     AllowedValues: [trace, debug, info, warn, error, fatal]
     ConstraintDescription: Please choose one of the recognized log levels.
+  BaseUrl:
+    Description: The base URL for this instance of the application.
+    Type: String
+    Default: https://dev.bottomtime.ca/
   AwsKeyId:
     Description: AWS API key Id
     Type: String
   AwsSecretKey:
     Description: AWS API secret key
+    Type: String
+  GoogleClientId:
+    Description: Client ID for Google OAuth service.
+    Type: String
+    Default: 399113053541-k86gnd1eo92ochborjtuofikn6v37dja.apps.googleusercontent.com
+  GoogleClientSecret:
+    Description: Client Secret for Google OAuth service.
+    Type: String
+  GitHubClientId:
+    Description: Client ID for GitHub OAuth service.
+    Type: String
+    Default: f53bc482f795f83a8520
+  GitHubClientSecret:
+    Description: Client Secret for GitHub OAuth service.
     Type: String
   UsersReadCapacity:
     Description: Users table read capcity units
@@ -179,6 +197,35 @@ Resources:
               Ref: UsersReadCapacity
             WriteCapacityUnits:
               Ref: UsersWriteCapacity
+
+  OAuthTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Fn::Join:
+          - '-'
+          - - divelog
+            - Ref: NodeEnv
+            - oauth
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: OAuthReadCapacity
+        WriteCapacityUnits:
+          Ref: OAuthWriteCapacity
+      AttributeDefinitions:
+        -
+          AttributeName: "providerId"
+          AttributeType: "S"
+        -
+          AttributeName: "provider"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "providerId"
+          KeyType: "HASH"
+        -
+          AttributeName: "provider"
+          KeyType: "RANGE"
 
   SessionsTable:
     Type: "AWS::DynamoDB::Table"
@@ -321,6 +368,16 @@ Resources:
             Value: !Ref AWS::Region
           - Name: DIVELOG_FORCE_SSL
             Value: true
+          - Name: DIVELOG_BASE_URL
+            Value: !Ref BaseUrl
+          - Name: DIVELOG_GOOGLE_CONSUMER_ID
+            Value: !Ref GoogleClientId
+          - Name: DIVELOG_GOOGLE_CONSUMER_SECRET
+            Value: !Ref GoogleClientSecret
+          - Name: DIVELOG_GITHUB_CLIENT_ID
+            Value: !Ref GitHubClientId
+          - Name: DIVELOG_GITHUB_CLIENT_SECRET
+            Value: !Ref GitHubClientSecret
         Memory: '300'
         LogConfiguration:
           LogDriver: awslogs
