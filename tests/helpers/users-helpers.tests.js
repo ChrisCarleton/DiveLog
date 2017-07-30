@@ -39,7 +39,7 @@ describe('Users helper methods', () => {
 			getOrCreateOAuthAccount(profile)
 				.then(user => {
 					expect(user).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
@@ -53,7 +53,7 @@ describe('Users helper methods', () => {
 					expect(user).to.exist;
 					user = user.attrs;
 					expect(user.userId).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
@@ -146,7 +146,7 @@ describe('Users helper methods', () => {
 				})
 				.then(user => {
 					expect(user).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
@@ -160,7 +160,7 @@ describe('Users helper methods', () => {
 					expect(user).to.exist;
 					user = user.attrs;
 					expect(user.userId).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');

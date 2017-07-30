@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird';
 import { EmailInUseError, MissingEmailError } from '../../utils/exceptions';
+import faker from 'faker';
 import OAuth from '../../data/oauth.table';
 import Users from '../../data/users.table';
 
@@ -58,7 +59,7 @@ const createNewOAuthAccount = (profile) => {
 			}
 
 			return Users.createAsync({
-				userName: profile.emails[0].value,
+				userName: faker.random.alphaNumeric(12),
 				email: profile.emails[0].value,
 				displayName: profile.displayName,
 				role: 'user',
