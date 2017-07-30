@@ -22,14 +22,20 @@ export default function(app) {
 					.execAsync()
 					.then(response => {
 						if (response.Items.length === 0) {
-							log.info('Could not log in user "', username, '". User does not exist');
+							log.debug('Could not log in user "', username, '". User does not exist');
 							return done(null, null);
 						}
 
 						const result = response.Items[0];
+						const passwordHash = result.get('passwordHash');
 
-						if (!bcrypt.compareSync(password, result.get('passwordHash'))) {
-							log.info('Could not log in user "', username, '". Password was invalid.');
+						if (!passwordHash) {
+							log.debug('Could not log in user "', username, '". This user has no password set.');
+							return done(null, null);
+						}
+
+						if (!bcrypt.compareSync(password, passwordHash)) {
+							log.debug('Could not log in user "', username, '". Password was invalid.');
 							return done(null, null);
 						}
 

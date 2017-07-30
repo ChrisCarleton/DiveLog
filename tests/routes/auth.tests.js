@@ -92,6 +92,33 @@ describe('Authentication routes', () => {
 				.catch(done);
 		});
 
+		it('will return 401 if the user does not have a password hash (OAuth users!)', done => {
+			let userId;
+			testUser.passwordHash = undefined;
+
+			Users
+				.createAsync(testUser)
+				.then(result => {
+					userId = result.get('userId');
+					idsToDestroy.push(userId);
+
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: testUser.userName,
+							password: ''
+						})
+						.expect('Content-Type', /json/)
+						.expect(401);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3000);
+					expect(result.headers['set-cookie']).to.not.exist;
+					done();
+				})
+				.catch(done);
+		});
+
 		it('will return 401 if the password is incorrect', done => {
 			let userId;
 
