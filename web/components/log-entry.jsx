@@ -1,6 +1,7 @@
 import Air from './logentry/air.jsx';
 import CurrentEntryActions from '../actions/current-entry-actions';
 import CurrentEntryStore from '../stores/current-entry-store';
+import DiveType from './logentry/dive-type.jsx';
 import Formsy from 'formsy-react';
 import { IndexLinkContainer } from 'react-router-bootstrap';
 import DiveLocation from './logentry/location.jsx';
@@ -116,6 +117,11 @@ class LogEntry extends React.Component {
 						<Row>
 							<Col xs={12}>
 								<h3>Dive Info</h3>
+							</Col>
+						</Row>
+						<Row>
+							<Col xs={12} md={4}>
+								<DiveType entry={ this.state.currentEntry } />
 							</Col>
 						</Row>
 						<Notes
