@@ -1,4 +1,5 @@
 import CurrentEntryActions from '../../actions/current-entry-actions';
+import formUtils from '../../utils/form-utils';
 import PropTypes from 'prop-types';
 import React from 'react';
 import TextBox from '../controls/text-box.jsx';
@@ -16,7 +17,9 @@ class Nitrox extends React.Component {
 
 	onValueChanged(e) {
 		if (e.target.id === 'cnsO2') {
-			return CurrentEntryActions.doPartialUpdate({ cnsO2Percent: e.target.value });
+			return CurrentEntryActions.doPartialUpdate({
+				cnsO2Percent: formUtils.tryReturnAsNumber(e.target.value)
+			});
 		}
 
 		const cylinder = this.props.entry.cylinders && this.props.entry.cylinders[0]
@@ -24,9 +27,9 @@ class Nitrox extends React.Component {
 			: {};
 
 		if (cylinder.gas) {
-			cylinder.gas.o2Percent = e.target.value;
+			cylinder.gas.o2Percent = formUtils.tryReturnAsNumber(e.target.value);
 		} else {
-			cylinder.gas = { o2Percent: e.target.value };
+			cylinder.gas = { o2Percent: formUtils.tryReturnAsNumber(e.target.value) };
 		}
 
 		CurrentEntryActions.updateCylinderInfo(0, cylinder);

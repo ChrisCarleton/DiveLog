@@ -1,4 +1,5 @@
 import CurrentEntryActions from '../../actions/current-entry-actions';
+import formUtils from '../../utils/form-utils';
 import PropTypes from 'prop-types';
 import React from 'react';
 import TextBox from '../controls/text-box.jsx';
@@ -25,7 +26,7 @@ class Weight extends React.Component {
 		if (e.target.id) {
 			switch (e.target.id) {
 				case 'weight':
-					weight.amount = e.target.value;
+					weight.amount = formUtils.tryReturnAsNumber(e.target.value);
 					break;
 			}
 		} else {

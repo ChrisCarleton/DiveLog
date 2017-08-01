@@ -1,4 +1,5 @@
 import CurrentEntryActions from '../../actions/current-entry-actions';
+import formUtils from '../../utils/form-utils';
 import HelpBubble from '../controls/help-bubble.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -44,11 +45,11 @@ class Location extends React.Component {
 
 		switch (e.target.id) {
 			case 'avgDepth':
-				depth.average = e.target.value;
+				depth.average = formUtils.tryReturnAsNumber(e.target.value);
 				break;
 
 			case 'maxDepth':
-				depth.max = e.target.value;
+				depth.max = formUtils.tryReturnAsNumber(e.target.value);
 				break;
 		}
 

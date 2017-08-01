@@ -1,4 +1,5 @@
 import CurrentEntryActions from '../../actions/current-entry-actions';
+import formUtils from '../../utils/form-utils';
 import PropTypes from 'prop-types';
 import React from 'react';
 import TextBox from '../controls/text-box.jsx';
@@ -25,15 +26,15 @@ class Air extends React.Component {
 
 		switch(e.target.id) {
 			case 'capacity':
-				cylinder.volume = e.target.value;
+				cylinder.volume = formUtils.tryReturnAsNumber(e.target.value);
 				break;
 
 			case 'startPressure':
-				cylinder.gas.startPressure = e.target.value;
+				cylinder.gas.startPressure = formUtils.tryReturnAsNumber(e.target.value);
 				break;
 
 			case 'endPressure':
-				cylinder.gas.endPressure = e.target.value;
+				cylinder.gas.endPressure = formUtils.tryReturnAsNumber(e.target.value);
 				break;
 
 			default:

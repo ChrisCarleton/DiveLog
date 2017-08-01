@@ -1,5 +1,6 @@
 import CurrentEntryActions from '../../actions/current-entry-actions';
 import DatePicker from '../controls/date-picker.jsx';
+import formUtils from '../../utils/form-utils';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -27,18 +28,26 @@ class DiveTime extends React.Component {
 
 		switch (e.target.id) {
 			case 'diveNumber':
-				return CurrentEntryActions.doPartialUpdate({ diveNumber: e.target.value });
+				return CurrentEntryActions.doPartialUpdate({
+					diveNumber: formUtils.tryReturnAsNumber( e.target.value)
+				});
 
 			case 'diveLength':
-				update = { diveLength: e.target.value };
+				update = {
+					diveLength: formUtils.tryReturnAsNumber(e.target.value)
+				};
 				break;
 
 			case 'bottomTime':
-				update = { bottomTime: e.target.value };
+				update = {
+					bottomTime: formUtils.tryReturnAsNumber(e.target.value)
+				};
 				break;
 
 			case 'surfaceInterval':
-				update = { surfaceInterval: e.target.value };
+				update = {
+					surfaceInterval: formUtils.tryReturnAsNumber(e.target.value)
+				};
 				break;
 		}
 
