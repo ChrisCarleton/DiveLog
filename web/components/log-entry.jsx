@@ -1,7 +1,10 @@
 import Air from './logentry/air.jsx';
+import Conditions from './logentry/conditions.jsx';
 import CurrentEntryActions from '../actions/current-entry-actions';
 import CurrentEntryStore from '../stores/current-entry-store';
+import DecoStops from './logentry/deco-stops.jsx';
 import DiveType from './logentry/dive-type.jsx';
+import Equipment from './logentry/equipment.jsx';
 import Formsy from 'formsy-react';
 import { IndexLinkContainer } from 'react-router-bootstrap';
 import DiveLocation from './logentry/location.jsx';
@@ -111,6 +114,7 @@ class LogEntry extends React.Component {
 								<Air entry={ this.state.currentEntry } />
 							</Col>
 							<Col xs={12} md={4}>
+								<DecoStops entry={ this.state.currentEntry } />
 								<Nitrox entry={ this.state.currentEntry } />
 							</Col>
 						</Row>
@@ -121,7 +125,13 @@ class LogEntry extends React.Component {
 						</Row>
 						<Row>
 							<Col xs={12} md={4}>
+								<Conditions entry={ this.state.currentEntry } />
+							</Col>
+							<Col xs={12} md={4}>
 								<DiveType entry={ this.state.currentEntry } />
+							</Col>
+							<Col xs={12} md={4}>
+								<Equipment entry={this.state.currentEntry } />
 							</Col>
 						</Row>
 						<Notes

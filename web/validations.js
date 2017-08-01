@@ -1,24 +1,28 @@
+import _ from 'lodash';
 import Formsy from 'formsy-react';
 import geolib from 'geolib';
+
+const isPositive = value => {
+	if (!value) return true;
+	const number = _.toNumber(value);
+	if (Number.isNaN(number)) return false;
+	return number > 0.0;
+};
 
 Formsy.addValidationRule('isAtLeast', (values, value, minimum) => {
 	return value >= minimum;
 });
 
 Formsy.addValidationRule('isPositive', (values, value) => {
-	if (!value) return true;
-	let number;
-	try { number = Number.parseFloat(value); }
-	catch (error) { return false; }
-	return number > 0.0;
+	return isPositive(value);
 });
 
 Formsy.addValidationRule('isInteger', (values, value) => {
 	if (!value) return true;
-	let int;
-	try { int = Number.parseInt(value); }
-	catch (error) { return false; }
-	return Number.isInteger(int);
+	const int = _.toNumber(value);
+	if (Number.isNaN(int)) return false;
+
+	return _.isInteger(int);
 });
 
 Formsy.addValidationRule('isBetween', (values, value, bounds) => {
@@ -42,6 +46,15 @@ function isGps(value, bounds) {
 
 	return (bounds[0] <= decimalValue && decimalValue <= bounds[1]);
 }
+
+Formsy.addValidationRule('isDecoStop', (values, value) => {
+	if (!value) return true;
+
+	if (value.depth && !isPositive(value.depth)) return false;
+	if (value.duration && !isPositive(value.duration)) return false;
+
+	return true;
+});
 
 Formsy.addValidationRule('isLatitude', (values, value) => {
 	return isGps(value, [-90.0, 90.0]);

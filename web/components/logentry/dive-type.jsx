@@ -21,10 +21,8 @@ class DiveType extends React.Component {
 		this.onCheckboxUpdated = this.onCheckboxUpdated.bind(this);
 	}
 
-	getBoolValue(key) {
-		const entry = this.props.entry.diveType || {};
-
-		if (!entry[key]) {
+	getBoolValue(diveType, key) {
+		if (!diveType[key]) {
 			return false;
 		}
 
@@ -33,7 +31,7 @@ class DiveType extends React.Component {
 
 	onRadioUpdated(e) {
 		const diveType = Object.assign({}, this.props.entry.diveType);
-		
+
 		switch (e.target.name) {
 			case 'entryType':
 				diveType.boat = (e.target.value === 'boat');
@@ -61,7 +59,7 @@ class DiveType extends React.Component {
 					<Checkbox
 						id={camelCase}
 						key={camelCase}
-						checked={this.getBoolValue(camelCase)}
+						checked={this.getBoolValue(diveType, camelCase)}
 						onChange={this.onCheckboxUpdated}
 						inline>
 							{t}
@@ -70,6 +68,11 @@ class DiveType extends React.Component {
 
 		return (
 			<div>
+				<Row>
+					<Col xs={12}>
+						<h4>Dive Type</h4>
+					</Col>
+				</Row>
 				<FormGroup bsSize="small" controlId="boatDive">
 					<Col xs={4}>
 						<ControlLabel>Entry type:</ControlLabel>
@@ -79,7 +82,7 @@ class DiveType extends React.Component {
 							id="boat"
 							name="entryType"
 							value="boat"
-							checked={ this.getBoolValue('boat') }
+							checked={ this.getBoolValue(diveType, 'boat') }
 							onChange={ this.onRadioUpdated }
 							inline>
 							Boat
@@ -88,7 +91,7 @@ class DiveType extends React.Component {
 							id="shore"
 							name="entryType"
 							value="shore"
-							checked={ !this.getBoolValue('boat') }
+							checked={ !this.getBoolValue(diveType, 'boat') }
 							onChange={ this.onRadioUpdated }
 							inline>
 							Shore
@@ -104,7 +107,7 @@ class DiveType extends React.Component {
 							id="salt"
 							name="water"
 							value="salt"
-							checked={ this.getBoolValue('saltWater') }
+							checked={ this.getBoolValue(diveType, 'saltWater') }
 							onChange={ this.onRadioUpdated }
 							inline>
 							Salt
@@ -113,7 +116,7 @@ class DiveType extends React.Component {
 							id="fresh"
 							name="water"
 							value="fresh"
-							checked={ !this.getBoolValue('saltWater') }
+							checked={ !this.getBoolValue(diveType, 'saltWater') }
 							onChange={ this.onRadioUpdated }
 							inline>
 							Fresh
