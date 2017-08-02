@@ -7,7 +7,8 @@ import React from 'react';
 import {
 	Col,
 	ControlLabel,
-	FormGroup
+	FormGroup,
+	HelpBlock
 } from 'react-bootstrap';
 
 class DecoStop extends React.Component {
@@ -67,7 +68,7 @@ class DecoStop extends React.Component {
 				</Col>
 				<Col xs={8} xsOffset={4}>
 					{ this.props.showError()
-						? <span className="text-danger">{ this.props.getErrorMessage() }</span>
+						? <HelpBlock>{ this.props.getErrorMessage() }</HelpBlock>
 						: null }
 				</Col>
 			</FormGroup>);

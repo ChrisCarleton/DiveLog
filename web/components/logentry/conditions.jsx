@@ -47,6 +47,8 @@ class Conditions extends React.Component {
 				</Row>
 				<Row>
 					<ul>
+						<li>Current</li>
+						<li>Visibility</li>
 						<li>Surface conditions</li>
 						<li>Weather</li>
 						<li>Diver mood</li>
