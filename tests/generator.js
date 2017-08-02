@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import faker from 'faker';
+import geolib from 'geolib';
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -49,8 +50,8 @@ function generateDiveLogEntry(ownerIds) {
 		location: faker.fake('{{address.cityPrefix}} {{name.firstName}}{{address.citySuffix}}, {{address.countryCode}}'),
 		site: faker.fake('{{name.lastName}} {{address.cityPrefix}}'),
 		gps: {
-			latitude: Number.parseFloat(faker.address.latitude()),
-			longitude: Number.parseFloat(faker.address.longitude())
+			latitude: geolib.decimal2sexagesimal(faker.address.latitude()),
+			longitude: geolib.decimal2sexagesimal(faker.address.longitude())
 		},
 
 		cnsO2Percent: faker.random.number({ min: 5, max: 80 }),
@@ -111,12 +112,11 @@ function generateDiveLogEntry(ownerIds) {
 			wreck: faker.random.boolean()
 		},
 
-		visibility: faker.random.number({ min: 1, max: 101 }),
-		current: faker.random.number({ min: 0, max: 100 }),
-		surfaceConditions: faker.random.arrayElement(['calm', 'moderate', 'rough']),
-		weather: faker.random.arrayElement(['sunny', 'partially cloudy', 'cloudy', 'rainy']),
-
-		mood: faker.random.arrayElement(['sick', 'bad', 'tired', 'ok', 'good', 'stoked!']),
+		visibility: faker.random.arrayElement(['none', 'poor', 'moderate', 'good', 'excellent', 'ultra']),
+		current: faker.random.arrayElement(['none', 'mild', 'moderate', 'fast', 'extreme']),
+		surfaceConditions: faker.random.arrayElement(['calm', 'moderate', 'rough', 'insane']),
+		weather: faker.random.arrayElement(['sunny', 'mainlySunny', 'overcast', 'rainy', 'stormy']),
+		mood: faker.random.arrayElement(['terrible', 'bad', 'ok', 'good', 'excellent']),
 
 		weight: {
 			amount: faker.random.number({ min: 6, max: 32 }),

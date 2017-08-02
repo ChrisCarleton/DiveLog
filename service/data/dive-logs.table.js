@@ -24,8 +24,8 @@ const baseSchema = {
 	location: Joi.string().required(),
 	site: Joi.string().required(),
 	gps: Joi.object().keys({
-		latitude: Joi.number(),
-		longitude: Joi.number()
+		latitude: Joi.string(),
+		longitude: Joi.string()
 	}),
 
 	cnsO2Percent: Joi.number().min(0).max(150).precision(2),
@@ -89,12 +89,11 @@ const baseSchema = {
 		wreck: Joi.boolean()
 	}),
 
-	visibility: Joi.number().min(0).max(101),
-	current: Joi.number().min(0).max(100),
-	surfaceConditions: Joi.string().regex(/^(calm|moderate|rough)$/),
-	weather: Joi.string(),
-
-	mood: Joi.string(),
+	visibility: Joi.string().regex(/^(none|poor|moderate|good|excellent|ultra)$/),
+	current: Joi.string().regex(/^(none|mild|moderate|fast|extreme)$/),
+	surfaceConditions: Joi.string().regex(/^(calm|moderate|rough|insane)$/),
+	weather: Joi.string().regex(/^(sunny|mainlySunny|overcast|rainy|stormy)$/),
+	mood: Joi.string().regex(/^(terrible|bad|ok|good|excellent)$/),
 
 	weight: Joi.object().keys({
 		amount: Joi.number().positive(),
