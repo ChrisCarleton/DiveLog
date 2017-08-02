@@ -18,14 +18,22 @@ class Equipment extends React.Component {
 		super();
 		this.equipment = ['Compass', 'Computer', 'Knife', 'Light', 'Scooter',
 			'Slate', 'Surface marker'];
-		this.onCheckboxChanged = this.onCheckboxChanged.bind(this);
+		this.exposureGear = ['Boots', 'Gloves', 'Hood'];
+		this.onEquipmentCheckboxChanged = this.onEquipmentCheckboxChanged.bind(this);
+		this.onExposureCheckboxChanged = this.onExposureCheckboxChanged.bind(this);
 		this.onSelectBoxChanged = this.onSelectBoxChanged.bind(this);
 	}
 
-	onCheckboxChanged(e) {
+	onEquipmentCheckboxChanged(e) {
 		const equipment = this.props.entry.equipment || {};
 		equipment[e.target.id] = e.target.checked;
 		CurrentEntryActions.doPartialUpdate({ equipment: equipment });
+	}
+
+	onExposureCheckboxChanged(e) {
+		const exposure = this.props.entry.exposure || {};
+		exposure[e.target.id] = e.target.checked;
+		CurrentEntryActions.doPartialUpdate({ exposure: exposure });
 	}
 
 	onSelectBoxChanged(id, value) {
@@ -45,16 +53,6 @@ class Equipment extends React.Component {
 		}
 
 		CurrentEntryActions.doPartialUpdate({ exposure: exposure });
-	}
-
-	getBoolValue(key) {
-		const entry = this.props.entry.equipment || {};
-
-		if (!entry[key]) {
-			return false;
-		}
-
-		return true;
 	}
 
 	getThicknessSelectBox(exposure) {
@@ -78,14 +76,28 @@ class Equipment extends React.Component {
 
 	render() {
 		const exposure = this.props.entry.exposure || {};
-		const checkboxes = _.map(this.equipment, e => {
+		const equipment = this.props.entry.equipment || {};
+		const equipmentCheckboxes = _.map(this.equipment, e => {
 			const camelCase = _.camelCase(e);
 			return (
 				<Checkbox
 					id={camelCase}
 					key={camelCase}
-					checked={this.getBoolValue(camelCase)}
-					onChange={this.onCheckboxChanged}
+					checked={equipment[camelCase] ? true : false}
+					onChange={this.onEquipmentCheckboxChanged}
+					inline>
+						{e}
+				</Checkbox>);
+		});
+
+		const exposureCheckboxes = _.map(this.exposureGear, e => {
+			const camelCase = _.camelCase(e);
+			return (
+				<Checkbox
+					id={camelCase}
+					key={camelCase}
+					checked={exposure[camelCase] ? true : false}
+					onChange={this.onExposureCheckboxChanged}
 					inline>
 						{e}
 				</Checkbox>);
@@ -112,11 +124,19 @@ class Equipment extends React.Component {
 				</SelectBox>
 				{ this.getThicknessSelectBox(exposure) }
 				<FormGroup bsSize="small">
+					<Col xs={4}>
+						<ControlLabel>Also wearing:</ControlLabel>
+					</Col>
+					<Col xs={8}>
+						{exposureCheckboxes}
+					</Col>
+				</FormGroup>
+				<FormGroup bsSize="small">
 					<Col xs={12}>
 						<ControlLabel>Other equipment:</ControlLabel>
 					</Col>
 					<Col xs={12}>
-						{checkboxes}
+						{equipmentCheckboxes}
 					</Col>
 				</FormGroup>
 			</div>);
