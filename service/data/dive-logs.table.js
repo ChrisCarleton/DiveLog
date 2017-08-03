@@ -4,7 +4,7 @@ import Joi from 'joi';
 
 const baseSchema = {
 	logId: Joi.string().uuid(),
-	ownerId: Joi.string().uuid(),
+	ownerId: Joi.string().uuid().required(),
 
 	entryTime: Joi.string().isoDate().required(),
 
@@ -18,17 +18,17 @@ const baseSchema = {
 				depth: Joi.number().positive(),
 				duration: Joi.number().positive()
 			})
-		)
+		).max(10)
 	}),
 
-	location: Joi.string().required(),
-	site: Joi.string().required(),
+	location: Joi.string().max(250).required(),
+	site: Joi.string().max(250).required(),
 	gps: Joi.object().keys({
-		latitude: Joi.string(),
-		longitude: Joi.string()
+		latitude: Joi.string().max(100),
+		longitude: Joi.string().max(100)
 	}),
 
-	cnsO2Percent: Joi.number().min(0).max(150).precision(2),
+	cnsO2Percent: Joi.number().min(0).max(150),
 
 	cylinders: Joi.array().items(
 		Joi.object().keys({
@@ -109,11 +109,6 @@ export const createSchema = Joi.object().keys(baseSchema);
 
 export const updateSchema = Joi.object().keys(
 	Object.assign({}, baseSchema, {
-		// These are not required on update - but cannot be removed from the database!
-		entryTime: Joi.string().isoDate().invalid(null),
-		location: Joi.string().invalid(null),
-		site: Joi.string().invalid(null),
-
 		// Allow these just in case users are posting back objects they just received
 		// with small modifications.
 		createdAt: Joi.any().strip(),

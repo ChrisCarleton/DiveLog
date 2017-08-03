@@ -38,7 +38,9 @@ class Conditions extends React.Component {
 	}
 
 	onSelectBoxChanged(id, value) {
-
+		let update = {};
+		update[id] = value;
+		CurrentEntryActions.doPartialUpdate(update);
 	}
 
 	render() {
@@ -72,11 +74,11 @@ class Conditions extends React.Component {
 					value={ this.props.entry.visibility }>
 						<option value=""></option>
 						<option value="none">None</option>
-						<option value="poor">Poor (&lt;10')</option>
-						<option value="moderate">Decent (10'-30')</option>
-						<option value="good">Good (30'-60')</option>
-						<option value="excellent">Very good (60'-100')</option>
-						<option value="ultra">Crystal clear! (100'+)</option>
+						<option value="poor">{ "Poor (<10')" }</option>
+						<option value="moderate">{ "Decent (10'-30')" }</option>
+						<option value="good">{ "Good (30'-60')" }</option>
+						<option value="excellent">{ "Very good (60'-100')" }</option>
+						<option value="ultra">{ "Crystal clear! (100'+)" }</option>
 				</SelectBox>
 				<SelectBox
 					controlId="surfaceConditions"
