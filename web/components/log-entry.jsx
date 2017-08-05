@@ -31,11 +31,13 @@ class LogEntry extends React.Component {
 		super(props);
 		this.state = {
 			title: props.match.params.logId ? 'Edit Log Entry' : 'Create New Entry',
+			isSaving: false,
 			currentEntry: {}
 		};
 
 		this.onStateChanged = this.onStateChanged.bind(this);
 		this.submit = this.submit.bind(this);
+		this.reset = this.reset.bind(this);
 	}
 
 	componentDidMount() {
@@ -60,7 +62,22 @@ class LogEntry extends React.Component {
 			CurrentEntryStore.getState()));
 	}
 
-	submit(/*model*/) {}
+	reset() {
+
+	}
+
+	submit() {
+		if (this.props.match.params.logId) {
+			CurrentEntryActions.saveEntry(
+				this.props.match.params.userName,
+				this.props.match.params.logId,
+				this.state.currentEntry);
+		} else {
+			CurrentEntryActions.createEntry(
+				this.props.match.params.userName,
+				this.state.currentEntry);
+		}
+	}
 
 	render() {
 		return (
@@ -138,7 +155,11 @@ class LogEntry extends React.Component {
 							controlId="notes"
 							value={this.state.currentEntry.notes} />
 					</Grid>
-					<Button type="submit" bsStyle="primary">Save</Button>
+					<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
+						{ this.state.isSaving ? "Saving..." : "Save Log Entry" }
+					</Button>
+					{ " " }
+					<Button onClick={ this.reset } disabled={ this.state.isSaving }>Reset</Button>
 				</Formsy.Form>
 				<p>{ JSON.stringify(this.state.currentEntry, null, ' ') }</p>
 			</div>);

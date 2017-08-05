@@ -9,6 +9,7 @@ class CurrentEntryActions {
 			request
 				.get(`/api/logs/${userName}/${id}`)
 				.then(res => {
+					AlertActions.dismissAlert('log-entry');
 					this.fetchLogSucceeded(res.body);
 				})
 				.catch(err => {
@@ -19,6 +20,54 @@ class CurrentEntryActions {
 
 	fetchLogSucceeded(logInfo) {
 		return logInfo;
+	}
+
+	createEntry(userName, logInfo) {
+		return dispatch => {
+			dispatch();
+			request
+				.post(`/api/logs/${userName}/`)
+				.send(logInfo)
+				.then(res => {
+					AlertActions.dismissAlert('log-entry');
+					this.saveSucceeded(res.body);
+				})
+				.catch(error => {
+					this.endSaving();
+					AlertActions.handleErrorResponse('log-entry', error);
+				});
+		};
+	}
+
+	saveEntry(userName, logId, logInfo) {
+		this.beginSaving();
+		return dispatch => {
+			dispatch();
+			request
+				.put(`/api/logs/${userName}/${logId}/`)
+				.send(logInfo)
+				.then(res => {
+					AlertActions.dismissAlert('log-entry');
+					this.saveSucceeded(res.body);
+				})
+				.catch(err => {
+					this.endSaving();
+					AlertActions.handleErrorResponse('log-entry', err);
+				});
+		};
+	}
+
+	saveSucceeded(result) {
+		this.endSaving();
+		return result;
+	}
+
+	beginSaving() {
+		return true;
+	}
+
+	endSaving() {
+		return false;
 	}
 
 	doPartialUpdate(update) {

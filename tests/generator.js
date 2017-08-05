@@ -14,6 +14,18 @@ function generateUser(password) {
 	};
 }
 
+function generateCylinderEntry() {
+	return {
+		gas: {
+			o2Percent: faker.random.number({ min: 21, max: 40 }),
+			startPressure: faker.random.number({min: 2800, max: 3500 }),
+			endPressure: faker.random.number({ min: 450, max: 1200 })
+		},
+		volume: faker.random.arrayElement([66, 80, 100]),
+		type: faker.random.arrayElement(['aluminum', 'steel'])
+	};
+}
+
 function generateDiveLogEntry(ownerIds) {
 	const entryTime = faker.date.past(5, new Date());
 	const diveTime = faker.random.number({ min: 20, max: 65 });
@@ -56,17 +68,7 @@ function generateDiveLogEntry(ownerIds) {
 
 		cnsO2Percent: faker.random.number({ min: 5, max: 80 }),
 
-		cylinders: [
-			{
-				gas: {
-					o2Percent: faker.random.number({ min: 21, max: 40 }),
-					startPressure: faker.random.number({min: 2800, max: 3500 }),
-					endPressure: faker.random.number({ min: 450, max: 1200 })
-				},
-				volume: faker.random.arrayElement([66, 80, 100]),
-				type: faker.random.arrayElement(['aluminum', 'steel'])
-			}
-		],
+		cylinders: [ generateCylinderEntry() ],
 
 		depth: {
 			average: averageDepth,
@@ -131,5 +133,6 @@ function generateDiveLogEntry(ownerIds) {
 
 export default {
 	generateUser: generateUser,
+	generateCylinderEntry: generateCylinderEntry,
 	generateDiveLogEntry: generateDiveLogEntry
 };

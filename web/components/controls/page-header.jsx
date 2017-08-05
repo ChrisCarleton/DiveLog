@@ -1,6 +1,7 @@
 import AlertActions from '../../actions/alert-actions';
 import AlertStore from '../../stores/alert-store';
 import React from 'react';
+import { Redirect } from 'react-router';
 import PropTypes from 'prop-types';
 
 import {
@@ -44,6 +45,8 @@ class MyPageHeader extends React.Component {
 
 		return (
 			<Alert bsStyle={ this.state.alertStyle } onDismiss={ this.dismissAlert }>
+				<a id="alert-well"></a>
+				<Redirect to="#alert-well" />
 				<h4>{ this.state.alertTitle }</h4>
 				<p>{ this.state.alertDescription}</p>
 			</Alert>);
