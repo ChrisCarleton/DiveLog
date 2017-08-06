@@ -12,7 +12,7 @@ class Notes extends React.Component {
 		return (
 			<FormGroup bsSize="small" controlId={this.props.controlId}>
 				<Col xs={12}>
-					<ControlLabel><h3>Notes</h3></ControlLabel>
+					<ControlLabel><h4>Notes</h4></ControlLabel>
 					<FormControl
 						componentClass="textarea"
 						rows={8}

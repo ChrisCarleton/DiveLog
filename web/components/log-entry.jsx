@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import RequireAuth from './controls/require-auth.jsx';
 import SiteMap from './logentry/site-map.jsx';
+import Temperature from './logentry/temperature.jsx';
 import Weight from './logentry/weight.jsx';
 
 import {
@@ -151,9 +152,16 @@ class LogEntry extends React.Component {
 								<Equipment entry={this.state.currentEntry } />
 							</Col>
 						</Row>
-						<Notes
-							controlId="notes"
-							value={this.state.currentEntry.notes} />
+						<Row>
+							<Col xs={12} md={4}>
+								<Temperature entry={ this.state.currentEntry } />
+							</Col>
+							<Col xs={12} md={8}>
+								<Notes
+									controlId="notes"
+									value={this.state.currentEntry.notes} />
+							</Col>
+						</Row>
 					</Grid>
 					<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
 						{ this.state.isSaving ? "Saving..." : "Save Log Entry" }
