@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import HelpBubble from './help-bubble.jsx';
 import { HOC } from 'formsy-react';
 import React from 'react';
@@ -23,8 +24,10 @@ class TextBox extends React.Component {
 
 	render() {
 		const isValid = this.props.isValid();
-		let value = this.props.getValue() || '';
+		let value = this.props.getValue();
 		let validationState, errorMessage;
+
+		value = _.isNil(value) ? '' : value;
 
 		if (this.props.isPristine()) {
 			validationState = null;
@@ -54,7 +57,7 @@ class TextBox extends React.Component {
 				<Col sm={7}>
 					<FormControl
 						type={this.props.isPassword ? 'password' : 'text'}
-						value={value || ''}
+						value={value}
 						placeholder={this.props.placeholder}
 						onChange={this.props.onChange || this.onTextChanged} />
 					<FormControl.Feedback />
