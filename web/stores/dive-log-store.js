@@ -8,6 +8,7 @@ class DiveLogStore {
 		this.logs = [];
 		this.endOfStream = false;
 		this.lastEntry = null;
+		this.deleting = null;
 		this.sortOrder = 'desc';
 
 		this.bindListeners({
@@ -15,12 +16,14 @@ class DiveLogStore {
 			stopLoading: DiveLogActions.CANCEL_LOADING,
 			setSortOrder: DiveLogActions.SET_SORT_ORDER,
 			fetchLogs: DiveLogActions.FETCH_ENTRIES_SUCCEEDED,
-			fetchMoreLogs: DiveLogActions.FETCH_MORE_ENTRIES_SUCCEEDED
+			fetchMoreLogs: DiveLogActions.FETCH_MORE_ENTRIES_SUCCEEDED,
+			entryDeleted: DiveLogActions.DELETE_SUCCEEDED
 		});
 
 		this.loading = this.loading.bind(this);
 		this.fetchLogs = this.fetchLogs.bind(this);
 		this.fetchMoreLogs = this.fetchMoreLogs.bind(this);
+		this.entryDeleted = this.entryDeleted.bind(this);
 	}
 
 	loading() {
@@ -51,6 +54,10 @@ class DiveLogStore {
 		this.logs = _.concat(this.logs, newLogs);
 		this.lastEntry = newLogs.length > 1 ? newLogs[newLogs.length - 1].entryTime : null;
 		this.endOfStream = (newLogs.length < 100);
+	}
+
+	entryDeleted(entryId) {
+		_.remove(this.logs, e => e.logId === entryId);
 	}
 }
 

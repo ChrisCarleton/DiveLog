@@ -69,6 +69,12 @@ class Location extends React.Component {
 					placeholder="City or location of dive site"
 					value={ this.props.entry.location }
 					onChange={ this.onLocationChange }
+					validations={{
+						maxLength: 250
+					}}
+					validationErrors={{
+						maxLength: 'Name of location cannot be longer than 250 characters.'
+					}}
 					required />
 				<TextBox
 					controlId="site"
@@ -77,6 +83,12 @@ class Location extends React.Component {
 					placeholder="Name of dive site"
 					value={ this.props.entry.site }
 					onChange={ this.onSiteChange }
+					validations={{
+						maxLength: 250
+					}}
+					validationErrors={{
+						maxLength: 'Name of site cannot be longer than 250 characters.'
+					}}
 					required />
 
 				<Row>
@@ -137,10 +149,12 @@ class Location extends React.Component {
 					value={ depth.average }
 					onChange={ this.onDepthChange }
 					validations={{
-						isPositive: true
+						isPositive: true,
+						noMoreThan: 'maxDepth'
 					}}
 					validationErrors={{
-						isPositive: 'Must be a positive value.'
+						isPositive: 'Must be a positive value.',
+						noMoreThan: 'Your average depth cannot be deeper than your max depth.'
 					}} />
 				<TextBox
 					controlId="maxDepth"
@@ -149,11 +163,14 @@ class Location extends React.Component {
 					value={ depth.max }
 					onChange={ this.onDepthChange }
 					validations={{
-						isPositive: true
+						isPositive: true,
+						max: 1000
 					}}
 					validationErrors={{
-						isPositive: 'Must be a positive value.'
-					}} />
+						isPositive: 'Must be a positive value.',
+						max: 'Maximum depth cannot be over 1000ft.'
+					}}
+					required />
 			</div>);
 	}
 }

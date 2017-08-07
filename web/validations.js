@@ -9,10 +9,6 @@ const isPositive = value => {
 	return number > 0.0;
 };
 
-Formsy.addValidationRule('isAtLeast', (values, value, minimum) => {
-	return value >= minimum;
-});
-
 Formsy.addValidationRule('isPositive', (values, value) => {
 	return isPositive(value);
 });
@@ -23,6 +19,28 @@ Formsy.addValidationRule('isInteger', (values, value) => {
 	if (Number.isNaN(int)) return false;
 
 	return _.isInteger(int);
+});
+
+Formsy.addValidationRule('min', (values, value, minimum) => {
+	if (!value) return true;
+	const number = _.toNumber(value);
+	if (Number.isNaN(number)) return true;
+	return number >= minimum;
+});
+
+Formsy.addValidationRule('max', (values, value, maximum) => {
+	if (!value) return true;
+	const number = _.toNumber(value);
+	if (Number.isNaN(number)) return true;
+	return number <= maximum;
+});
+
+Formsy.addValidationRule('noMoreThan', (values, value, id) => {
+	if (!value || !values[id]) return true;
+	const number = _.toNumber(value);
+	const other = _.toNumber(values[id]);
+	if (Number.isNaN(number) || Number.isNaN(other)) return true;
+	return number <= other;
 });
 
 Formsy.addValidationRule('isBetween', (values, value, bounds) => {

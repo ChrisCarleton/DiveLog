@@ -74,14 +74,16 @@ class Air extends React.Component {
 					onChange={ this.onValueChanged }
 					validations={{
 						isInteger: true,
-						isPositive: true
+						isPositive: true,
+						max: 200
 					}}
 					validationErrors={{
 						isInteger: 'Must be a whole number (no decimal places.)',
-						isPositive: 'Must be a positive number.'
+						isPositive: 'Must be a positive number.',
+						max: 'Cylinder volume cannot be greater than 200cf.'
 					}} />
 
-				<FormGroup bsSize="small" validationState="success">
+				<FormGroup bsSize="small" validationState={ cylinder.type ? 'success' : null }>
 					<Col xs={4}>
 						<ControlLabel>Type:</ControlLabel>
 					</Col>
@@ -120,11 +122,13 @@ class Air extends React.Component {
 					unit="psi"
 					validations={{
 						isInteger: true,
-						isPositive: true
+						isPositive: true,
+						max: 5000
 					}}
 					validationErrors={{
 						isInteger: 'Must be a whole number (no decimal places.)',
-						isPositive: 'Must be a positive number.'
+						isPositive: 'Must be a positive number.',
+						max: 'Starting pressure may not be greater than 5000psi.'
 					}} />
 
 				<TextBox
@@ -136,11 +140,13 @@ class Air extends React.Component {
 					unit="psi"
 					validations={{
 						isInteger: true,
-						isPositive: true
+						isPositive: true,
+						noMoreThan: 'startPressure'
 					}}
 					validationErrors={{
 						isInteger: 'Must be a whole number (no decimal places.)',
-						isPositive: 'Must be a positive number.'
+						isPositive: 'Must be a positive number.',
+						noMoreThan: 'Ending pressure cannot be greater than starting pressure.'
 					}} />
 
 			</div>);

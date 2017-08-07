@@ -7,7 +7,10 @@ class CurrentEntryStore {
 		this.isSaving = false;
 
 		this.bindListeners({
-			entryRetrieved: CurrentEntryActions.FETCH_LOG_SUCCEEDED,
+			entryRetrieved: [
+				CurrentEntryActions.FETCH_LOG_SUCCEEDED,
+				CurrentEntryActions.FETCH_ERRORED,
+				CurrentEntryActions.CLEAR_ENTRY ],
 			onPartialUpdate: CurrentEntryActions.DO_PARTIAL_UPDATE,
 			onUpdateCylinder: CurrentEntryActions.UPDATE_CYLINDER_INFO,
 			onSavingChanged: [

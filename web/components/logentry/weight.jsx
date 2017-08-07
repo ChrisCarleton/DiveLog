@@ -63,14 +63,16 @@ class Weight extends React.Component {
 					onChange={ this.onValueChanged }
 					validations={{
 						isInteger: true,
-						isPositive: true
+						isPositive: true,
+						max: 100
 					}}
 					validationErrors={{
 						isInteger: 'Must be a whole number (no decimal places.)',
-						isPositive: 'Must be a positive number.'
+						isPositive: 'Must be a positive number.',
+						max: 'Weight can be set to no more than 100lbs.'
 					}} />
 
-				<FormGroup bsSize="small" validationState="success">
+				<FormGroup bsSize="small" validationState={ weight.correctness ? 'success' : null }>
 					<Col xs={4}>
 						<ControlLabel>Correct Amount?</ControlLabel>
 					</Col>
@@ -99,7 +101,7 @@ class Weight extends React.Component {
 					</Col>
 				</FormGroup>
 
-				<FormGroup bsSize="small" validationState="success">
+				<FormGroup bsSize="small" validationState={ weight.trim ? 'success' : null }>
 					<Col xs={4}>
 						<ControlLabel>Trim</ControlLabel>
 					</Col>

@@ -11,13 +11,16 @@ import DiveLocation from './logentry/location.jsx';
 import DiveTime from './logentry/dive-time.jsx';
 import Nitrox from './logentry/nitrox.jsx';
 import Notes from './logentry/notes.jsx';
+import NotFound from './errors/not-found.jsx';
 import PageHeader from './controls/page-header.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
 import RequireAuth from './controls/require-auth.jsx';
+import ServerError from './errors/server-error.jsx';
 import SiteMap from './logentry/site-map.jsx';
 import Temperature from './logentry/temperature.jsx';
 import Weight from './logentry/weight.jsx';
+import { withRouter } from 'react-router';
 
 import {
 	Breadcrumb,
@@ -48,7 +51,10 @@ class LogEntry extends React.Component {
 		if (params.logId) {
 			CurrentEntryActions.fetchLogEntry(
 				params.userName,
-				params.logId);
+				params.logId,
+				this.props.history);
+		} else {
+			CurrentEntryActions.clearEntry();
 		}
 	}
 
@@ -76,11 +82,20 @@ class LogEntry extends React.Component {
 		} else {
 			CurrentEntryActions.createEntry(
 				this.props.match.params.userName,
-				this.state.currentEntry);
+				this.state.currentEntry,
+				this.props.history);
 		}
 	}
 
 	render() {
+		if (this.state.currentEntry === 'not found') {
+			return <NotFound />;
+		}
+
+		if (this.state.currentEntry === 'server error') {
+			return <ServerError />;
+		}
+
 		return (
 			<div>
 				<RequireAuth />
@@ -178,4 +193,4 @@ LogEntry.propTypes = {
 	match: PropTypes.object.isRequired
 };
 
-export default LogEntry;
+export default withRouter(LogEntry);

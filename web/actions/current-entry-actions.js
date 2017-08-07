@@ -3,7 +3,7 @@ import alt from '../alt';
 import request from '../request-agent';
 
 class CurrentEntryActions {
-	fetchLogEntry(userName, id) {
+	fetchLogEntry(userName, id, history) {
 		return dispatch => {
 			dispatch();
 			request
@@ -13,6 +13,14 @@ class CurrentEntryActions {
 					this.fetchLogSucceeded(res.body);
 				})
 				.catch(err => {
+					if (err.status === 404) {
+						// Not found!
+						return this.fetchErrored('not found');
+					}
+					if (err.status === 500) {
+						return this.fetchErrored('server error');
+					}
+
 					AlertActions.handleErrorResponse('log-entry', err);
 				});
 		};
@@ -22,7 +30,11 @@ class CurrentEntryActions {
 		return logInfo;
 	}
 
-	createEntry(userName, logInfo) {
+	fetchErrored(reason) {
+		return reason;
+	}
+
+	createEntry(userName, logInfo, history) {
 		return dispatch => {
 			dispatch();
 			request
@@ -30,10 +42,12 @@ class CurrentEntryActions {
 				.send(logInfo)
 				.then(res => {
 					AlertActions.dismissAlert('log-entry');
-					this.saveSucceeded(res.body);
+					history.push(`/logbook/${userName}/${res.body.logId}/`)
+					//this.saveSucceeded(res.body);
 				})
 				.catch(error => {
 					this.endSaving();
+					console.log(error);
 					AlertActions.handleErrorResponse('log-entry', error);
 				});
 		};
@@ -79,6 +93,10 @@ class CurrentEntryActions {
 			index: index,
 			cylinder: cylinder
 		};
+	}
+
+	clearEntry() {
+		return {};
 	}
 }
 

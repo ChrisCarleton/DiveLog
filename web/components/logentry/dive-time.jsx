@@ -124,11 +124,13 @@ class DiveTime extends React.Component {
 					placeholder="Total dive time in minutes"
 					validations={{
 						isInteger: true,
-						isPositive: true
+						isPositive: true,
+						max: 4000
 					}}
 					validationErrors={{
 						isInteger: 'Must be a whole number (no decimal places or seconds.)',
-						isPositive: 'Must be a positive number.'
+						isPositive: 'Must be a positive number.',
+						max: 'Cannot be longer than 4000 minutes (C\'mon. That\'s like 3 days!)'
 					}}
 					required />
 
@@ -142,11 +144,13 @@ class DiveTime extends React.Component {
 					placeholder="Bottom time in minutes"
 					validations={{
 						isInteger: true,
-						isPositive: true
+						isPositive: true,
+						noMoreThan: 'diveLength'
 					}}
 					validationErrors={{
 						isInteger: 'Must be a whole number (no decimal places or seconds.)',
-						isPositive: 'Must be a positive number.'
+						isPositive: 'Must be a positive number.',
+						noMoreThan: 'Bottom time cannot be longer than the total dive time!'
 					}}
 					helpText="Bottom time is defined as the number of minutes between the start of your descent and the start of your final ascent." />
 

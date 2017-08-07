@@ -10,9 +10,9 @@ const baseSchema = {
 
 	diveNumber: Joi.number().integer().positive().allow(null),
 	diveTime: Joi.object().keys({
-		diveLength: Joi.number().integer().positive().required(),
+		diveLength: Joi.number().integer().positive().max(4000).required(),
 		surfaceInterval: Joi.number().integer().positive().allow(null),
-		bottomTime: Joi.number().integer().positive().allow(null),
+		bottomTime: Joi.number().integer().positive().max(Joi.ref('diveLength')).allow(null),
 		decoStops: Joi.array().items(
 			Joi.object().keys({
 				depth: Joi.number().positive().allow(null),

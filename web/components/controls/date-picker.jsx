@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import DatePicker from 'react-bootstrap-date-picker';
 import { HOC } from 'formsy-react';
 import moment from 'moment';
@@ -23,15 +24,17 @@ class FormsyDatePicker extends React.Component {
 
 	render() {
 		const isValid = this.props.isValid();
-		const value = moment(this.props.getValue());
+		let value = this.props.getValue();
 		let validationState, errorMessage;
+
+		value = _.isNil(value) ? null : moment(this.props.getValue()).local().format();
 
 		if (this.props.isPristine()) {
 			validationState = null;
 			errorMessage = null;
-		} else if (this.props.required && !value) {
+		} else if (this.props.showRequired()) {
 			validationState = 'error';
-			errorMessage = this.props.label + ' is required.';
+			errorMessage = null;
 		} else if (!this.props.required && !value) {
 			validationState = null;
 			errorMessage = null;
@@ -51,10 +54,13 @@ class FormsyDatePicker extends React.Component {
 				</Col>
 				<Col xs={7}>
 					<DatePicker
-						value={value.local().format()}
+						value={value}
 						onChange={this.props.onChange || this.onDateChanged}
 						showTodayButton />
 					{ errorMessage ? <HelpBlock>{errorMessage}</HelpBlock> : null }
+					{ !this.props.isPristine() && this.props.showRequired()
+						? <HelpBlock>{ this.props.label + ' is required.' }</HelpBlock>
+						: null }
 				</Col>
 			</FormGroup>);
 	}

@@ -52,10 +52,12 @@ class Temperature extends React.Component {
 					unit="°F"
 					value={ temperature.surface }
 					validations={{
-						isNumeric: true
+						isNumeric: true,
+						isBetween: { min: -76, max: 150 }
 					}}
 					validationErrors={{
-						isNumeric: 'Must be a number'
+						isNumeric: 'Must be a number',
+						isBetween: 'Surface temperature should be between -76F and 150F.'
 					}}
 					onChange={ this.onTemperatureChanged } />
 
@@ -66,10 +68,12 @@ class Temperature extends React.Component {
 					unit="°F"
 					value={ temperature.water }
 					validations={{
-						isNumeric: true
+						isNumeric: true,
+						isBetween: { min: 30, max: 150 }
 					}}
 					validationErrors={{
-						isNumeric: 'Must be a number'
+						isNumeric: 'Must be a number',
+						isBetween: 'Must be between 30F and 150F'
 					}}
 					onChange={ this.onTemperatureChanged } />
 
@@ -80,10 +84,12 @@ class Temperature extends React.Component {
 					unit="°F"
 					value={ temperature.thermocline1 }
 					validations={{
-						isNumeric: true
+						isNumeric: true,
+						isBetween: { min: 30, max: 150 }
 					}}
 					validationErrors={{
-						isNumeric: 'Must be a number'
+						isNumeric: 'Must be a number',
+						isBetween: 'Must be between 30F and 150F'
 					}}
 					onChange={ this.onTemperatureChanged } />
 			</div>);
