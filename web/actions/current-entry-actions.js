@@ -3,7 +3,7 @@ import alt from '../alt';
 import request from '../request-agent';
 
 class CurrentEntryActions {
-	fetchLogEntry(userName, id, history) {
+	fetchLogEntry(userName, id) {
 		return dispatch => {
 			dispatch();
 			request
@@ -42,12 +42,10 @@ class CurrentEntryActions {
 				.send(logInfo)
 				.then(res => {
 					AlertActions.dismissAlert('log-entry');
-					history.push(`/logbook/${userName}/${res.body.logId}/`)
-					//this.saveSucceeded(res.body);
+					history.push(`/logbook/${userName}/${res.body.logId}/`);
 				})
 				.catch(error => {
 					this.endSaving();
-					console.log(error);
 					AlertActions.handleErrorResponse('log-entry', error);
 				});
 		};

@@ -75,7 +75,8 @@ FormsyDatePicker.propTypes = {
 	label: PropTypes.string.isRequired,
 	onChange: PropTypes.func,
 	required: PropTypes.bool,
-	setValue: PropTypes.func.isRequired
+	setValue: PropTypes.func.isRequired,
+	showRequired: PropTypes.func.isRequired
 };
 
 export default HOC(FormsyDatePicker);

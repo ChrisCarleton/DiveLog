@@ -51,8 +51,7 @@ class LogEntry extends React.Component {
 		if (params.logId) {
 			CurrentEntryActions.fetchLogEntry(
 				params.userName,
-				params.logId,
-				this.props.history);
+				params.logId);
 		} else {
 			CurrentEntryActions.clearEntry();
 		}
@@ -190,6 +189,7 @@ class LogEntry extends React.Component {
 }
 
 LogEntry.propTypes = {
+	history: PropTypes.object.isRequired,
 	match: PropTypes.object.isRequired
 };
 
