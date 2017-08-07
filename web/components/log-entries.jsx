@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import ConfirmDialog from './controls/confirm-dialog.jsx';
 import DiveLogActions from '../actions/dive-log-actions';
 import DiveLogStore from '../stores/dive-log-store';
 import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
@@ -191,6 +192,10 @@ class LogEntries extends React.Component {
 
 	render() {
 		const entries = _.map(this.state.logs, e => this.renderItem(e));
+		const deleteEntryTime =
+			this.state.deleting
+			? moment(this.state.deleting.entryTime).format('MMMM Do YYYY, h:mm a')
+			: null;
 
 		return (
 			<div>
@@ -227,7 +232,23 @@ class LogEntries extends React.Component {
 					: this.state.endOfStream
 						? <Alert bsStyle="info"><Glyphicon glyph="exclamation-sign" /> No more items to show.</Alert>
 						: <Button onClick={ this.onLoadMoreClicked }>Load More</Button> }
-				{ this.showDeleteDialog() }
+				<ConfirmDialog
+					confirmText="Delete"
+					title="Confirm Deletion"
+					visible={ !_.isNil(this.state.deleting) }
+					onConfirm={ this.deleteEntry }
+					onCancel={ this.onCancelDeleteClicked }>
+						<p>
+							{ "Are you sure you want to delete the log book entry from " }
+							<strong>
+								{ deleteEntryTime }
+							</strong>
+							{ "?" }
+						</p>
+						<p>
+							<em>Caution: This cannot be undone.</em>
+						</p>
+				</ConfirmDialog>
 			</div>);
 	}
 }

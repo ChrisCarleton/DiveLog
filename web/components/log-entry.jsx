@@ -1,4 +1,5 @@
 import Air from './logentry/air.jsx';
+import AlertActions from '../actions/alert-actions';
 import Conditions from './logentry/conditions.jsx';
 import CurrentEntryActions from '../actions/current-entry-actions';
 import CurrentEntryStore from '../stores/current-entry-store';
@@ -46,15 +47,7 @@ class LogEntry extends React.Component {
 
 	componentDidMount() {
 		CurrentEntryStore.listen(this.onStateChanged);
-
-		const params = this.props.match.params;
-		if (params.logId) {
-			CurrentEntryActions.fetchLogEntry(
-				params.userName,
-				params.logId);
-		} else {
-			CurrentEntryActions.clearEntry();
-		}
+		this.reset();
 	}
 
 	componentWillUnmount() {
@@ -69,7 +62,14 @@ class LogEntry extends React.Component {
 	}
 
 	reset() {
-
+		const params = this.props.match.params;
+		if (params.logId) {
+			CurrentEntryActions.fetchLogEntry(
+				params.userName,
+				params.logId);
+		} else {
+			CurrentEntryActions.clearEntry();
+		}
 	}
 
 	submit() {
@@ -84,6 +84,13 @@ class LogEntry extends React.Component {
 				this.state.currentEntry,
 				this.props.history);
 		}
+	}
+
+	onValidationFailed() {
+		AlertActions.showError(
+			'log-entry',
+			'There were problems with your submission',
+			'Please check the values below and then re-submit.');
 	}
 
 	render() {
@@ -108,7 +115,7 @@ class LogEntry extends React.Component {
 					<Breadcrumb.Item active>{ this.state.title }</Breadcrumb.Item>
 				</Breadcrumb>
 				<PageHeader heading={ this.state.title } alertKey="log-entry" />
-				<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit }>
+				<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit } onInvalidSubmit={ this.onValidationFailed }>
 					<Grid>
 						<Row>
 							<Col xs={12}>
@@ -183,7 +190,6 @@ class LogEntry extends React.Component {
 					{ " " }
 					<Button onClick={ this.reset } disabled={ this.state.isSaving }>Reset</Button>
 				</Formsy.Form>
-				<p>{ JSON.stringify(this.state.currentEntry, null, ' ') }</p>
 			</div>);
 	}
 }

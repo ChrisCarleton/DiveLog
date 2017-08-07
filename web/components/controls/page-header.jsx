@@ -3,6 +3,7 @@ import AlertStore from '../../stores/alert-store';
 import React from 'react';
 import { Redirect } from 'react-router';
 import PropTypes from 'prop-types';
+import scrollToElement from 'scroll-to-element';
 
 import {
 	Alert,
@@ -22,6 +23,10 @@ class MyPageHeader extends React.Component {
 	componentDidMount() {
 		AlertStore.listen(this.onStateChange);
 		AlertActions.dismissAlert(this.props.alertKey);
+	}
+
+	componentDidUpdate() {
+		scrollToElement('#alert-well', { duration: 500, offset: -70 });
 	}
 
 	componentWillUnmount() {
@@ -44,12 +49,14 @@ class MyPageHeader extends React.Component {
 		}
 
 		return (
-			<Alert bsStyle={ this.state.alertStyle } onDismiss={ this.dismissAlert }>
+			<div>
 				<a id="alert-well"></a>
-				<Redirect to="#alert-well" />
-				<h4>{ this.state.alertTitle }</h4>
-				<p>{ this.state.alertDescription}</p>
-			</Alert>);
+				<Alert bsStyle={ this.state.alertStyle } onDismiss={ this.dismissAlert }>
+					<Redirect to="#alert-well" />
+					<h4>{ this.state.alertTitle }</h4>
+					<p>{ this.state.alertDescription}</p>
+				</Alert>
+			</div>);
 	}
 
 	render() {
