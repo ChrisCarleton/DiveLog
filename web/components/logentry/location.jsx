@@ -147,6 +147,7 @@ class Location extends React.Component {
 					name="avgDepth"
 					label="Average"
 					value={ depth.average }
+					unit="ft"
 					onChange={ this.onDepthChange }
 					validations={{
 						isPositive: true,
@@ -161,6 +162,7 @@ class Location extends React.Component {
 					name="maxDepth"
 					label="Max"
 					value={ depth.max }
+					unit="ft"
 					onChange={ this.onDepthChange }
 					validations={{
 						isPositive: true,

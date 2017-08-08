@@ -1,7 +1,6 @@
 import AlertActions from '../../actions/alert-actions';
 import AlertStore from '../../stores/alert-store';
 import React from 'react';
-import { Redirect } from 'react-router';
 import PropTypes from 'prop-types';
 import scrollToElement from 'scroll-to-element';
 
@@ -16,6 +15,8 @@ class MyPageHeader extends React.Component {
 		this.state =
 			AlertStore.getState()[props.alertKey]
 			|| { alertVisible: false };
+		this.hasScrolled = false;
+
 		this.onStateChange = this.onStateChange.bind(this);
 		this.dismissAlert = this.dismissAlert.bind(this);
 	}
@@ -26,7 +27,10 @@ class MyPageHeader extends React.Component {
 	}
 
 	componentDidUpdate() {
-		scrollToElement('#alert-well', { duration: 500, offset: -70 });
+		if (this.state.alertVisible && !this.hasScrolled) {
+			scrollToElement('#alert-well', { duration: 500, offset: -70 });
+			this.hasScrolled = true;
+		}
 	}
 
 	componentWillUnmount() {
@@ -41,6 +45,7 @@ class MyPageHeader extends React.Component {
 		this.setState(
 			AlertStore.getState()[this.props.alertKey]
 			|| { alertVisible: false });
+		this.hasScrolled = false;
 	}
 
 	renderAlert() {
@@ -52,7 +57,6 @@ class MyPageHeader extends React.Component {
 			<div>
 				<a id="alert-well"></a>
 				<Alert bsStyle={ this.state.alertStyle } onDismiss={ this.dismissAlert }>
-					<Redirect to="#alert-well" />
 					<h4>{ this.state.alertTitle }</h4>
 					<p>{ this.state.alertDescription}</p>
 				</Alert>

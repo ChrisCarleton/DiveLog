@@ -6,15 +6,14 @@ class CurrentEntryActions {
 	fetchLogEntry(userName, id) {
 		return dispatch => {
 			dispatch();
+			AlertActions.dismissAlert('log-entry');
 			request
 				.get(`/api/logs/${userName}/${id}`)
 				.then(res => {
-					AlertActions.dismissAlert('log-entry');
 					this.fetchLogSucceeded(res.body);
 				})
 				.catch(err => {
 					if (err.status === 404) {
-						// Not found!
 						return this.fetchErrored('not found');
 					}
 					if (err.status === 500) {
@@ -37,12 +36,16 @@ class CurrentEntryActions {
 	createEntry(userName, logInfo, history) {
 		return dispatch => {
 			dispatch();
+			AlertActions.dismissAlert('log-entry');
 			request
 				.post(`/api/logs/${userName}/`)
 				.send(logInfo)
 				.then(res => {
-					AlertActions.dismissAlert('log-entry');
 					history.push(`/logbook/${userName}/${res.body.logId}/`);
+					AlertActions.showSuccess(
+						'log-entry',
+						'Entry Created',
+						'Your new log entry has been saved successfully.');
 				})
 				.catch(error => {
 					this.endSaving();
@@ -53,14 +56,18 @@ class CurrentEntryActions {
 
 	saveEntry(userName, logId, logInfo) {
 		this.beginSaving();
+		AlertActions.dismissAlert('log-entry');
 		return dispatch => {
 			dispatch();
 			request
 				.put(`/api/logs/${userName}/${logId}/`)
 				.send(logInfo)
 				.then(res => {
-					AlertActions.dismissAlert('log-entry');
 					this.saveSucceeded(res.body);
+					AlertActions.showSuccess(
+						'log-entry',
+						'Entry Saved',
+						'The changes to your log entry have been saved successfully.');
 				})
 				.catch(err => {
 					this.endSaving();
