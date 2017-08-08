@@ -1,13 +1,15 @@
 import bcrypt from 'bcrypt';
 import config from './config';
+import { getOrCreateOAuthAccount } from './controllers/helpers/users-helpers';
 import log from './logger';
 import passport from 'passport';
 import url from 'url';
 import Users from './data/users.table';
 
 import { Strategy as LocalStrategy } from 'passport-local';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth';
+import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 import { Strategy as GithubStrategy } from 'passport-github';
+import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 export default function(app) {
 	passport.use(
@@ -39,12 +41,16 @@ export default function(app) {
 	passport.use(
 		new GoogleStrategy(
 			{
-				consumerKey: config.auth.google.consumerId,
-				consumerSecret: config.auth.google.consumerSecret,
-				callbackURL: url.resolve(config.baseUrl, '/api/1.0/auth/google/callback')
+				clientID: config.auth.google.consumerId,
+				clientSecret: config.auth.google.consumerSecret,
+				callbackURL: url.resolve(config.baseUrl, '/auth/google/callback')
 			},
-			(token, tokenSecret, profile, done) => {
-				done();
+			(accessToken, refreshToken, profile, done) => {
+				getOrCreateOAuthAccount(profile)
+					.then(user => {
+						done(null, user);
+					})
+					.catch(done);
 			}));
 
 	passport.use(
@@ -52,10 +58,40 @@ export default function(app) {
 			{
 				clientID: config.auth.github.clientId,
 				clientSecret: config.auth.github.clientSecret,
-				callbackURL: url.resolve(config.baseUrl, '/api/1.0/auth/github/callback')
+				callbackURL: url.resolve(config.baseUrl, '/auth/github/callback'),
+				scope: ['user:email']
 			},
 			(accessToken, refreshToken, profile, done) => {
-				return done();
+				if (!profile) return done(null, null);
+
+				// We need to do some transformation on the profile object here because the
+				// GitHub strategy does not present the profile using the schema prescribed
+				// in the Passport documentation.
+				if (!profile.displayName) profile.displayName = profile.username;
+				if (profile.photos && profile.photos.length > 0) {
+					profile.imageUrl = profile.photos[0].value;
+				}
+
+				getOrCreateOAuthAccount(profile)
+					.then(user => {
+						done(null, user);
+					})
+					.catch(done);
+			}));
+
+	passport.use(
+		new FacebookStrategy(
+			{
+				clientID: config.auth.facebook.clientId,
+				clientSecret: config.auth.facebook.clientSecret,
+				callbackURL: url.resolve(config.baseUrl, '/auth/facebook/callback')
+			},
+			(accessToken, refreshToken, profile, done) => {
+				getOrCreateOAuthAccount(profile)
+					.then(user => {
+						done(null, user);
+					})
+					.catch(done);
 			}));
 
 	passport.serializeUser((user, done) => {

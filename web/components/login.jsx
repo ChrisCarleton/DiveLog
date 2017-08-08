@@ -3,6 +3,7 @@ import Formsy from 'formsy-react';
 import PageHeader from './controls/page-header.jsx';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import SignInWithProvider from './controls/sign-in-with-provider.jsx';
 import TextBox from './controls/text-box.jsx';
 import UserActions from '../actions/user-actions';
 import UserStore from '../stores/user-store';
@@ -79,7 +80,7 @@ class LogIn extends React.Component {
 						<h4>- or -</h4>
 					</Col>
 					<Col md={5}>
-						<h4>Sign In Using One of These Providers</h4>
+						<SignInWithProvider />
 					</Col>
 				</Row>
 			</Grid>

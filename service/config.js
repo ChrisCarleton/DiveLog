@@ -21,6 +21,10 @@ const config = {
 		github: {
 			clientId: process.env.DIVELOG_GITHUB_CLIENT_ID || 'github-id',
 			clientSecret: process.env.DIVELOG_GITHUB_CLIENT_SECRET || 'github-secret'
+		},
+		facebook: {
+			clientId: process.env.DIVELOG_FACEBOOK_CLIENT_ID || 'facebook-id',
+			clientSecret: process.env.DIVELOG_FACEBOOK_CLIENT_SECRET || 'facebook-secret'
 		}
 	}
 };
