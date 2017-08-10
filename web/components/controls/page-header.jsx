@@ -42,10 +42,10 @@ class MyPageHeader extends React.Component {
 	}
 
 	onStateChange() {
+		this.hasScrolled = false;
 		this.setState(
 			AlertStore.getState()[this.props.alertKey]
 			|| { alertVisible: false });
-		this.hasScrolled = false;
 	}
 
 	renderAlert() {

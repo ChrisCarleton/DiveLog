@@ -23,12 +23,8 @@ class Weight extends React.Component {
 			? Object.assign({}, this.props.entry.weight)
 			: {};
 
-		if (e.target.id) {
-			switch (e.target.id) {
-				case 'weight':
-					weight.amount = formUtils.tryReturnAsNumber(e.target.value);
-					break;
-			}
+		if (e.target.id === 'weight') {
+			weight.amount = formUtils.tryReturnAsNumber(e.target.value);
 		} else {
 			switch (e.target.name) {
 				case 'weight':
@@ -62,12 +58,10 @@ class Weight extends React.Component {
 					value={ weight.amount }
 					onChange={ this.onValueChanged }
 					validations={{
-						isInteger: true,
 						isPositive: true,
 						max: 100
 					}}
 					validationErrors={{
-						isInteger: 'Must be a whole number (no decimal places.)',
 						isPositive: 'Must be a positive number.',
 						max: 'Weight can be set to no more than 100lbs.'
 					}} />

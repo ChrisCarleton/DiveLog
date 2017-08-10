@@ -1,6 +1,7 @@
 import Air from './logentry/air.jsx';
 import AlertActions from '../actions/alert-actions';
 import Conditions from './logentry/conditions.jsx';
+import ConfirmDialog from './controls/confirm-dialog.jsx';
 import CurrentEntryActions from '../actions/current-entry-actions';
 import CurrentEntryStore from '../stores/current-entry-store';
 import DecoStops from './logentry/deco-stops.jsx';
@@ -37,11 +38,15 @@ class LogEntry extends React.Component {
 		this.state = {
 			title: props.match.params.logId ? 'Edit Log Entry' : 'Create New Entry',
 			isSaving: false,
-			currentEntry: {}
+			currentEntry: {},
+			showConfirmReset: false
 		};
 
 		this.onStateChanged = this.onStateChanged.bind(this);
 		this.submit = this.submit.bind(this);
+		this.showConfirmReset = this.showConfirmReset.bind(this);
+		this.hideConfirmReset = this.hideConfirmReset.bind(this);
+		this.confirmReset = this.confirmReset.bind(this);
 		this.reset = this.reset.bind(this);
 	}
 
@@ -61,6 +66,27 @@ class LogEntry extends React.Component {
 			CurrentEntryStore.getState()));
 	}
 
+	confirmReset() {
+		this.reset();
+		this.hideConfirmReset();
+	}
+
+	showConfirmReset() {
+		this.setState(
+			Object.assign(
+				{},
+				this.state,
+				{ showConfirmReset: true } ));
+	}
+
+	hideConfirmReset() {
+		this.setState(
+			Object.assign(
+				{},
+				this.state,
+				{ showConfirmReset: false } ));
+	}
+
 	reset() {
 		const params = this.props.match.params;
 		if (params.logId) {
@@ -73,14 +99,15 @@ class LogEntry extends React.Component {
 	}
 
 	submit() {
-		if (this.props.match.params.logId) {
+		const params = this.props.match.params;
+		if (params.logId) {
 			CurrentEntryActions.saveEntry(
-				this.props.match.params.userName,
-				this.props.match.params.logId,
+				params.userName,
+				params.logId,
 				this.state.currentEntry);
 		} else {
 			CurrentEntryActions.createEntry(
-				this.props.match.params.userName,
+				params.userName,
 				this.state.currentEntry,
 				this.props.history);
 		}
@@ -137,7 +164,8 @@ class LogEntry extends React.Component {
 									mapElement={
 										<div style={{ height: '100%' }} />
 									}
-									entry={ this.state.currentEntry } />
+									site={ this.state.currentEntry.site }
+									gps={ this.state.currentEntry.gps } />
 							</Col>
 						</Row>
 						<Row>
@@ -188,8 +216,19 @@ class LogEntry extends React.Component {
 						{ this.state.isSaving ? "Saving..." : "Save Log Entry" }
 					</Button>
 					{ " " }
-					<Button onClick={ this.reset } disabled={ this.state.isSaving }>Reset</Button>
+					<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
 				</Formsy.Form>
+				<ConfirmDialog
+					confirmText="Discard"
+					onConfirm={ this.confirmReset }
+					onCancel={ this.hideConfirmReset }
+					title="Confirm Reset"
+					visible={ this.state.showConfirmReset }>
+						<p>
+							Are you sure you want to discard your changes? The log entry will be restored
+							to its previously-saved state.
+						</p>
+				</ConfirmDialog>
 			</div>);
 	}
 }

@@ -39,7 +39,6 @@ class LogEntries extends React.Component {
 		this.onSortOrderChanged = this.onSortOrderChanged.bind(this);
 		this.setDescSortOrder = this.setDescSortOrder.bind(this);
 		this.setAscSortOder = this.setAscSortOder.bind(this);
-		this.showDeleteDialog = this.showDeleteDialog.bind(this);
 		this.onDeleteClicked = this.onDeleteClicked.bind(this);
 		this.onCancelDeleteClicked = this.onCancelDeleteClicked.bind(this);
 		this.deleteEntry = this.deleteEntry.bind(this);
@@ -124,6 +123,7 @@ class LogEntries extends React.Component {
 				<Media.Left>
 					<ButtonGroup>
 						<Button onClick={ () => this.onDeleteClicked(item) }>
+							{ /* Think of accessibility here! */ }
 							<Glyphicon glyph="trash" />
 						</Button>
 					</ButtonGroup>
@@ -133,7 +133,7 @@ class LogEntries extends React.Component {
 						<LinkContainer to={ `/logbook/${this.props.match.params.userName}/${item.logId}/` }>
 							<a href="#">{ dateString }</a>
 						</LinkContainer>
-						{ item.diveNumber ? <small>(Dive #{ item.diveNumber })</small> : null }
+						{ item.diveNumber ? <small> (Dive #{ item.diveNumber })</small> : null }
 					</Media.Heading>
 					<Grid>
 						<Row>

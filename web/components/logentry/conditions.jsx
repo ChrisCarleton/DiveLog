@@ -15,7 +15,7 @@ class Conditions extends React.Component {
 	}
 
 	onSelectBoxChanged(id, value) {
-		let update = {};
+		const update = {};
 		update[id] = value;
 		CurrentEntryActions.doPartialUpdate(update);
 	}
