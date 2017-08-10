@@ -27,10 +27,11 @@ app.use(bodyParser.json());
 // 	app.use(forceSsl);
 // }
 
+log.trace('Using session secret:', config.sessionSecret);
 const sessionStore = SessionStore(session);
 app.use(session({
 	store: sessionStore,
-	secret: 'my-secret',
+	secret: config.sessionSecret,
 	resave: false,
 	saveUninitialized: false
 }));

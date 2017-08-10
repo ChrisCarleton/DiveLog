@@ -49,6 +49,9 @@ Parameters:
     Default: info
     AllowedValues: [trace, debug, info, warn, error, fatal]
     ConstraintDescription: Please choose one of the recognized log levels.
+  SessionSecret:
+    Description: The secret string used to secure session cookies.
+    Type: String
   BaseUrl:
     Description: The base URL for this instance of the application.
     Type: String
@@ -370,6 +373,8 @@ Resources:
             Value: true
           - Name: DIVELOG_BASE_URL
             Value: !Ref BaseUrl
+          - Name: DIVELOG_SESSION_SECRET
+            Value: !Ref SessionSecret
           - Name: DIVELOG_GOOGLE_CONSUMER_ID
             Value: !Ref GoogleClientId
           - Name: DIVELOG_GOOGLE_CONSUMER_SECRET
