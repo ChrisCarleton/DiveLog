@@ -22,7 +22,6 @@ import {
 	ListGroup,
 	ListGroupItem,
 	Media,
-	Modal,
 	Row
 } from 'react-bootstrap';
 
@@ -116,34 +115,6 @@ class LogEntries extends React.Component {
 		DiveLogActions.deleteEntry(
 			this.props.match.params.userName,
 			this.state.deleting.logId);
-	}
-
-	showDeleteDialog() {
-		if (!this.state.deleting) {
-			return null;
-		}
-
-		const entryTime = moment(this.state.deleting.entryTime).format('MMMM Do YYYY, h:mm a');
-		return (
-			<Modal.Dialog>
-				<Modal.Header>
-					<Modal.Title>Confirm Deletion</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<p>
-						{ "Are you sure you want to delete the log book entry from " }
-						<strong>{entryTime}</strong>
-						{ "?" }
-					</p>
-					<p>
-						<em>Caution: This cannot be undone.</em>
-					</p>
-				</Modal.Body>
-				<Modal.Footer>
-					<Button onClick={ this.deleteEntry } bsStyle="primary">Delete</Button>
-					<Button onClick={ this.onCancelDeleteClicked }>Cancel</Button>
-				</Modal.Footer>
-			</Modal.Dialog>);
 	}
 
 	renderItem(item){
