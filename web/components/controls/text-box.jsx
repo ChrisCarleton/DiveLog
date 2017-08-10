@@ -50,7 +50,7 @@ class TextBox extends React.Component {
 						<span className="text-right">
 							{this.props.label}
 							{this.props.required ? <span className="text-danger"> * </span> : null}
-							{":"}
+							{':'}
 						</span>
 					</ControlLabel>
 				</Col>
@@ -66,7 +66,7 @@ class TextBox extends React.Component {
 				<Col sm={1}>
 					<span className="tb-unit">{ this.props.unit }</span>
 					{ this.props.helpText
-						? <div className="tb-help-bubble"><HelpBubble id={this.props.controlId + "_help"}>{this.props.helpText}</HelpBubble></div>
+						? <div className="tb-help-bubble"><HelpBubble id={this.props.controlId + '_help'}>{this.props.helpText}</HelpBubble></div>
 						: null }
 				</Col>
 			</FormGroup>);

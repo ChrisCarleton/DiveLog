@@ -127,7 +127,7 @@ gulp.task('webpack-server', done => {
 				throw new util.PluginError('webpack-dev-server', err);
 			}
 
-			util.log('[webpack-dev-server]', "Webpack Dev Server started on port 3002.");
+			util.log('[webpack-dev-server]', 'Webpack Dev Server started on port 3002.');
 
 			done();
 		});

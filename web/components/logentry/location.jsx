@@ -97,15 +97,15 @@ class Location extends React.Component {
 							GPS Coordinates{' '}
 							<HelpBubble id="gps-help">
 								<span>
-									{"Specify GPS coordinates in either decimal "}
+									{ 'Specify GPS coordinates in either decimal ' }
 									<em>
-										{"(e.g. -19.3097)"}
+										{ '(e.g. -19.3097)' }
 									</em>
-									{" or sexagesimal "}
+									{ ' or sexagesimal ' }
 									<em>
-										{"(e.g. 51° 29' 46.000\" N)"}
+										{ '(e.g. 51° 29\' 46.000" N)' }
 									</em>
-									{" format."}
+									{ ' format.' }
 								</span>
 							</HelpBubble>
 						</h4>

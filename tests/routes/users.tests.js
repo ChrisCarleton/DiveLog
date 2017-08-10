@@ -296,11 +296,10 @@ describe('User routes', () => {
 			const passwordHash = bcrypt.hashSync(testUser.password, salt);
 
 			Users.createAsync({
-					userName: testUser.userName,
-					passwordHash: passwordHash,
-					displayName: testUser.displayName,
-					email: testUser.email
-				})
+				userName: testUser.userName,
+				passwordHash: passwordHash,
+				displayName: testUser.displayName,
+				email: testUser.email })
 				.then(result => {
 					idsToDestroy.push(result.get('userId'));
 					testUser.email = 'different_now@email.com';
@@ -328,11 +327,10 @@ describe('User routes', () => {
 			const passwordHash = bcrypt.hashSync(testUser.password, salt);
 
 			Users.createAsync({
-					userName: testUser.userName,
-					passwordHash: passwordHash,
-					displayName: testUser.displayName,
-					email: testUser.email
-				})
+				userName: testUser.userName,
+				passwordHash: passwordHash,
+				displayName: testUser.displayName,
+				email: testUser.email })
 				.then(result => {
 					idsToDestroy.push(result.get('userId'));
 					testUser.userName = 'DifferentUserName';

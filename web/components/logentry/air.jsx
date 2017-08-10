@@ -24,7 +24,7 @@ class Air extends React.Component {
 			: {};
 		if (!cylinder.gas) cylinder.gas = {};
 
-		switch(e.target.id) {
+		switch (e.target.id) {
 			case 'capacity':
 				cylinder.volume = formUtils.tryReturnAsNumber(e.target.value);
 				break;

@@ -152,7 +152,7 @@ describe('Dive log routes:', () => {
 			loginAdmin()
 				.then(cookie => {
 					return request
-						.post(`/api/logs/NotARealUser/`)
+						.post('/api/logs/NotARealUser/')
 						.send(testLog)
 						.set('cookie', cookie)
 						.expect('Content-Type', /json/)
@@ -673,7 +673,7 @@ describe('Dive log routes:', () => {
 			loginAdmin()
 				.then(cookie => {
 					return request
-						.get(`/api/logs/NotARealUser/`)
+						.get('/api/logs/NotARealUser/')
 						.set('cookie', cookie)
 						.expect('Content-Type', /json/)
 						.expect(404);

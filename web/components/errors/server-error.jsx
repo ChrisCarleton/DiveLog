@@ -11,10 +11,10 @@ class ServerError extends React.Component {
 				<PageHeader>500: Server Error!</PageHeader>
 
 				<p>
-					{ "Uh oh! We're sorry but something has gone wrong on our end. Please try again later "
-						+ "and if the problem persists please contact us at " }
+					{ 'Uh oh! We\'re sorry but something has gone wrong on our end. Please try again later '
+						+ 'and if the problem persists please contact us at ' }
 					<a href="mailto:admin@bottomtime.ca">admin@bottomtime.ca</a>
-					{ " and let us know what happened." }
+					{ ' and let us know what happened.' }
 				</p>
 
 				<p>

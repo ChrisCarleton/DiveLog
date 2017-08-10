@@ -40,9 +40,8 @@ describe('Dive log helpers', () => {
 
 	after(done => {
 		Bluebird.all([
-				purgeTable(Users, 'userId'),
-				purgeTable(DiveLogs, 'logId')
-			])
+			purgeTable(Users, 'userId'),
+			purgeTable(DiveLogs, 'logId') ])
 			.then(() => done())
 			.catch(done);
 	});
@@ -341,7 +340,7 @@ describe('Dive log helpers', () => {
 		it('will retrieve records correctly and in reverse chronological order', done => {
 			doListLogs(logOwner.userId)
 				.then(results => {
-					for(let i = 0; i < results.length; i++) {
+					for (let i = 0; i < results.length; i++) {
 						records[i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[i]);
 					}
@@ -371,7 +370,7 @@ describe('Dive log helpers', () => {
 		it('will retrieve more results if requested', done => {
 			doListLogs(logOwner.userId, { before: records[99].entryTime })
 				.then(results => {
-					for(let i = 0; i < results.length; i++) {
+					for (let i = 0; i < results.length; i++) {
 						records[100 + i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[100 + i]);
 					}
@@ -382,9 +381,8 @@ describe('Dive log helpers', () => {
 
 		it('will return 400 if both before and after parameters are supplied', done => {
 			doListLogs(logOwner.userId, {
-					after: records[99].entryTime,
-					before: records[200].entryTime
-				})
+				after: records[99].entryTime,
+				before: records[200].entryTime })
 				.then(() => {
 					done('should not have succeeded');
 				})
@@ -397,7 +395,7 @@ describe('Dive log helpers', () => {
 		it('will retrieve more results if requested in ascending order', done => {
 			doListLogs(logOwner.userId, { order: 'asc', after: records[records.length - 100].entryTime })
 				.then(results => {
-					for(let i = 0; i < results.length; i++) {
+					for (let i = 0; i < results.length; i++) {
 						records[records.length - 101 - i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[records.length - 101 - i]);
 					}
@@ -419,7 +417,7 @@ describe('Dive log helpers', () => {
 		it('will retrieve records in chronological order if requested', done => {
 			doListLogs(logOwner.userId, { order: 'asc' })
 				.then(results => {
-					for(let i = 0; i < results.length; i++) {
+					for (let i = 0; i < results.length; i++) {
 						records[records.length - 1 - i].logId = results[i].logId;
 						expect(results[i]).to.eql(records[records.length - 1 - i]);
 					}
