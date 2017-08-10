@@ -50,17 +50,17 @@ class DiveType extends React.Component {
 	render() {
 		const diveType = this.props.entry.diveType || {};
 		const checkboxes = _.map(this.diveTypes, t => {
-				const camelCase = _.camelCase(t);
-				return (
-					<Checkbox
-						id={camelCase}
-						key={camelCase}
-						checked={this.getBoolValue(diveType, camelCase)}
-						onChange={this.onCheckboxUpdated}
-						inline>
-							{t}
-					</Checkbox>);
-			});
+			const camelCase = _.camelCase(t);
+			return (
+				<Checkbox
+					id={camelCase}
+					key={camelCase}
+					checked={this.getBoolValue(diveType, camelCase)}
+					onChange={this.onCheckboxUpdated}
+					inline>
+					{t}
+				</Checkbox>);
+		});
 
 		return (
 			<div>

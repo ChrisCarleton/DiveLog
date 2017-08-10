@@ -20,10 +20,10 @@ class ConfirmDialog extends React.Component {
 				</Modal.Body>
 				<Modal.Footer>
 					<Button onClick={ this.props.onConfirm } bsStyle="primary">
-						{ this.props.confirmText || "Confirm" }
+						{ this.props.confirmText || 'Confirm' }
 					</Button>
 					<Button onClick={ this.props.onCancel }>
-						{ this.props.cancelText || "Cancel" }
+						{ this.props.cancelText || 'Cancel' }
 					</Button>
 				</Modal.Footer>
 			</Modal.Dialog>);

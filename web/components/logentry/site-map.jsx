@@ -24,7 +24,7 @@ class SiteMap extends React.Component {
 						title={this.props.site || 'dive site'}
 						defaultAnimation={2} />;
 			}
-		} catch(error) {
+		} catch (error) {
 			position = {};
 		}
 

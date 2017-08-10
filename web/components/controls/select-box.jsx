@@ -35,7 +35,7 @@ class SelectBox extends React.Component {
 					<ControlLabel>
 						{this.props.label}
 						{this.props.required ? <span className="text-danger"> * </span> : null}
-						{":"}
+						{':'}
 					</ControlLabel>
 				</Col>
 				<Col sm={7}>

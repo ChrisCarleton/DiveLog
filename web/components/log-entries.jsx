@@ -116,7 +116,7 @@ class LogEntries extends React.Component {
 			this.state.deleting.logId);
 	}
 
-	renderItem(item){
+	renderItem(item) {
 		const dateString = moment(item.entryTime).format('MMMM Do YYYY, h:mm a');
 		return (
 			<ListGroupItem key={ item.logId }>
@@ -165,8 +165,8 @@ class LogEntries extends React.Component {
 		const entries = _.map(this.state.logs, e => this.renderItem(e));
 		const deleteEntryTime =
 			this.state.deleting
-			? moment(this.state.deleting.entryTime).format('MMMM Do YYYY, h:mm a')
-			: null;
+				? moment(this.state.deleting.entryTime).format('MMMM Do YYYY, h:mm a')
+				: null;
 
 		return (
 			<div>
@@ -209,16 +209,16 @@ class LogEntries extends React.Component {
 					visible={ !_.isNil(this.state.deleting) }
 					onConfirm={ this.deleteEntry }
 					onCancel={ this.onCancelDeleteClicked }>
-						<p>
-							{ "Are you sure you want to delete the log book entry from " }
-							<strong>
-								{ deleteEntryTime }
-							</strong>
-							{ "?" }
-						</p>
-						<p>
-							<em>Caution: This cannot be undone.</em>
-						</p>
+					<p>
+						{ 'Are you sure you want to delete the log book entry from ' }
+						<strong>
+							{ deleteEntryTime }
+						</strong>
+						{ '?' }
+					</p>
+					<p>
+						<em>Caution: This cannot be undone.</em>
+					</p>
 				</ConfirmDialog>
 			</div>);
 	}

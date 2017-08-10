@@ -47,9 +47,9 @@ class FormsyDatePicker extends React.Component {
 			<FormGroup bsSize="small" controlId={this.props.controlId} validationState={validationState}>
 				<Col xs={4}>
 					<ControlLabel>
-							{this.props.label}
-							{this.props.required ? <span className="text-danger"> * </span> : null}
-							{":"}
+						{this.props.label}
+						{this.props.required ? <span className="text-danger"> * </span> : null}
+						{':'}
 					</ControlLabel>
 				</Col>
 				<Col xs={7}>

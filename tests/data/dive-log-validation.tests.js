@@ -213,7 +213,7 @@ describe('Dive logs table validation:', () => {
 		});
 
 		it('no more than 10 deco stops can be entered', () => {
-			let decoStops = [];
+			const decoStops = [];
 			for (let i = 0; i < 11; i++) {
 				decoStops.push({
 					depth: faker.random.number({ min: 1, max: 100 }),
@@ -225,7 +225,7 @@ describe('Dive logs table validation:', () => {
 		});
 
 		it('up to 10 deco stops can be entered', () => {
-			let decoStops = [];
+			const decoStops = [];
 			for (let i = 0; i < 10; i++) {
 				decoStops.push({
 					depth: faker.random.number({ min: 1, max: 100 }),
@@ -723,8 +723,8 @@ describe('Dive logs table validation:', () => {
 			keys.forEach(k => {
 				entry.temperature[k] =
 					k === 'surface'
-					? -78.0
-					: 29.5;
+						? -78.0
+						: 29.5;
 				assertFails(entry);
 
 				entry.temperature[k] = 30.0;
@@ -960,7 +960,7 @@ describe('Dive logs table validation:', () => {
 			});
 		});
 
-		it('correctness will not accept other values' ,() => {
+		it('correctness will not accept other values', () => {
 			entry.weight.correctness = 'pretty good';
 			assertFails(entry);
 		});
@@ -980,7 +980,7 @@ describe('Dive logs table validation:', () => {
 			});
 		});
 
-		it('trim will not accept other values' ,() => {
+		it('trim will not accept other values', () => {
 			entry.weight.trim = 'pretty good';
 			assertFails(entry);
 		});

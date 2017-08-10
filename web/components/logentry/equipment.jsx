@@ -64,10 +64,10 @@ class Equipment extends React.Component {
 					label="Thickness"
 					onChange={ this.onSelectBoxChanged }
 					value={ exposure.thickness }>
-						<option value=""></option>
-						<option value="3">3mm</option>
-						<option value="5">5mm</option>
-						<option value="7">7mm</option>
+					<option value=""></option>
+					<option value="3">3mm</option>
+					<option value="5">5mm</option>
+					<option value="7">7mm</option>
 				</SelectBox>);
 		}
 
@@ -86,7 +86,7 @@ class Equipment extends React.Component {
 					checked={equipment[camelCase] ? true : false}
 					onChange={this.onEquipmentCheckboxChanged}
 					inline>
-						{e}
+					{e}
 				</Checkbox>);
 		});
 
@@ -99,7 +99,7 @@ class Equipment extends React.Component {
 					checked={exposure[camelCase] ? true : false}
 					onChange={this.onExposureCheckboxChanged}
 					inline>
-						{e}
+					{e}
 				</Checkbox>);
 		});
 
@@ -116,11 +116,11 @@ class Equipment extends React.Component {
 					label="Exposure suit"
 					onChange={ this.onSelectBoxChanged }
 					value={ exposure.body }>
-						<option value=""></option>
-						<option value="none">None</option>
-						<option value="shorty">Shorty</option>
-						<option value="full">Full-Length Wetsuit</option>
-						<option value="dry">Dry suit</option>
+					<option value=""></option>
+					<option value="none">None</option>
+					<option value="shorty">Shorty</option>
+					<option value="full">Full-Length Wetsuit</option>
+					<option value="dry">Dry suit</option>
 				</SelectBox>
 				{ this.getThicknessSelectBox(exposure) }
 				<FormGroup bsSize="small">

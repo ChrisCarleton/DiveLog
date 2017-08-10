@@ -64,10 +64,9 @@ class TimePicker extends React.Component {
 
 	render() {
 		const time = moment(this.props.getValue());
-		let validationState = 'success';
 
 		return (
-			<FormGroup bsSize="small" validationState={ validationState }>
+			<FormGroup bsSize="small" validationState="success">
 				<Col xs={4}>
 					<ControlLabel>
 						{ this.props.label }
@@ -81,7 +80,7 @@ class TimePicker extends React.Component {
 						className="form-control time-picker-select"
 						value={time.format('h')}
 						onChange={this.onValueChanged}>
-							{ this.hours }
+						{ this.hours }
 					</select>
 					<span className="time-picker-spacer">{' : '}</span>
 					<select
@@ -89,7 +88,7 @@ class TimePicker extends React.Component {
 						className="form-control time-picker-select"
 						value={time.format('m')}
 						onChange={this.onValueChanged}>
-							{ this.minutes }
+						{ this.minutes }
 					</select>
 					<span className="time-picker-spacer">{' '}</span>
 					<select
@@ -97,8 +96,8 @@ class TimePicker extends React.Component {
 						className="form-control time-picker-select"
 						value={time.format('a')}
 						onChange={this.onValueChanged}>
-							<option key="am" value="am">am</option>
-							<option key="pm" value="pm">pm</option>
+						<option key="am" value="am">am</option>
+						<option key="pm" value="pm">pm</option>
 					</select>
 				</Col>
 			</FormGroup>);

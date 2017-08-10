@@ -213,9 +213,9 @@ class LogEntry extends React.Component {
 						</Row>
 					</Grid>
 					<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
-						{ this.state.isSaving ? "Saving..." : "Save Log Entry" }
+						{ this.state.isSaving ? 'Saving...' : 'Save Log Entry' }
 					</Button>
-					{ " " }
+					{ ' ' }
 					<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
 				</Formsy.Form>
 				<ConfirmDialog
@@ -224,10 +224,10 @@ class LogEntry extends React.Component {
 					onCancel={ this.hideConfirmReset }
 					title="Confirm Reset"
 					visible={ this.state.showConfirmReset }>
-						<p>
-							Are you sure you want to discard your changes? The log entry will be restored
-							to its previously-saved state.
-						</p>
+					<p>
+						Are you sure you want to discard your changes? The log entry will be restored
+						to its previously-saved state.
+					</p>
 				</ConfirmDialog>
 			</div>);
 	}
