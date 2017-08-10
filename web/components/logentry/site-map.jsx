@@ -8,7 +8,7 @@ class SiteMap extends React.Component {
 		// Paso de Cedral, Cozumel!
 		const defaultPosition = {lat: 20.354289, lng: -87.028272};
 
-		const gps = this.props.entry.gps || {};
+		const gps = this.props.gps || {};
 		let position, marker = null;
 
 		try {
@@ -21,7 +21,7 @@ class SiteMap extends React.Component {
 					<Marker
 						position={position}
 						key="dive site"
-						title={this.props.entry.site || 'dive site'}
+						title={this.props.site || 'dive site'}
 						defaultAnimation={2} />;
 			}
 		} catch(error) {
@@ -47,9 +47,10 @@ class SiteMap extends React.Component {
 }
 
 SiteMap.propTypes = {
+	gps: PropTypes.object,
 	onMapClick: PropTypes.func,
 	onMapLoad: PropTypes.func,
-	entry: PropTypes.object.isRequired
+	site: PropTypes.string
 };
 
 export default withGoogleMap(SiteMap);

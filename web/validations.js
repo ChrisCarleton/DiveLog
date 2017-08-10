@@ -46,7 +46,7 @@ Formsy.addValidationRule('noMoreThan', (values, value, id) => {
 Formsy.addValidationRule('isBetween', (values, value, bounds) => {
 	if (!value) return true;
 
-	const number = Number.parseFloat(value);
+	const number = _.toNumber(value);
 	if (Number.isNaN(number)) return false;
 
 	return (number >= bounds.min && number <= bounds.max);

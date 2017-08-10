@@ -79,7 +79,7 @@ class Nitrox extends React.Component {
 					validationErrors={{
 						isBetween: 'Must be a valid number between 0 and 110%.'
 					}}
-					helpText="Central nervous system oxygen toxicity (as a percentage) after the dive." />
+					helpText="Central nervous system oxygen toxicity (as a percentage of maximum) after the dive." />
 			</div>);
 	}
 }

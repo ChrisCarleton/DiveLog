@@ -22,11 +22,7 @@ class DiveType extends React.Component {
 	}
 
 	getBoolValue(diveType, key) {
-		if (!diveType[key]) {
-			return false;
-		}
-
-		return true;
+		return !diveType[key] ? false : true;
 	}
 
 	onRadioUpdated(e) {

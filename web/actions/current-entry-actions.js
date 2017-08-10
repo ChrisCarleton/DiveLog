@@ -34,6 +34,8 @@ class CurrentEntryActions {
 	}
 
 	createEntry(userName, logInfo, history) {
+		this.beginSaving();
+		AlertActions.dismissAlert('log-entry');
 		return dispatch => {
 			dispatch();
 			AlertActions.dismissAlert('log-entry');
@@ -41,6 +43,7 @@ class CurrentEntryActions {
 				.post(`/api/logs/${userName}/`)
 				.send(logInfo)
 				.then(res => {
+					this.endSaving();
 					history.push(`/logbook/${userName}/${res.body.logId}/`);
 					AlertActions.showSuccess(
 						'log-entry',
