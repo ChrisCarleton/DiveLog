@@ -77,6 +77,7 @@ app.get('*', (req, res) => {
 		baseUrl: config.baseUrl,
 		styleLocation: styleLocation,
 		bundleLocation: bundleLocation,
+		googleMapsLocation: `https://maps.googleapis.com/maps/api/js?key=${config.googleApiKey}&callback=initMap`,
 		initialState: JSON.stringify(initialState(req))
 	}));
 });

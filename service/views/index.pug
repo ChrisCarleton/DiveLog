@@ -13,6 +13,8 @@ html
 	script(type="text/javascript").
 		window.baseUrl = '!{baseUrl}';
 		window.initialState = !{initialState};
+		function initMap() {}	// Required for Google Map component to work!
 
+	script(type="text/javascript", src=googleMapsLocation)
 	script(type="text/javascript", src=bundleLocation)
 	

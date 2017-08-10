@@ -1,22 +1,27 @@
 import _ from 'lodash';
+import ConfirmDialog from './controls/confirm-dialog.jsx';
 import DiveLogActions from '../actions/dive-log-actions';
 import DiveLogStore from '../stores/dive-log-store';
+import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
 import moment from 'moment';
 import React from 'react';
 import PageHeader from './controls/page-header.jsx';
 import PropTypes from 'prop-types';
+import RequireAuth from './controls/require-auth.jsx';
 import Spinner from './controls/spinner.jsx';
 
 import {
 	Alert,
+	Breadcrumb,
 	Button,
+	ButtonGroup,
+	ButtonToolbar,
 	Col,
 	Glyphicon,
 	Grid,
 	ListGroup,
 	ListGroupItem,
-	Nav,
-	NavItem,
+	Media,
 	Row
 } from 'react-bootstrap';
 
@@ -26,11 +31,17 @@ class LogEntries extends React.Component {
 		this.state = {
 			logs: [],
 			isLoading: true,
-			sortOrder: 'desc'
+			sortOrder: 'desc',
+			deleting: null
 		};
 		this.onLogsRetrieved = this.onLogsRetrieved.bind(this);
 		this.onLoadMoreClicked = this.onLoadMoreClicked.bind(this);
 		this.onSortOrderChanged = this.onSortOrderChanged.bind(this);
+		this.setDescSortOrder = this.setDescSortOrder.bind(this);
+		this.setAscSortOder = this.setAscSortOder.bind(this);
+		this.onDeleteClicked = this.onDeleteClicked.bind(this);
+		this.onCancelDeleteClicked = this.onCancelDeleteClicked.bind(this);
+		this.deleteEntry = this.deleteEntry.bind(this);
 	}
 
 	componentDidMount() {
@@ -55,10 +66,16 @@ class LogEntries extends React.Component {
 			this.state.lastEntry);
 	}
 
-	onSortOrderChanged(key) {
-		const sortOrder = (key === 2) ? 'asc' : 'desc';
-		if (sortOrder === this.state.sortOrder) return;
+	setDescSortOrder() {
+		this.onSortOrderChanged('desc');
+	}
 
+	setAscSortOder() {
+		this.onSortOrderChanged('asc');
+	}
+
+	onSortOrderChanged(sortOrder) {
+		if (this.state.sortOrder === sortOrder) return;
 		DiveLogActions.setSortOrder(sortOrder);
 		DiveLogActions.fetchLogEntries(
 			this.props.match.params.userName,
@@ -73,50 +90,111 @@ class LogEntries extends React.Component {
 		return `${depth}'`;
 	}
 
+	onDeleteClicked(logEntry) {
+		this.setState(
+			Object.assign(
+				{},
+				this.state,
+				{
+					deleting: logEntry
+				}));
+	}
+
+	onCancelDeleteClicked() {
+		this.setState(
+			Object.assign(
+				{},
+				this.state,
+				{
+					deleting: null
+				}));
+	}
+
+	deleteEntry() {
+		DiveLogActions.deleteEntry(
+			this.props.match.params.userName,
+			this.state.deleting.logId);
+	}
+
 	renderItem(item){
-		const dateString = moment(new Date(item.entryTime)).format('MMMM Do YYYY, h:mm a');
+		const dateString = moment(item.entryTime).format('MMMM Do YYYY, h:mm a');
 		return (
-			<ListGroupItem
-				key={ item.entryTime }
-				href={ `/logbook/${this.props.match.params.userName}/${item.logId}/` }
-				disabled>
-				<h3>{ dateString } { item.diveNumber ? <small>(Dive #{ item.diveNumber })</small> : null }</h3>
-				<Grid>
-					<Row>
-						<Col sm={12} md={3}>
-							<dl>
-								<dt>Location:</dt>
-								<dd>{ item.location }</dd>
+			<ListGroupItem key={ item.logId }>
+				<Media.Left>
+					<ButtonGroup>
+						<Button onClick={ () => this.onDeleteClicked(item) }>
+							{ /* Think of accessibility here! */ }
+							<Glyphicon glyph="trash" />
+						</Button>
+					</ButtonGroup>
+				</Media.Left>
+				<Media.Body>
+					<Media.Heading>
+						<LinkContainer to={ `/logbook/${this.props.match.params.userName}/${item.logId}/` }>
+							<a href="#">{ dateString }</a>
+						</LinkContainer>
+						{ item.diveNumber ? <small> (Dive #{ item.diveNumber })</small> : null }
+					</Media.Heading>
+					<Grid>
+						<Row>
+							<Col sm={12} md={3}>
+								<dl>
+									<dt>Location:</dt>
+									<dd>{ item.location }</dd>
 
-								<dt>Site:</dt>
-								<dd>{ item.site }</dd>
-							</dl>
-						</Col>
-						<Col xsHidden md={3}>
-							<dl>
-								<dt>Average Depth:</dt>
-								<dd>{ this.formatDepth(item.depth.average) }</dd>
+									<dt>Site:</dt>
+									<dd>{ item.site }</dd>
+								</dl>
+							</Col>
+							<Col xsHidden md={3}>
+								<dl>
+									<dt>Average Depth:</dt>
+									<dd>{ this.formatDepth(item.depth.average) }</dd>
 
-								<dt>Max Depth:</dt>
-								<dd>{ this.formatDepth(item.depth.max) }</dd>
-							</dl>
-						</Col>
-					</Row>
-				</Grid>
+									<dt>Max Depth:</dt>
+									<dd>{ this.formatDepth(item.depth.max) }</dd>
+								</dl>
+							</Col>
+						</Row>
+					</Grid>
+				</Media.Body>
 			</ListGroupItem>);
 	}
 
 	render() {
 		const entries = _.map(this.state.logs, e => this.renderItem(e));
+		const deleteEntryTime =
+			this.state.deleting
+			? moment(this.state.deleting.entryTime).format('MMMM Do YYYY, h:mm a')
+			: null;
 
 		return (
 			<div>
+				<RequireAuth />
+				<Breadcrumb>
+					<IndexLinkContainer to="/">
+						<Breadcrumb.Item>Home</Breadcrumb.Item>
+					</IndexLinkContainer>
+					<Breadcrumb.Item active>Log Book</Breadcrumb.Item>
+				</Breadcrumb>
+
 				<PageHeader heading="Log Book" alertKey="log-book" />
 				<p>Showing <strong>{ this.state.logs.length }</strong> log entries.</p>
-				<Nav bsStyle="tabs" activeKey={ this.state.sortOrder === 'asc' ? 2 : 1 } onSelect={ this.onSortOrderChanged }>
-					<NavItem eventKey={1}>Latest to Earliest</NavItem>
-					<NavItem eventKey={2}>Earliest to Latest</NavItem>
-				</Nav>
+				<ButtonToolbar>
+					<ButtonGroup>
+						<LinkContainer to={ `/logbook/${this.props.match.params.userName}/new` }>
+							<Button bsStyle="primary">Create New Entry</Button>
+						</LinkContainer>
+					</ButtonGroup>
+					<ButtonGroup>
+						<Button active={ this.state.sortOrder !== 'asc' } onClick={ this.setDescSortOrder }>
+							Latest to Earliest
+						</Button>
+						<Button active={ this.state.sortOrder === 'asc' } onClick={ this.setAscSortOder }>
+							Earliest to Latest
+						</Button>
+					</ButtonGroup>
+				</ButtonToolbar>
 				<ListGroup>
 					{ entries }
 				</ListGroup>
@@ -125,6 +203,23 @@ class LogEntries extends React.Component {
 					: this.state.endOfStream
 						? <Alert bsStyle="info"><Glyphicon glyph="exclamation-sign" /> No more items to show.</Alert>
 						: <Button onClick={ this.onLoadMoreClicked }>Load More</Button> }
+				<ConfirmDialog
+					confirmText="Delete"
+					title="Confirm Deletion"
+					visible={ !_.isNil(this.state.deleting) }
+					onConfirm={ this.deleteEntry }
+					onCancel={ this.onCancelDeleteClicked }>
+						<p>
+							{ "Are you sure you want to delete the log book entry from " }
+							<strong>
+								{ deleteEntryTime }
+							</strong>
+							{ "?" }
+						</p>
+						<p>
+							<em>Caution: This cannot be undone.</em>
+						</p>
+				</ConfirmDialog>
 			</div>);
 	}
 }

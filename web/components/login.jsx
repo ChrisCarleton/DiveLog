@@ -59,7 +59,7 @@ class LogIn extends React.Component {
 				<Row>
 					<Col md={5}>
 						<h4>Log In</h4>
-						<Formsy.Form className="form form-horizontal" onValidSubmit={ this.submit }>
+						<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit }>
 							<TextBox
 								label="User name"
 								controlId="username"
