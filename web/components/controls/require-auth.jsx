@@ -1,6 +1,9 @@
+import PropTypes from 'prop-types';
+import queryString from 'query-string';
 import { Redirect } from 'react-router';
 import React from 'react';
 import UserStore from '../../stores/user-store';
+import { withRouter } from 'react-router';
 
 class RequireAuth extends React.Component {
 	constructor() {
@@ -21,8 +24,17 @@ class RequireAuth extends React.Component {
 	}
 
 	render() {
-		return this.state.currentUser ? null : <Redirect to="/" />;
+		if (!this.state.currentUser) {
+			const query = queryString.stringify({ returnTo: this.props.location.pathname });
+			return <Redirect to={ `/login?${query}` } />;			
+		}
+
+		return null;
 	}
 }
 
-export default RequireAuth;
+RequireAuth.propTypes = {
+	location: PropTypes.object.isRequired
+};
+
+export default withRouter(RequireAuth);

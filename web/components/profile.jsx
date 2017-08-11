@@ -5,6 +5,7 @@ import PageHeader from './controls/page-header.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
+import RequireAuth from './controls/require-auth.jsx';
 import UserStore from '../stores/user-store';
 
 import {
@@ -45,6 +46,10 @@ class Profile extends React.Component {
 	}
 
 	render() {
+		if (!this.state.user) {
+			return <RequireAuth />;
+		}
+
 		const userName = this.props.match.params.userName;
 		const displayName = this.state.user.displayName
 			|| this.state.user.userName
