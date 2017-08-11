@@ -22,7 +22,7 @@ class AppRouter extends React.Component {
 						<Route exact path="/login" component={ LogIn } />
 						<Route exact path="/signup" component={ SignUp } />
 						<Route exact path="/logbook/:userName" component={ LogEntries } />
-						<Route exact path="/profile/:userName" component={ Profile } />
+						<Route path="/profile/:userName" component={ Profile } />
 						<Route component={ NotFound } />
 					</Switch>
 				</Chrome>
