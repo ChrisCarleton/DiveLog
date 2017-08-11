@@ -1,4 +1,4 @@
-FROM node:6.11
+FROM node:8.3.0
 
 RUN mkdir -p /usr/src/divelog
 WORKDIR /usr/src/divelog
