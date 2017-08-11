@@ -73,6 +73,14 @@ Parameters:
   GitHubClientSecret:
     Description: Client Secret for GitHub OAuth service.
     Type: String
+  FacebookClientId:
+    Description: Client ID for Facebook OAuth service.
+    Type: String
+    Default: '1442189925869117'
+  FacebookClientSecret:
+    Description: Client Secret for Facebook OAuth service.
+    Type: String
+
   UsersReadCapacity:
     Description: Users table read capcity units
     Type: Number
@@ -378,6 +386,10 @@ Resources:
             Value: !Ref GitHubClientId
           - Name: DIVELOG_GITHUB_CLIENT_SECRET
             Value: !Ref GitHubClientSecret
+          - Name: DIVELOG_FACEBOOK_CLIENT_ID
+            Value: !Ref FacebookClientId
+          - Name: DIVELOG_FACEBOOK_CLIENT_SECRET
+            Value: !Ref FacebookClientSecret
         Memory: '300'
         LogConfiguration:
           LogDriver: awslogs
