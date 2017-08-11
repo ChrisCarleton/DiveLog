@@ -355,7 +355,7 @@ Resources:
       Family: !Join ['', [!Ref 'AWS::StackName', -divelog]]
       ContainerDefinitions:
       - Name: divelog-web
-        Cpu: '10'
+        Cpu: '20'
         Essential: 'true'
         Image: !Ref DockerImage
         Environment:
@@ -389,9 +389,22 @@ Resources:
           Options:
             awslogs-group: !Ref 'CloudwatchLogsGroup'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: ecs-demo-app
+            awslogs-stream-prefix: divelog
         PortMappings:
         - ContainerPort: 8100
+  redirecttaskdefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Join ['', [!Ref 'AWS::StackName', -redirect]]
+      ContainerDefinitions:
+      - Name: divelog-redirect
+        Cpu: '8'
+        Essential: 'true'
+        Image: geldim/https-redirect
+        Memory: '128'
+        PortMappings:
+        - ContainerPort: 80
+
   ECSALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -408,7 +421,7 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref 'ECSTG'
+        TargetGroupArn: !Ref 'ECSRedirectTG'
       LoadBalancerArn: !Ref 'ECSALB'
       Port: '80'
       Protocol: HTTP
@@ -430,7 +443,7 @@ Resources:
     Properties:
       Actions:
       - Type: forward
-        TargetGroupArn: !Ref 'ECSTG'
+        TargetGroupArn: !Ref 'ECSRedirectTG'
       Conditions:
       - Field: path-pattern
         Values: [/]
@@ -458,6 +471,22 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Name: ECSTG
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'VpcId'
+  ECSRedirectTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ECSALB
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 3
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-399
+      Name: ECSRedirectTG
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2
@@ -502,6 +531,18 @@ Resources:
         TargetGroupArn: !Ref 'ECSTG'
       Role: !Ref 'ECSServiceRole'
       TaskDefinition: !Ref 'taskdefinition'
+  redirectservice:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListener
+    Properties:
+      Cluster: !Ref 'ECSCluster'
+      DesiredCount: '1'
+      LoadBalancers:
+      - ContainerName: divelog-redirect
+        ContainerPort: '80'
+        TargetGroupArn: !Ref 'ECSRedirectTG'
+      Role: !Ref 'ECSServiceRole'
+      TaskDefinition: !Ref 'redirecttaskdefinition'
   ECSServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -525,7 +566,7 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: service
     Properties:
-      MaxCapacity: 2
+      MaxCapacity: 6
       MinCapacity: 1
       ResourceId: !Join ['', [service/, !Ref 'ECSCluster', /, !GetAtt [service, Name]]]
       RoleARN: !GetAtt [AutoscalingRole, Arn]
