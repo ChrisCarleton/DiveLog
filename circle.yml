@@ -16,4 +16,5 @@ deployment:
     branch: master
     commands:
       - deploy/push-docker-image.sh
+      - aws configure set default.region us-east-1
       - aws codepipeline start-pipeline-execution --name DiveLog
