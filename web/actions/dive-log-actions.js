@@ -15,10 +15,27 @@ class DiveLogActions {
 		return order;
 	}
 
+	deleteEntry(userName, logId) {
+		return dispatch => {
+			dispatch();
+			AlertActions.dismissAlert('log-book');
+
+			request
+				.delete(`/api/logs/${userName}/${logId}/`)
+				.then(() => {
+					this.deleteSucceeded(logId);
+				})
+				.catch(err => {
+					AlertActions.handleErrorResponse('log-book', err);
+				});
+		};
+	}
+
 	fetchLogEntries(userName, sortOrder = 'desc') {
 		return dispatch => {
 			dispatch();
 			this.startLoading();
+			AlertActions.dismissAlert('log-book');
 
 			request
 				.get(`/api/logs/${userName}/`)
@@ -37,6 +54,7 @@ class DiveLogActions {
 		return dispatch => {
 			dispatch();
 			this.startLoading();
+			AlertActions.dismissAlert('log-book');
 
 			const options = { order: sortOrder };
 			if (sortOrder === 'asc') {
@@ -64,6 +82,15 @@ class DiveLogActions {
 
 	fetchMoreEntriesSucceeded(entries) {
 		return entries;
+	}
+
+	deleteSucceeded(logId) {
+		AlertActions.showSuccess('log-book', 'Entry deleted', 'The selected entry has been removed from your log book.');
+		return logId;
+	}
+
+	clearEntries() {
+		return [];
 	}
 }
 

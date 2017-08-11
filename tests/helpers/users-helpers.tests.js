@@ -11,9 +11,8 @@ describe('Users helper methods', () => {
 
 	const purgeTables = done => {
 		Bluebird.all([
-				purgeTable(Users, 'userId'),
-				purgeTable(OAuth, 'providerId', 'provider')
-			])
+			purgeTable(Users, 'userId'),
+			purgeTable(OAuth, 'providerId', 'provider') ])
 			.then(() => {
 				done();
 			})
@@ -58,7 +57,6 @@ describe('Users helper methods', () => {
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
 					expect(user.displayName).to.equal(profile.displayName);
-
 
 					expect(oauth).to.exist;
 					oauth = oauth.attrs;
@@ -136,11 +134,10 @@ describe('Users helper methods', () => {
 
 		it('will self-correct if the oauth record exists but the matching user does not', done => {
 			OAuth.createAsync({
-					providerId: profile.id,
-					provider: profile.provider,
-					userId: uuid(),
-					email: 'missing_user@weirdstates.com'
-				})
+				providerId: profile.id,
+				provider: profile.provider,
+				userId: uuid(),
+				email: 'missing_user@weirdstates.com' })
 				.then(() => {
 					return getOrCreateOAuthAccount(profile);
 				})
@@ -165,7 +162,6 @@ describe('Users helper methods', () => {
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
 					expect(user.displayName).to.equal(profile.displayName);
-
 
 					expect(oauth).to.exist;
 					oauth = oauth.attrs;

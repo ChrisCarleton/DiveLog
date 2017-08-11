@@ -72,10 +72,11 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 		.pipe(istanbul.writeReports({
 			dir: './coverage',
 			reporters: ['lcov', 'text-summary']
-		}));
+		}))
+		.on('end', process.exit.bind(process, 0));
 });
 
-gulp.task('report-coverage', ['test'], () => {
+gulp.task('report-coverage', () => {
 	return gulp
 		.src('coverage/lcov.info')
 		.pipe(coveralls());
@@ -127,7 +128,7 @@ gulp.task('webpack-server', done => {
 				throw new util.PluginError('webpack-dev-server', err);
 			}
 
-			util.log('[webpack-dev-server]', "Webpack Dev Server started on port 3002.");
+			util.log('[webpack-dev-server]', 'Webpack Dev Server started on port 3002.');
 
 			done();
 		});

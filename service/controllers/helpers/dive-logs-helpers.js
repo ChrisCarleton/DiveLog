@@ -97,6 +97,11 @@ export function doUpdateLog(owner, logId, logInfo) {
 				'The log entry ID is fixed and cannot be changed. Please omit the "logId" field from the data.'));
 	}
 
+	logInfo.logId = logId,
+	logInfo.ownerId = owner.userId;
+	delete logInfo['createdAt'];
+	delete logInfo['updatedAt'];
+
 	const validation = Joi.validate(logInfo, updateSchema);
 	if (validation.error) {
 		return Bluebird.reject(
@@ -105,15 +110,9 @@ export function doUpdateLog(owner, logId, logInfo) {
 				validation.error.details));
 	}
 
-	logInfo.logId = logId,
-	logInfo.ownerId = owner.userId;
-	delete logInfo['createdAt'];
-	delete logInfo['updatedAt'];
-
 	return DiveLogs.updateAsync(logInfo)
 		.then(result => {
 			if (!result) return null;
-
 			return result.attrs;
 		});
 }

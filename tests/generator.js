@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import faker from 'faker';
-import moment from 'moment';
+import geolib from 'geolib';
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -11,6 +11,18 @@ function generateUser(password) {
 		email: faker.internet.email(),
 		passwordHash: bcrypt.hashSync(password || faker.internet.password(9), salt),
 		role: 'user'
+	};
+}
+
+function generateCylinderEntry() {
+	return {
+		gas: {
+			o2Percent: faker.random.number({ min: 21, max: 40 }),
+			startPressure: faker.random.number({min: 2800, max: 3500 }),
+			endPressure: faker.random.number({ min: 450, max: 1200 })
+		},
+		volume: faker.random.arrayElement([66, 80, 100]),
+		type: faker.random.arrayElement(['aluminum', 'steel'])
 	};
 }
 
@@ -36,7 +48,7 @@ function generateDiveLogEntry(ownerIds) {
 		entryTime: entryTime.toISOString(),
 		diveNumber: faker.random.number({ min: 1, max: 500 }),
 		diveTime: {
-			exitTime: moment(entryTime).add(diveTime, 'm').toISOString(),
+			diveLength: diveTime,
 			surfaceInterval: faker.random.number({ min: 15, max: 120}),
 			bottomTime: diveTime - 5,
 			decoStops: [
@@ -50,23 +62,13 @@ function generateDiveLogEntry(ownerIds) {
 		location: faker.fake('{{address.cityPrefix}} {{name.firstName}}{{address.citySuffix}}, {{address.countryCode}}'),
 		site: faker.fake('{{name.lastName}} {{address.cityPrefix}}'),
 		gps: {
-			latitude: Number.parseFloat(faker.address.latitude()),
-			longitude: Number.parseFloat(faker.address.longitude())
+			latitude: geolib.decimal2sexagesimal(faker.address.latitude()),
+			longitude: geolib.decimal2sexagesimal(faker.address.longitude())
 		},
 
 		cnsO2Percent: faker.random.number({ min: 5, max: 80 }),
 
-		cylinders: [
-			{
-				gas: {
-					o2Percent: faker.random.number({ min: 21, max: 40 }),
-					startPressure: faker.random.number({min: 2800, max: 3500 }),
-					endPressure: faker.random.number({ min: 450, max: 1200 })
-				},
-				volume: faker.random.arrayElement([66, 80, 100]),
-				type: faker.random.arrayElement(['aluminum', 'steel'])
-			}
-		],
+		cylinders: [ generateCylinderEntry() ],
 
 		depth: {
 			average: averageDepth,
@@ -112,12 +114,11 @@ function generateDiveLogEntry(ownerIds) {
 			wreck: faker.random.boolean()
 		},
 
-		visibility: faker.random.number({ min: 1, max: 101 }),
-		current: faker.random.number({ min: 0, max: 100 }),
-		surfaceConditions: faker.random.arrayElement(['calm', 'moderate', 'rough']),
-		weather: faker.random.arrayElement(['sunny', 'partially cloudy', 'cloudy', 'rainy']),
-
-		mood: faker.random.arrayElement(['sick', 'bad', 'tired', 'ok', 'good', 'stoked!']),
+		visibility: faker.random.arrayElement(['none', 'poor', 'moderate', 'good', 'excellent', 'ultra']),
+		current: faker.random.arrayElement(['none', 'mild', 'moderate', 'fast', 'extreme']),
+		surfaceConditions: faker.random.arrayElement(['calm', 'moderate', 'rough', 'insane']),
+		weather: faker.random.arrayElement(['sunny', 'mainlySunny', 'overcast', 'rainy', 'stormy']),
+		mood: faker.random.arrayElement(['terrible', 'bad', 'ok', 'good', 'excellent']),
 
 		weight: {
 			amount: faker.random.number({ min: 6, max: 32 }),
@@ -132,5 +133,6 @@ function generateDiveLogEntry(ownerIds) {
 
 export default {
 	generateUser: generateUser,
+	generateCylinderEntry: generateCylinderEntry,
 	generateDiveLogEntry: generateDiveLogEntry
 };

@@ -3,7 +3,6 @@ import bodyParser from 'body-parser';
 import config from './config';
 import cookieParser from 'cookie-parser';
 import express from 'express';
-// import forceSsl from 'express-force-ssl';
 import glob from 'glob';
 import http from 'http';
 import initialState from './initial-state';
@@ -23,14 +22,11 @@ const app = express();
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-// if (config.forceSsl) {
-// 	app.use(forceSsl);
-// }
-
+log.trace('Using session secret:', config.sessionSecret);
 const sessionStore = SessionStore(session);
 app.use(session({
 	store: sessionStore,
-	secret: 'my-secret',
+	secret: config.sessionSecret,
 	resave: false,
 	saveUninitialized: false
 }));
@@ -77,6 +73,7 @@ app.get('*', (req, res) => {
 		baseUrl: config.baseUrl,
 		styleLocation: styleLocation,
 		bundleLocation: bundleLocation,
+		googleMapsLocation: `https://maps.googleapis.com/maps/api/js?key=${config.googleApiKey}&callback=initMap`,
 		initialState: JSON.stringify(initialState(req))
 	}));
 });

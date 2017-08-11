@@ -38,9 +38,8 @@ export function signUp(req, res) {
 	}
 
 	Bluebird.all([
-			Users.query(req.body.userName).usingIndex('UserNameIndex').limit(1).execAsync(),
-			Users.query(req.body.email).usingIndex('EmailIndex').limit(1).execAsync()
-		])
+		Users.query(req.body.userName).usingIndex('UserNameIndex').limit(1).execAsync(),
+		Users.query(req.body.email).usingIndex('EmailIndex').limit(1).execAsync() ])
 		.spread((userNameTaken, emailTaken) => {
 			if (userNameTaken.Items.length > 0) {
 				throw 'user name taken';

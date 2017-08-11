@@ -39,7 +39,7 @@ class LogIn extends React.Component {
 		this.setState(Object.assign(
 			{},
 			this.state,
-			{ signedIn: userInfo.currentUser ? true :false }));
+			{ signedIn: userInfo.currentUser ? true : false }));
 	}
 
 	submit(model) {
@@ -53,38 +53,38 @@ class LogIn extends React.Component {
 		}
 
 		return (
-		<div>
-			<PageHeader heading="Log In" alertKey={ ALERT_KEY } />
-			<Grid>
-				<Row>
-					<Col md={5}>
-						<h4>Log In</h4>
-						<Formsy.Form className="form form-horizontal" onValidSubmit={ this.submit }>
-							<TextBox
-								label="User name"
-								controlId="username"
-								name="username"
-								required />
-							<TextBox
-								label="Password"
-								controlId="password"
-								name="password"
-								isPassword
-								required />
-							<Button type="submit" bsStyle="primary">
-								Log In
-							</Button>
-						</Formsy.Form>
-					</Col>
-					<Col md={2}>
-						<h4>- or -</h4>
-					</Col>
-					<Col md={5}>
-						<SignInWithProvider />
-					</Col>
-				</Row>
-			</Grid>
-		</div>);
+			<div>
+				<PageHeader heading="Log In" alertKey={ ALERT_KEY } />
+				<Grid>
+					<Row>
+						<Col md={5}>
+							<h4>Log In</h4>
+							<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit }>
+								<TextBox
+									label="User name"
+									controlId="username"
+									name="username"
+									required />
+								<TextBox
+									label="Password"
+									controlId="password"
+									name="password"
+									isPassword
+									required />
+								<Button type="submit" bsStyle="primary">
+									Log In
+								</Button>
+							</Formsy.Form>
+						</Col>
+						<Col md={2}>
+							<h4>- or -</h4>
+						</Col>
+						<Col md={5}>
+							<SignInWithProvider />
+						</Col>
+					</Row>
+				</Grid>
+			</div>);
 	}
 }
 
