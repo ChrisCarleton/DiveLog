@@ -7,7 +7,7 @@
   "scripts": {
     "test": "gulp test",
     "server": "node service/index.js | bunyan",
-    "report-coverage": "gulp report-coverage",
+    "report-coverage": "gulp test && gulp report-coverage",
     "dev": "NODE_ENV=dev-server gulp dev-server",
     "test-data": "NODE_ENV=dev-server gulp test-data"
   },

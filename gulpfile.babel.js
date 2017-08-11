@@ -76,7 +76,7 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 		.on('end', process.exit.bind(process, 0));
 });
 
-gulp.task('report-coverage', ['test'], () => {
+gulp.task('report-coverage', () => {
 	return gulp
 		.src('coverage/lcov.info')
 		.pipe(coveralls());
