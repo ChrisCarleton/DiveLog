@@ -15,7 +15,7 @@ class DiveLogStore {
 			loading: DiveLogActions.START_LOADING,
 			stopLoading: DiveLogActions.CANCEL_LOADING,
 			setSortOrder: DiveLogActions.SET_SORT_ORDER,
-			fetchLogs: DiveLogActions.FETCH_ENTRIES_SUCCEEDED,
+			fetchLogs: [ DiveLogActions.FETCH_ENTRIES_SUCCEEDED, DiveLogActions.CLEAR_ENTRIES ],
 			fetchMoreLogs: DiveLogActions.FETCH_MORE_ENTRIES_SUCCEEDED,
 			entryDeleted: DiveLogActions.DELETE_SUCCEEDED
 		});

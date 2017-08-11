@@ -1,3 +1,5 @@
+import CurrentEntryActions from './current-entry-actions';
+import DiveLogActions from './dive-log-actions';
 import AlertActions from './alert-actions';
 import alt from '../alt';
 import request from '../request-agent';
@@ -40,6 +42,8 @@ class UserActions {
 			request
 				.post('/api/auth/logout/')
 				.then(() => {
+					CurrentEntryActions.clearEntry();
+					DiveLogActions.clearEntries();
 					this.signOutSucceeded();
 				})
 				.catch(err => {

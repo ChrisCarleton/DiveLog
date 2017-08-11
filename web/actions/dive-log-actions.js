@@ -88,6 +88,10 @@ class DiveLogActions {
 		AlertActions.showSuccess('log-book', 'Entry deleted', 'The selected entry has been removed from your log book.');
 		return logId;
 	}
+
+	clearEntries() {
+		return [];
+	}
 }
 
 export default alt.createActions(DiveLogActions);
