@@ -161,8 +161,8 @@ Many of the log entry APIs accept or return a Dive Log Entry Object. Here is the
 	location: [string],
 	site: [string],
 	gps: {
-		latitude: [number],
-		longitude: [number]
+		latitude: [string],
+		longitude: [string]
 	},
 	cnsO2Percent: [number],
 	cylinders: [
@@ -218,8 +218,8 @@ Many of the log entry APIs accept or return a Dive Log Entry Object. Here is the
 		training: [boolean],
 		wreck: [boolean]
 	},
-	visibility: [number],
-	current: [number],
+	visibility: [string],
+	current: [string],
 	surfaceConditions: [string],
 	weather: [string],
 	mood: [string],
