@@ -40,7 +40,7 @@
     "gulp-eslint": "^4.0.0",
     "gulp-istanbul": "^1.1.2",
     "gulp-live-server": "0.0.30",
-    "gulp-mocha": "^4.3.1",
+    "gulp-mocha": "^3.0.1",
     "gulp-util": "^3.0.8",
     "isparta": "^4.0.0",
     "less": "^2.7.2",
