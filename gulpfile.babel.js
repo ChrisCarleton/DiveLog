@@ -72,7 +72,8 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 		.pipe(istanbul.writeReports({
 			dir: './coverage',
 			reporters: ['lcov', 'text-summary']
-		}));
+		}))
+		.on('end', process.exit.bind(process, 0));
 });
 
 gulp.task('report-coverage', ['test'], () => {
