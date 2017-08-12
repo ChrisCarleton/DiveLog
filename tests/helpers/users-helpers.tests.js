@@ -1,11 +1,16 @@
+import _ from 'lodash';
 import Bluebird from 'bluebird';
 import generator from '../generator';
-import { getOrCreateOAuthAccount } from '../../service/controllers/helpers/users-helpers';
 import { expect } from 'chai';
 import OAuth from '../../service/data/oauth.table';
 import { purgeTable } from '../test-utils';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
+
+import {
+	getOrCreateOAuthAccount,
+	getOAuthAccounts
+} from '../../service/controllers/helpers/users-helpers';
 
 describe('Users helper methods', () => {
 
@@ -21,6 +26,75 @@ describe('Users helper methods', () => {
 
 	after(purgeTables);
 	beforeEach(purgeTables);
+
+	describe('getOAuthAccounts method', () => {
+
+		let profile;
+		beforeEach(done => {
+			profile = generator.generateUser();
+			Users.createAsync(profile)
+				.then(result => {
+					profile.userId = result.get('userId');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('returns a collection of connected OAuth providers', done => {
+			const oauth = [
+				{
+					providerId: uuid(),
+					provider: 'InstaBook',
+					userId: profile.userId,
+					email: profile.email
+				},
+				{
+					providerId: uuid(),
+					provider: 'Facegram',
+					userId: profile.userId,
+					email: profile.email
+				}
+			];
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return getOAuthAccounts(profile.userName);
+				})
+				.then(result => {
+					expect(result).to.exist;
+
+					const expected = _.map(oauth, oa => {
+						return oa.provider;
+					});
+					const difference = _.difference(result, expected);
+
+					expect(difference).to.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return an empty array of no connections exist', done => {
+			getOAuthAccounts(profile.userName)
+				.then(result => {
+					expect(result).to.be.an('array');
+					expect(result).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return an empty array if the user name does not exist', done => {
+			getOAuthAccounts('MadeUpUserName')
+				.then(result => {
+					expect(result).to.be.an('array');
+					expect(result).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+	});
 
 	describe('getOrCreateOAuthAccount method', () => {
 

@@ -26,7 +26,7 @@ class RequireAuth extends React.Component {
 	render() {
 		if (!this.state.currentUser) {
 			const query = queryString.stringify({ returnTo: this.props.location.pathname });
-			return <Redirect to={ `/login?${query}` } />;			
+			return <Redirect to={ `/login?${query}` } />;
 		}
 
 		return null;

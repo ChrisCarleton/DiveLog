@@ -1,8 +1,29 @@
+import _ from 'lodash';
 import Bluebird from 'bluebird';
 import { EmailInUseError, MissingEmailError } from '../../utils/exceptions';
 import faker from 'faker';
 import OAuth from '../../data/oauth.table';
 import Users from '../../data/users.table';
+
+export function getOAuthAccounts(userName) {
+	return getUserByName(userName)
+		.then(user => {
+			if (!user) {
+				return [];
+			}
+
+			return OAuth
+				.query(user.userId)
+				.usingIndex('UserIdIndex')
+				.loadAll()
+				.execAsync();
+		})
+		.then(result => {
+			return _.map(result.Items, oa => {
+				return oa.get('provider');
+			});
+		});
+}
 
 export function getUserByName(userName) {
 	return Users

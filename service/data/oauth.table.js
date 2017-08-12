@@ -13,7 +13,18 @@ const OAuth = db.define(
 			userId: Joi.string().required(),
 			email: Joi.string().required()
 		},
-		tableName: `divelog-${config.env}-oauth`
+		tableName: `divelog-${config.env}-oauth`,
+		indexes: [
+			{
+				hashKey: 'userId',
+				rangeKey: 'provider',
+				name: 'UserIdIndex',
+				type: 'global',
+				projection: {
+					ProjectionType: 'KEYS_ONLY'
+				}
+			}
+		]
 	}
 );
 

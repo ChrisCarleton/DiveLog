@@ -237,6 +237,23 @@ Resources:
         -
           AttributeName: "provider"
           KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "UserIdIndex"
+          KeySchema:
+            -
+              AttributeName: "userId"
+              KeyType: "HASH"
+            -
+              AttributeName: "provider"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "KEYS_ONLY"
+          ProvisionedThroughput:
+            ReadCapacityUnits:
+              Ref: OAuthReadCapacity
+            WriteCapacityUnits:
+              Ref: OAuthWriteCapacity
 
   SessionsTable:
     Type: "AWS::DynamoDB::Table"

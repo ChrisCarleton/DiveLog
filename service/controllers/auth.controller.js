@@ -31,25 +31,13 @@ export function login(req, res) {
 	})(req, res);
 }
 
-export function logout(req, res) {
-	req.logout();
+export function listOAuthAccounts(req, res) {
 	res.send('ok');
 }
 
-export function googleLogin() {
-
-}
-
-export function googleCallback() {
-
-}
-
-export function githubLogin() {
-
-}
-
-export function githubCallback() {
-
+export function logout(req, res) {
+	req.logout();
+	res.send('ok');
 }
 
 // Proceed if a user is currently signed in;
