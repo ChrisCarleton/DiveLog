@@ -1,6 +1,7 @@
 import errorRespone, { notAuthroizedResponse, serverErrorResponse } from '../utils/error-response';
 import log from '../logger';
 import passport from 'passport';
+import { getOAuthAccounts } from './helpers/users-helpers';
 
 export function login(req, res) {
 	passport.authenticate('local', (err, user) => {
@@ -32,7 +33,32 @@ export function login(req, res) {
 }
 
 export function listOAuthAccounts(req, res) {
-	res.send('ok');
+	getOAuthAccounts(req.params.user)
+		.then(accounts => {
+			res.json(accounts);
+		})
+		.catch(err => {
+			log.error(
+				'An error occured while attempting to retrieve user\'s OAuth accounts:',
+				err);
+			serverErrorResponse(res);
+		});
+}
+
+export function ensureOAuthAccountAccess(req, res, next) {
+	if (!req.user) {
+		return notAuthroizedResponse(res);
+	}
+
+	if (req.user.role === 'admin') {
+		return next();
+	}
+
+	if (req.user.userName !== req.params.user) {
+		return notAuthroizedResponse(res);
+	}
+
+	next();
 }
 
 export function logout(req, res) {

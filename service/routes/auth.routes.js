@@ -1,4 +1,5 @@
 import {
+	ensureOAuthAccountAccess,
 	listOAuthAccounts,
 	login,
 	logout,
@@ -6,10 +7,10 @@ import {
 
 module.exports = function(app) {
 	const baseRoute = '/api/auth/';
-	const baseUserRoute = '/api/auth/:user/'
+	const baseUserRoute = '/api/auth/:user/';
 
 	app.post(baseRoute + 'login/', login);
 	app.post(baseRoute + 'logout/', logout);
 
-	app.get(baseUserRoute + 'oauth/', listOAuthAccounts);
+	app.get(baseUserRoute + 'oauth/', ensureOAuthAccountAccess, listOAuthAccounts);
 };
