@@ -8,6 +8,7 @@ import LogIn from './components/login.jsx';
 import NotFound from './components/errors/not-found.jsx';
 import React from 'react';
 import { render } from 'react-dom';
+import ServerError from './components/errors/server-error.jsx';
 import SignUp from './components/sign-up.jsx';
 
 require('./validations');
@@ -25,6 +26,8 @@ class AppRouter extends React.Component {
 						<Route exact path="/logbook/:userName" component={ LogEntries } />
 						<Route exact path="/logbook/:userName/new" component={ LogEntry } />
 						<Route exact path="/logbook/:userName/:logId" component={ LogEntry } />
+						<Route exact path="/error/notFound" component={ NotFound } />
+						<Route exact path="/error/server" component={ ServerError } />
 						<Route component={ NotFound } />
 					</Switch>
 				</Chrome>
