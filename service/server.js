@@ -82,6 +82,7 @@ app.get('*', (req, res) => {
 app.use((err, req, res, next) => {
 	log.error(`Uncaught server error at "${req.path}":`, err);
 	serverErrorResponse(res);
+	next();
 });
 
 const server = http.createServer(app);
