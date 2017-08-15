@@ -9,6 +9,7 @@ import initialState from './initial-state';
 import log from './logger';
 import path from 'path';
 import pug from 'pug';
+import { serverErrorResponse } from './utils/error-response';
 import session from 'express-session';
 import SessionStore from './session-store';
 
@@ -76,6 +77,12 @@ app.get('*', (req, res) => {
 		googleMapsLocation: `https://maps.googleapis.com/maps/api/js?key=${config.googleApiKey}&callback=initMap`,
 		initialState: JSON.stringify(initialState(req))
 	}));
+});
+
+app.use((err, req, res, next) => {
+	log.error(`Uncaught server error at "${req.path}":`, err);
+	serverErrorResponse(res);
+	next();
 });
 
 const server = http.createServer(app);
