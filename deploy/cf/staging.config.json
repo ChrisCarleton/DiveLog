@@ -2,6 +2,9 @@
   "Parameters" : {
     "AwsKeyId" : "AKIAI2EGEWBDKUX7SBBA",
     "AwsSecretKey": "",
+    "GitHubClientSecret": "",
+    "FacebookClientSecret": "",
+    "GoogleClientSecret": "",
     "HttpCidrIP": "23.233.5.150/32",
     "KeyName": "ChrisLinuxMintLaptop",
     "LogLevel": "debug",
