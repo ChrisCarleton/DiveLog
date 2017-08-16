@@ -33,7 +33,7 @@ class ConnectOAuth extends React.Component {
 		}
 
 		if (_.indexOf(this.state.connectedAccounts, provider) === -1) {
-			return <a href="#">{ `Connect your ${friendlyName} account` }</a>;
+			return <a href={ `/auth/${provider}/connect` }>{ `Connect your ${friendlyName} account` }</a>;
 		}
 
 		return (
