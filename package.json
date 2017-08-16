@@ -7,7 +7,7 @@
   "scripts": {
     "test": "gulp test",
     "server": "node service/index.js | bunyan",
-    "report-coverage": "gulp test && gulp report-coverage",
+    "report-coverage": "gulp test-full && gulp report-coverage",
     "dev": "NODE_ENV=dev-server gulp dev-server",
     "test-data": "NODE_ENV=dev-server gulp test-data"
   },
@@ -41,6 +41,7 @@
     "gulp-istanbul": "^1.1.2",
     "gulp-live-server": "0.0.30",
     "gulp-mocha": "^3.0.1",
+    "gulp-nsp": "^2.4.2",
     "gulp-util": "^3.0.8",
     "isparta": "^4.0.0",
     "less": "^2.7.2",
