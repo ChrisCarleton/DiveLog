@@ -9,6 +9,7 @@ import uuid from 'uuid/v4';
 
 import {
 	getOrCreateOAuthAccount,
+	getOrConnectOAuthAccount,
 	getOAuthAccounts
 } from '../../service/controllers/helpers/users-helpers';
 
@@ -244,6 +245,120 @@ describe('Users helper methods', () => {
 					expect(oauth.userId).to.equal(user.userId);
 					expect(oauth.email).to.equal(profile.emails[0].value);
 
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
+	describe('getOrConnectOAuthAccount method', () => {
+
+		it('will return the user if connection exists', done => {
+			const user = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'LinkedOut',
+				email: user.email
+			};
+
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					user.createdAt = u.get('createdAt');
+					oauth.userId = user.userId;
+					return OAuth.createAsync(oauth);
+				})
+				.then(() => {
+					const profile = {
+						id: oauth.providerId,
+						displayName: user.displayName,
+						provider: oauth.provider,
+						emails: [{
+							type: 'main',
+							value: user.email
+						}]
+					};
+					return getOrConnectOAuthAccount(user, profile);
+				})
+				.then(result => {
+					expect(result).to.exist;
+					expect(result).to.eql(user);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will create connection and return user if necessary', done => {
+			const user = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'LinkedOut',
+				email: user.email
+			};
+			const profile = {
+				id: oauth.providerId,
+				displayName: user.displayName,
+				provider: oauth.provider,
+				emails: [{
+					type: 'main',
+					value: user.email
+				}]
+			};
+
+			Users.createAsync(user)
+				.then(newUser => {
+					user.userId = newUser.get('userId');
+					user.createdAt = newUser.get('createdAt');
+					oauth.userId = user.userId;
+					return getOrConnectOAuthAccount(user, profile);
+				})
+				.then(result => {
+					expect(result).to.exist;
+					expect(result).to.eql(user);
+					return OAuth.getAsync(profile.id, profile.provider);
+				})
+				.then(result => {
+					expect(result).to.not.be.null;
+					expect(result.attrs).to.eql(oauth);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return error if connection exists and is bound to another user account', done => {
+			const user = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'LinkedOut',
+				userId: uuid(),
+				email: 'another@user.com'
+			};
+
+			Bluebird.all([
+				Users.createAsync(user),
+				OAuth.createAsync(oauth)])
+				.spread(u => {
+					user.userId = u.get('userId');
+					user.createdAt = u.get('createdAt');
+				})
+				.then(() => {
+					const profile = {
+						id: oauth.providerId,
+						displayName: user.displayName,
+						provider: oauth.provider,
+						emails: [{
+							type: 'main',
+							value: user.email
+						}]
+					};
+					return getOrConnectOAuthAccount(user, profile);
+				})
+				.then(() => {
+					done('Operation was not meant to succeed.');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('ForbiddenActionError');
 					done();
 				})
 				.catch(done);
