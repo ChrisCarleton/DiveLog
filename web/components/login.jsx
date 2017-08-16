@@ -1,12 +1,15 @@
 import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
 import PageHeader from './controls/page-header.jsx';
+import PropTypes from 'prop-types';
+import queryString from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import SignInWithProvider from './controls/sign-in-with-provider.jsx';
 import TextBox from './controls/text-box.jsx';
 import UserActions from '../actions/user-actions';
 import UserStore from '../stores/user-store';
+import { withRouter } from 'react-router';
 
 import {
 	Col,
@@ -49,6 +52,11 @@ class LogIn extends React.Component {
 
 	render() {
 		if (this.state.signedIn) {
+			const query = queryString.parse(this.props.location.search);
+			if (query && query.returnTo) {
+				return <Redirect to={ query.returnTo } />;
+			}
+
 			return <Redirect to="/" push />;
 		}
 
@@ -88,4 +96,8 @@ class LogIn extends React.Component {
 	}
 }
 
-export default LogIn;
+LogIn.propTypes = {
+	location: PropTypes.object.isRequired
+};
+
+export default withRouter(LogIn);

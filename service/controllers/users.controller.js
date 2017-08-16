@@ -124,19 +124,3 @@ export function signUp(req, res) {
 export function me(req, res) {
 	res.json(req.user);
 }
-
-export function searchUsers() {
-
-}
-
-export function profile() {
-
-}
-
-export function changePassword() {
-
-}
-
-export function resetPassword() {
-
-}

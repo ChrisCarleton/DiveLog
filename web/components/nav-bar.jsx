@@ -70,6 +70,9 @@ class AppNavbar extends React.Component {
 					{ this.state.user ?
 						<Nav pullRight>
 							<NavDropdown id="user-nav" title={ this.state.user.displayName || this.state.user.userName }>
+								<LinkContainer to={ `/profile/${this.state.user.userName}` }>
+									<MenuItem>Profile</MenuItem>
+								</LinkContainer>
 								<MenuItem divider />
 								<MenuItem onClick={ this.onLogOutClicked }>Log Out</MenuItem>
 							</NavDropdown>

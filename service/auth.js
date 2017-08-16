@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import config from './config';
-import { getOrCreateOAuthAccount } from './controllers/helpers/users-helpers';
+import { getOrConnectOAuthAccount, getOrCreateOAuthAccount } from './controllers/helpers/users-helpers';
 import log from './logger';
 import passport from 'passport';
 import url from 'url';
@@ -10,6 +10,22 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 import { Strategy as GithubStrategy } from 'passport-github';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
+
+const verifyOAuth = (req, profile, done) => {
+	if (req.user) {
+		// User is already logged in. We're just connecting their account to an alternate,
+		// OAuth provider.
+		return getOrConnectOAuthAccount(req.user, profile)
+			.then(() => done(null, req.user))
+			.catch(done);
+	}
+
+	getOrCreateOAuthAccount(profile)
+		.then(user => {
+			done(null, user);
+		})
+		.catch(done);
+};
 
 export default function(app) {
 	passport.use(
@@ -22,14 +38,20 @@ export default function(app) {
 					.execAsync()
 					.then(response => {
 						if (response.Items.length === 0) {
-							log.info('Could not log in user "', username, '". User does not exist');
+							log.debug('Could not log in user "', username, '". User does not exist');
 							return done(null, null);
 						}
 
 						const result = response.Items[0];
+						const passwordHash = result.get('passwordHash');
 
-						if (!bcrypt.compareSync(password, result.get('passwordHash'))) {
-							log.info('Could not log in user "', username, '". Password was invalid.');
+						if (!passwordHash) {
+							log.debug('Could not log in user "', username, '". This user has no password set.');
+							return done(null, null);
+						}
+
+						if (!bcrypt.compareSync(password, passwordHash)) {
+							log.debug('Could not log in user "', username, '". Password was invalid.');
 							return done(null, null);
 						}
 
@@ -43,14 +65,11 @@ export default function(app) {
 			{
 				clientID: config.auth.google.consumerId,
 				clientSecret: config.auth.google.consumerSecret,
-				callbackURL: url.resolve(config.baseUrl, '/auth/google/callback')
+				callbackURL: url.resolve(config.baseUrl, '/auth/google/callback'),
+				passReqToCallback: true
 			},
-			(accessToken, refreshToken, profile, done) => {
-				getOrCreateOAuthAccount(profile)
-					.then(user => {
-						done(null, user);
-					})
-					.catch(done);
+			(req, accessToken, refreshToken, profile, done) => {
+				verifyOAuth(req, profile, done);
 			}));
 
 	passport.use(
@@ -59,9 +78,10 @@ export default function(app) {
 				clientID: config.auth.github.clientId,
 				clientSecret: config.auth.github.clientSecret,
 				callbackURL: url.resolve(config.baseUrl, '/auth/github/callback'),
-				scope: ['user:email']
+				scope: ['user:email'],
+				passReqToCallback: true
 			},
-			(accessToken, refreshToken, profile, done) => {
+			(req, accessToken, refreshToken, profile, done) => {
 				if (!profile) return done(null, null);
 
 				// We need to do some transformation on the profile object here because the
@@ -72,11 +92,7 @@ export default function(app) {
 					profile.imageUrl = profile.photos[0].value;
 				}
 
-				getOrCreateOAuthAccount(profile)
-					.then(user => {
-						done(null, user);
-					})
-					.catch(done);
+				verifyOAuth(req, profile, done);
 			}));
 
 	passport.use(
@@ -84,14 +100,11 @@ export default function(app) {
 			{
 				clientID: config.auth.facebook.clientId,
 				clientSecret: config.auth.facebook.clientSecret,
-				callbackURL: url.resolve(config.baseUrl, '/auth/facebook/callback')
+				callbackURL: url.resolve(config.baseUrl, '/auth/facebook/callback'),
+				passReqToCallback: true
 			},
-			(accessToken, refreshToken, profile, done) => {
-				getOrCreateOAuthAccount(profile)
-					.then(user => {
-						done(null, user);
-					})
-					.catch(done);
+			(req, accessToken, refreshToken, profile, done) => {
+				verifyOAuth(req, profile, done);
 			}));
 
 	passport.serializeUser((user, done) => {

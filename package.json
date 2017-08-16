@@ -85,6 +85,7 @@
     "passport-local": "^1.0.0",
     "prop-types": "^15.5.10",
     "pug": "^2.0.0-rc.2",
+    "query-string": "^5.0.0",
     "react": "^15.6.1",
     "react-bootstrap": "^0.31.1",
     "react-bootstrap-date-picker": "^5.0.1",

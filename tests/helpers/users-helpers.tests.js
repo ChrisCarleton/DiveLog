@@ -1,11 +1,17 @@
+import _ from 'lodash';
 import Bluebird from 'bluebird';
 import generator from '../generator';
-import { getOrCreateOAuthAccount } from '../../service/controllers/helpers/users-helpers';
 import { expect } from 'chai';
 import OAuth from '../../service/data/oauth.table';
 import { purgeTable } from '../test-utils';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
+
+import {
+	getOrCreateOAuthAccount,
+	getOrConnectOAuthAccount,
+	getOAuthAccounts
+} from '../../service/controllers/helpers/users-helpers';
 
 describe('Users helper methods', () => {
 
@@ -21,6 +27,75 @@ describe('Users helper methods', () => {
 
 	after(purgeTables);
 	beforeEach(purgeTables);
+
+	describe('getOAuthAccounts method', () => {
+
+		let profile;
+		beforeEach(done => {
+			profile = generator.generateUser();
+			Users.createAsync(profile)
+				.then(result => {
+					profile.userId = result.get('userId');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('returns a collection of connected OAuth providers', done => {
+			const oauth = [
+				{
+					providerId: uuid(),
+					provider: 'InstaBook',
+					userId: profile.userId,
+					email: profile.email
+				},
+				{
+					providerId: uuid(),
+					provider: 'Facegram',
+					userId: profile.userId,
+					email: profile.email
+				}
+			];
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return getOAuthAccounts(profile.userName);
+				})
+				.then(result => {
+					expect(result).to.exist;
+
+					const expected = _.map(oauth, oa => {
+						return oa.provider;
+					});
+					const difference = _.difference(result, expected);
+
+					expect(difference).to.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return an empty array if no connections exist', done => {
+			getOAuthAccounts(profile.userName)
+				.then(result => {
+					expect(result).to.be.an('array');
+					expect(result).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return an empty array if the user name does not exist', done => {
+			getOAuthAccounts('MadeUpUserName')
+				.then(result => {
+					expect(result).to.be.an('array');
+					expect(result).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+	});
 
 	describe('getOrCreateOAuthAccount method', () => {
 
@@ -38,7 +113,7 @@ describe('Users helper methods', () => {
 			getOrCreateOAuthAccount(profile)
 				.then(user => {
 					expect(user).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
@@ -52,7 +127,7 @@ describe('Users helper methods', () => {
 					expect(user).to.exist;
 					user = user.attrs;
 					expect(user.userId).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
@@ -143,7 +218,7 @@ describe('Users helper methods', () => {
 				})
 				.then(user => {
 					expect(user).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
@@ -157,7 +232,7 @@ describe('Users helper methods', () => {
 					expect(user).to.exist;
 					user = user.attrs;
 					expect(user.userId).to.exist;
-					expect(user.userName).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
 					expect(user.email).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
@@ -170,6 +245,120 @@ describe('Users helper methods', () => {
 					expect(oauth.userId).to.equal(user.userId);
 					expect(oauth.email).to.equal(profile.emails[0].value);
 
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
+	describe('getOrConnectOAuthAccount method', () => {
+
+		it('will return the user if connection exists', done => {
+			const user = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'LinkedOut',
+				email: user.email
+			};
+
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					user.createdAt = u.get('createdAt');
+					oauth.userId = user.userId;
+					return OAuth.createAsync(oauth);
+				})
+				.then(() => {
+					const profile = {
+						id: oauth.providerId,
+						displayName: user.displayName,
+						provider: oauth.provider,
+						emails: [{
+							type: 'main',
+							value: user.email
+						}]
+					};
+					return getOrConnectOAuthAccount(user, profile);
+				})
+				.then(result => {
+					expect(result).to.exist;
+					expect(result).to.eql(user);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will create connection and return user if necessary', done => {
+			const user = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'LinkedOut',
+				email: user.email
+			};
+			const profile = {
+				id: oauth.providerId,
+				displayName: user.displayName,
+				provider: oauth.provider,
+				emails: [{
+					type: 'main',
+					value: user.email
+				}]
+			};
+
+			Users.createAsync(user)
+				.then(newUser => {
+					user.userId = newUser.get('userId');
+					user.createdAt = newUser.get('createdAt');
+					oauth.userId = user.userId;
+					return getOrConnectOAuthAccount(user, profile);
+				})
+				.then(result => {
+					expect(result).to.exist;
+					expect(result).to.eql(user);
+					return OAuth.getAsync(profile.id, profile.provider);
+				})
+				.then(result => {
+					expect(result).to.not.be.null;
+					expect(result.attrs).to.eql(oauth);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return error if connection exists and is bound to another user account', done => {
+			const user = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'LinkedOut',
+				userId: uuid(),
+				email: 'another@user.com'
+			};
+
+			Bluebird.all([
+				Users.createAsync(user),
+				OAuth.createAsync(oauth)])
+				.spread(u => {
+					user.userId = u.get('userId');
+					user.createdAt = u.get('createdAt');
+				})
+				.then(() => {
+					const profile = {
+						id: oauth.providerId,
+						displayName: user.displayName,
+						provider: oauth.provider,
+						emails: [{
+							type: 'main',
+							value: user.email
+						}]
+					};
+					return getOrConnectOAuthAccount(user, profile);
+				})
+				.then(() => {
+					done('Operation was not meant to succeed.');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('ForbiddenActionError');
 					done();
 				})
 				.catch(done);

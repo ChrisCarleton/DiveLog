@@ -1,7 +1,29 @@
+import _ from 'lodash';
 import Bluebird from 'bluebird';
-import { EmailInUseError, MissingEmailError } from '../../utils/exceptions';
+import { EmailInUseError, ForbiddenActionError, MissingEmailError } from '../../utils/exceptions';
+import faker from 'faker';
 import OAuth from '../../data/oauth.table';
 import Users from '../../data/users.table';
+
+export function getOAuthAccounts(userName) {
+	return getUserByName(userName)
+		.then(user => {
+			if (!user) {
+				return [];
+			}
+
+			return OAuth
+				.query(user.userId)
+				.usingIndex('UserIdIndex')
+				.loadAll()
+				.execAsync();
+		})
+		.then(result => {
+			return _.map(result.Items, oa => {
+				return oa.get('provider');
+			});
+		});
+}
 
 export function getUserByName(userName) {
 	return Users
@@ -58,7 +80,7 @@ const createNewOAuthAccount = (profile) => {
 			}
 
 			return Users.createAsync({
-				userName: profile.emails[0].value,
+				userName: faker.random.alphaNumeric(12),
 				email: profile.emails[0].value,
 				displayName: profile.displayName,
 				role: 'user',
@@ -105,3 +127,26 @@ export function getOrCreateOAuthAccount(profile) {
 		});
 }
 
+export function getOrConnectOAuthAccount(user, profile) {
+	return OAuth.getAsync(profile.id, profile.provider)
+		.then(oauth => {
+			if (!oauth) {
+				return OAuth.createAsync({
+					providerId: profile.id,
+					provider: profile.provider,
+					userId: user.userId,
+					email: profile.emails[0].value })
+					.then(() => { return user; });
+			}
+
+			if (oauth.get('userId') !== user.userId) {
+				// This provider is already connected to another user account.
+				// The user may have to merge multiple accounts but this is not the
+				// place to do it.
+				throw new ForbiddenActionError(
+					'OAuth account is already connected to another user account.');
+			}
+
+			return user;
+		});
+}
