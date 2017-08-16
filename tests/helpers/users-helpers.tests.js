@@ -75,7 +75,7 @@ describe('Users helper methods', () => {
 				.catch(done);
 		});
 
-		it('will return an empty array of no connections exist', done => {
+		it('will return an empty array if no connections exist', done => {
 			getOAuthAccounts(profile.userName)
 				.then(result => {
 					expect(result).to.be.an('array');
