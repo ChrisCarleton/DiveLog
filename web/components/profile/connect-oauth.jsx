@@ -3,7 +3,7 @@ import OAuthActions from '../../actions/oauth-actions';
 import OAuthStore from '../../stores/oauth-store';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Image, Media } from 'react-bootstrap';
+import { Glyphicon, Image, Media } from 'react-bootstrap';
 
 class ConnectOAuth extends React.Component {
 	constructor() {
@@ -27,6 +27,12 @@ class ConnectOAuth extends React.Component {
 		this.setState(OAuthStore.getState());
 	}
 
+	disconnectProvider(provider) {
+		OAuthActions.removeOAuthAccount(
+			this.props.match.params.userName,
+			provider);
+	}
+
 	getAccountState(provider, friendlyName) {
 		if (!this.state.connectedAccounts) {
 			return <span>Please wait...</span>;
@@ -37,11 +43,15 @@ class ConnectOAuth extends React.Component {
 		}
 
 		return (
-			<span>
-				<strong>{ `Your ${friendlyName} account is connected!` }</strong>
-				{ ' ' }
-				<a href="#">(disconnect?)</a>
-			</span>);
+			<div>
+				<Glyphicon className="text-success" glyph="ok" />
+				<span>
+					{ ' ' }
+					<strong>{ `Your ${friendlyName} account is connected!` }</strong>
+					{ ' ' }
+					(<a href="#" onClick={ () => this.disconnectProvider(provider) }>disconnect?</a>)
+				</span>
+			</div>);
 	}
 
 	render() {

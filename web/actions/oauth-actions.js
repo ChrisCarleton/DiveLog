@@ -20,6 +20,22 @@ class OAuthActions {
 	fetchOAuthAccountsSucceeded(accounts) {
 		return accounts;
 	}
+
+	removeOAuthAccount(userName, provider) {
+		return dispatch => {
+			dispatch();
+			request
+				.delete(`/api/auth/${userName}/oauth/${provider}`)
+				.then(() => this.removeOAuthAccountSucceeded(provider))
+				.catch(err => {
+					AlertActions.handleErrorResponse('profile', err);
+				});
+		};
+	}
+
+	removeOAuthAccountSucceeded(provider) {
+		return provider;
+	}
 }
 
 export default alt.createActions(OAuthActions);
