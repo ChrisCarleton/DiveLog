@@ -4,33 +4,70 @@ import OAuthStore from '../../stores/oauth-store';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Glyphicon, Image, Media } from 'react-bootstrap';
+import UserStore from '../../stores/user-store';
 
 class ConnectOAuth extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			connectedAccounts: null
+			connectedAccounts: null,
+			currentUser: null
 		};
 		this.onAccountsChanged = this.onAccountsChanged.bind(this);
+		this.onUserChanged = this.onUserChanged.bind(this);
 	}
 
 	componentDidMount() {
 		OAuthStore.listen(this.onAccountsChanged);
+		UserStore.listen(this.onUserChanged);
 		OAuthActions.fetchOAuthAccounts(this.props.match.params.userName);
+		this.onUserChanged();
 	}
 
 	componentWillUnmount() {
 		OAuthStore.unlisten(this.onAccountsChanged);
+		UserStore.unlisten(this.onUserChanged);
 	}
 
 	onAccountsChanged() {
-		this.setState(OAuthStore.getState());
+		this.setState(
+			Object.assign(
+				{},
+				this.state,
+				OAuthStore.getState()));
+	}
+
+	onUserChanged() {
+		this.setState(
+			Object.assign(
+				{},
+				this.state,
+				{ currentUser: UserStore.getState().currentUser }));
 	}
 
 	disconnectProvider(provider) {
 		OAuthActions.removeOAuthAccount(
 			this.props.match.params.userName,
 			provider);
+	}
+
+	getDisconnectLink(provider) {
+		if (!this.state.connectedAccounts || !this.state.currentUser) {
+			return null;
+		}
+
+		if (this.state.connectedAccounts.length > 1 || this.state.currentUser.hasPassword) {
+			return (
+				<span>
+					{ '(' }
+					<a href="#" onClick={ () => this.disconnectProvider(provider) }>
+						disconnect?
+					</a>
+					{ ')' }
+				</span>);
+		}
+
+		return null;
 	}
 
 	getAccountState(provider, friendlyName) {
@@ -49,7 +86,7 @@ class ConnectOAuth extends React.Component {
 					{ ' ' }
 					<strong>{ `Your ${friendlyName} account is connected!` }</strong>
 					{ ' ' }
-					(<a href="#" onClick={ () => this.disconnectProvider(provider) }>disconnect?</a>)
+					{ this.getDisconnectLink(provider) }
 				</span>
 			</div>);
 	}
