@@ -13,11 +13,15 @@ import { Strategy as GithubStrategy } from 'passport-github';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 
 const verifyOAuth = (req, profile, done) => {
+	log.trace('Verifying auth');
 	if (req.user) {
 		// User is already logged in. We're just connecting their account to an alternate,
 		// OAuth provider.
 		return getOrConnectOAuthAccount(req.user, profile)
-			.then(() => done(null, req.user))
+			.then(() => {
+				req.accountConnected = true;
+				done(null, req.user);
+			})
 			.catch(done);
 	}
 

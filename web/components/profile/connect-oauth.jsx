@@ -52,9 +52,6 @@ class ConnectOAuth extends React.Component {
 					By connecting OAuth providers to your account you can use your existing social
 					media accounts to gain access to your dive logs!
 				</p>
-				<p>
-					{ 'Connected Accounts: ' + JSON.stringify(this.state.connectedAccounts) }
-				</p>
 				<Media>
 					<Media.Left align="middle">
 						<Image src="/public/img/google_logo.png" rounded />
