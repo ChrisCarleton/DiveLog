@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import errorRespone, {
 	badRequestResponse,
+	forbiddenActionResponse,
 	notAuthroizedResponse,
 	resourceNotFoundResponse,
 	serverErrorResponse
@@ -75,6 +76,12 @@ export function removeOAuthAccount(req, res) {
 		.catch(err => {
 			if (err === 'not found') {
 				return resourceNotFoundResponse(res);
+			}
+
+			if (err.name === 'ForbiddenActionError') {
+				return forbiddenActionResponse(
+					res,
+					'Users who do not have passwords set on their accounts must have at least one active OAuth provider.');
 			}
 
 			log.error('An error occurred while trying to remove an OAuth connection', err);

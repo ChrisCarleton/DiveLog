@@ -155,16 +155,24 @@ export function removeOAuthConnection(user, provider) {
 	return OAuth
 		.query(user.userId)
 		.usingIndex('UserIdIndex')
-		.where('provider').equals(provider)
-		.limit(1)
+		.loadAll()
 		.execAsync()
 		.then(results => {
-			if (results.Items.length === 0) {
-				return;
+			if (results.Items.length === 0) return;
+
+			const items = _.remove(
+				results.Items,
+				i => { return i.get('provider') === provider; });
+
+			if (items.length === 0) return;
+
+			if (results.Items.length === 0 && !user.hasPassword) {
+				throw new ForbiddenActionError(
+					'Users who do not have passwords on their accounts may not remove all of their OAuth providers.');
 			}
 
 			return OAuth.destroyAsync(
-				results.Items[0].get('providerId'),
-				results.Items[0].get('provider'));
+				items[0].get('providerId'),
+				items[0].get('provider'));
 		});
 }

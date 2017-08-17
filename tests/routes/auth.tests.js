@@ -554,7 +554,6 @@ describe('Authentication routes', () => {
 			admin = generator.generateUser(TEST_PASSWORD);
 
 			admin.role = 'admin';
-			user2.passwordHash = undefined;
 
 			Bluebird.all([
 				Users.createAsync(user1),
@@ -826,7 +825,34 @@ describe('Authentication routes', () => {
 		});
 
 		it('will return 403 if user tries to remove a connection when there are no others and user does not have a password', done => {
-			done();
+			let cookie;
+
+			OAuth.createAsync(oauth[2])
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: user2.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					cookie = result.headers['set-cookie'];
+					return Users.updateAsync({ userId: user2.userId, passwordHash: null });
+				})
+				.then(() => {
+					return request
+						.delete(`/api/auth/${user2.userName}/oauth/facebook`)
+						.set('cookie', cookie)
+						.expect(403);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3200);
+					done();
+				})
+				.catch(done);
 		});
 
 	});

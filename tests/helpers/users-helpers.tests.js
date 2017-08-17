@@ -381,12 +381,6 @@ describe('Users helper methods', () => {
 				.catch(done);
 		});
 
-		// afterEach(done => {
-		// 	purgeTable(OAuth, 'providerId', 'provider')
-		// 		.then(() => done())
-		// 		.catch(done);
-		// });
-
 		it('will remove the requested connection', done => {
 			const oauth = [
 				{
@@ -438,13 +432,53 @@ describe('Users helper methods', () => {
 		});
 
 		it('will fail if user has no password set and has no other OAuth connections', done => {
-			done();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'noogle',
+				userId: user.userId,
+				email: user.email
+			};
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return removeOAuthConnection(user, 'noogle');
+				})
+				.then(() => done('Action was not meant to succeed.'))
+				.catch(err => {
+					expect(err.name).to.equal('ForbiddenActionError');
+					done();
+				})
+				.catch(done);
 		});
 
 		it('will succeed if user has a password set and has no other OAuth connections', done => {
-			done();
+			const passwordUser = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'noogle',
+				email: passwordUser.email
+			};
+
+			Users.createAsync(passwordUser)
+				.then(u => {
+					passwordUser.userId = u.get('userId');
+					passwordUser.createdAt = u.get('createdAt');
+					passwordUser.hasPassword = true;
+					oauth.userId = passwordUser.userId;
+					return OAuth.createAsync(oauth);
+				})
+				.then(() => {
+					return removeOAuthConnection(passwordUser, 'noogle');
+				})
+				.then(() => {
+					return OAuth.getAsync(oauth.providerId, oauth.provider);
+				})
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
 		});
 
 	});
-
 });
