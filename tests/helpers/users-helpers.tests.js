@@ -10,7 +10,8 @@ import uuid from 'uuid/v4';
 import {
 	getOrCreateOAuthAccount,
 	getOrConnectOAuthAccount,
-	getOAuthAccounts
+	getOAuthAccounts,
+	removeOAuthConnection
 } from '../../service/controllers/helpers/users-helpers';
 
 describe('Users helper methods', () => {
@@ -362,6 +363,86 @@ describe('Users helper methods', () => {
 					done();
 				})
 				.catch(done);
+		});
+
+	});
+
+	describe('removeOAuthConnection method', () => {
+
+		const user = generator.generateUser();
+		user.passwordHash = undefined;
+		before(done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					user.createdAt = u.get('createdAt');
+					done();
+				})
+				.catch(done);
+		});
+
+		// afterEach(done => {
+		// 	purgeTable(OAuth, 'providerId', 'provider')
+		// 		.then(() => done())
+		// 		.catch(done);
+		// });
+
+		it('will remove the requested connection', done => {
+			const oauth = [
+				{
+					providerId: uuid(),
+					provider: 'noogle',
+					userId: user.userId,
+					email: user.email
+				},
+				{
+					providerId: uuid(),
+					provider: 'faceblam',
+					userId: user.userId,
+					email: user.email
+				}
+			];
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return removeOAuthConnection(user, 'faceblam');
+				})
+				.then(() => {
+					return OAuth.getAsync(oauth[1].providerId, oauth[1].provider);
+				})
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will be a no-op if connection does not exist', done => {
+			const oauth = [
+				{
+					providerId: uuid(),
+					provider: 'noogle',
+					userId: user.userId,
+					email: user.email
+				}
+			];
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return removeOAuthConnection(user, 'faceblam');
+				})
+				.then(() => {
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail if user has no password set and has no other OAuth connections', done => {
+			done();
+		});
+
+		it('will succeed if user has a password set and has no other OAuth connections', done => {
+			done();
 		});
 
 	});

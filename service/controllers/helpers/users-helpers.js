@@ -150,3 +150,21 @@ export function getOrConnectOAuthAccount(user, profile) {
 			return user;
 		});
 }
+
+export function removeOAuthConnection(user, provider) {
+	return OAuth
+		.query(user.userId)
+		.usingIndex('UserIdIndex')
+		.where('provider').equals(provider)
+		.limit(1)
+		.execAsync()
+		.then(results => {
+			if (results.Items.length === 0) {
+				return;
+			}
+
+			return OAuth.destroyAsync(
+				results.Items[0].get('providerId'),
+				results.Items[0].get('provider'));
+		});
+}

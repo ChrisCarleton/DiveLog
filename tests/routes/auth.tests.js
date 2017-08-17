@@ -542,4 +542,293 @@ describe('Authentication routes', () => {
 
 	});
 
+	describe('removeOAuthAccount method', () => {
+
+		const TEST_PASSWORD = 'SSadCL0wn>';
+
+		let user1, user2, admin;
+		let oauth;
+		before(done => {
+			user1 = generator.generateUser(TEST_PASSWORD);
+			user2 = generator.generateUser(TEST_PASSWORD);
+			admin = generator.generateUser(TEST_PASSWORD);
+
+			admin.role = 'admin';
+			user2.passwordHash = undefined;
+
+			Bluebird.all([
+				Users.createAsync(user1),
+				Users.createAsync(user2),
+				Users.createAsync(admin)])
+				.spread((u1, u2, a) => {
+					user1.userId = u1.get('userId');
+					user2.userId = u2.get('userId');
+					admin.userId = a.get('userId');
+					oauth = [
+						{
+							providerId: uuid(),
+							provider: 'google',
+							userId: user1.userId,
+							email: user1.email
+						},
+						{
+							providerId: uuid(),
+							provider: 'github',
+							userId: user1.userId,
+							email: user1.email
+						},
+						{
+							providerId: uuid(),
+							provider: 'facebook',
+							userId: user2.userId,
+							email: user2.email
+						},
+						{
+							providerId: uuid(),
+							provider: 'google',
+							userId: user2.userId,
+							email: user2.email
+						}
+					];
+					done();
+				})
+				.catch(done);
+		});
+
+		after(done => {
+			purgeTable(Users, 'userId')
+				.then(() => { done(); })
+				.catch(done);
+		});
+
+		afterEach(done => {
+			purgeTable(OAuth, 'providerId', 'provider')
+				.then(() => { done(); })
+				.catch(done);
+		});
+
+		it('will remove requested OAuth account', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: user1.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					return request
+						.delete(`/api/auth/${user1.userName}/oauth/google`)
+						.set('cookie', result.headers['set-cookie'])
+						.expect(200);
+				})
+				.then(() => {
+					return OAuth
+						.query(user1.userId)
+						.usingIndex('UserIdIndex')
+						.loadAll()
+						.execAsync();
+				})
+				.then(result => {
+					expect(result.Items.length).to.equal(1);
+					expect(result.Items[0].get('provider')).to.not.equal('google');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is not authorized to remove account', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: user1.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					return request
+						.delete(`/api/auth/${user2.userName}/oauth/google`)
+						.set('cookie', result.headers['set-cookie'])
+						.expect(401);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3100);
+					return OAuth
+						.query(user2.userId)
+						.usingIndex('UserIdIndex')
+						.loadAll()
+						.execAsync();
+				})
+				.then(result => {
+					expect(result.Items.length).to.equal(2);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is not authenticated', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.delete(`/api/auth/${user2.userName}/oauth/google`)
+						.expect(401);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3100);
+					return OAuth
+						.query(user2.userId)
+						.usingIndex('UserIdIndex')
+						.loadAll()
+						.execAsync();
+				})
+				.then(result => {
+					expect(result.Items.length).to.equal(2);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 to users if profile owner does not exist', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: user1.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					return request
+						.delete('/api/auth/fakeuser/oauth/google')
+						.set('cookie', result.headers['set-cookie'])
+						.expect(401);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 to admins if profile owner does not exist', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: admin.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					return request
+						.delete('/api/auth/fakeuser/oauth/google')
+						.set('cookie', result.headers['set-cookie'])
+						.expect(404);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('admins can remove other users\' connections', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: admin.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					return request
+						.delete(`/api/auth/${user1.userName}/oauth/google`)
+						.set('cookie', result.headers['set-cookie'])
+						.expect(200);
+				})
+				.then(() => {
+					return OAuth
+						.query(user1.userId)
+						.usingIndex('UserIdIndex')
+						.loadAll()
+						.execAsync();
+				})
+				.then(result => {
+					expect(result.Items.length).to.equal(1);
+					expect(result.Items[0].get('provider')).to.not.equal('google');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if user tries to remove an invalid account', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: user1.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					return request
+						.delete(`/api/auth/${user1.userName}/oauth/noogle`)
+						.set('cookie', result.headers['set-cookie'])
+						.expect(400);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 200 if user tries to remove a connection that is not there', done => {
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: user1.userName,
+							password: TEST_PASSWORD
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(result => {
+					return request
+						.delete(`/api/auth/${user1.userName}/oauth/facebook`)
+						.set('cookie', result.headers['set-cookie'])
+						.expect(200);
+				})
+				.then(() => done())
+				.catch(done);
+		});
+
+		it('will return 403 if user tries to remove a connection when there are no others and user does not have a password', done => {
+			done();
+		});
+
+	});
+
 });

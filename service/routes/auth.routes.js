@@ -3,6 +3,7 @@ import {
 	listOAuthAccounts,
 	login,
 	logout,
+	removeOAuthAccount
 } from '../controllers/auth.controller';
 
 module.exports = function(app) {
@@ -13,4 +14,8 @@ module.exports = function(app) {
 	app.post(baseRoute + 'logout/', logout);
 
 	app.get(baseUserRoute + 'oauth/', ensureOAuthAccountAccess, listOAuthAccounts);
+	app.delete(
+		baseUserRoute + 'oauth/:provider',
+		ensureOAuthAccountAccess,
+		removeOAuthAccount);
 };

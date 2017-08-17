@@ -1,7 +1,15 @@
-import errorRespone, { notAuthroizedResponse, serverErrorResponse } from '../utils/error-response';
+import _ from 'lodash';
+import errorRespone, {
+	badRequestResponse,
+	notAuthroizedResponse,
+	resourceNotFoundResponse,
+	serverErrorResponse
+} from '../utils/error-response';
 import log from '../logger';
 import passport from 'passport';
-import { getOAuthAccounts } from './helpers/users-helpers';
+import { getUserByName, getOAuthAccounts, removeOAuthConnection } from './helpers/users-helpers';
+
+const KNOWN_OAUTH_PROVIDERS = ['google', 'facebook', 'github'];
 
 export function login(req, res) {
 	passport.authenticate('local', (err, user) => {
@@ -41,6 +49,35 @@ export function listOAuthAccounts(req, res) {
 			log.error(
 				'An error occured while attempting to retrieve user\'s OAuth accounts:',
 				err);
+			serverErrorResponse(res);
+		});
+}
+
+export function removeOAuthAccount(req, res) {
+	if (_.indexOf(KNOWN_OAUTH_PROVIDERS, req.params.provider) === -1) {
+		return badRequestResponse(
+			res,
+			`"${req.params.provider}" is not a recognized OAuth provider.`);
+	}
+
+	getUserByName(req.params.user)
+		.then(user => {
+			if (!user) {
+				// Profile owner doesn't exist.
+				throw 'not found';
+			}
+
+			return removeOAuthConnection(user, req.params.provider);
+		})
+		.then(() => {
+			res.send('ok');
+		})
+		.catch(err => {
+			if (err === 'not found') {
+				return resourceNotFoundResponse(res);
+			}
+
+			log.error('An error occurred while trying to remove an OAuth connection', err);
 			serverErrorResponse(res);
 		});
 }
