@@ -108,3 +108,49 @@ The details of the newly-created user account are returned.
   * __Error ID 1010:__ User name is taken. The selected user name already belongs to a user in the database. Select a new user name and try again.
   * __Error ID 1020:__ Email is taken. The selected e-mail address already belongs to a user in the database. Perhaps an account recovery is in order?
 * __Status Code 500:__ Internal server error.
+
+## List Connected OAuth Providers
+
+Lists the connected OAuth providers for a given user.
+
+### Route
+```
+GET /api/auth/:user/oauth/
+```
+* __:user__ The User Name of the user for which connected OAuth providers should be retrieved.
+
+### Success Response
+* __Status Code:__ 200
+
+An array of strings listing the OAuth providers connected to the specified user's account. Example:
+
+```javascript
+['google', 'github']
+```
+
+__Note:__ Returns an empty array if no OAuth providers are connected to the user's account.
+
+### Error Response
+* __Status Code 401:__ Not authorized. The current user is either unauthenticated or not authorized to list the connected OAuth providers for the specified user.
+* __Status Code 500:__ Internal server error.
+
+## Delete a Connected OAuth Provider
+
+Removes a user's connected OAuth provider record.
+
+### Route
+```
+DELETE /api/auth/:user/oauth/:provider
+```
+* __:user__ The user name that identifies the user for which log entries should be returned.
+* __:provider__ The OAuth provider to detach from the given user's profile. Valid values are `google`, `facebook`, and `github`.
+
+### Success Response
+* __Status Code:__ 200
+
+### Error Response
+* __Status Code 400:__ Bad request. An invalid provider was specified in the route path. Only `google`, `facebook`, and `github` are permitted.
+* __Status Code 401:__ Not authorized. The current user is not authorized to remove OAuth providers from the given user's profile.
+* __Status Code 403:__ Forbidden. This is returned when an attempt is made to remove the last OAuth provider from a user account that does not have a password set for local login. Users must be able to log in with at least one OAuth provider if they cannot log in locally using a traditional username/password.
+* __Status Code 404:__ Resource not found. Site administrators will receive a 404 response if trying to delete OAuth providers from users that do not exist. (Non-administrative users will simply receive a 401 response.)
+* __Status Code 500:__ Internal server error.
