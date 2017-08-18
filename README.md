@@ -18,7 +18,7 @@ See the API documentation [here](./docs/api.md).
 
 ### Prerequisites
 
-* You must have Node.js v6.11 or higher installed.
+* You must have Node.js v8.4.0 or higher installed.
 * You must have Docker installed to run the fake DynamoDb module.
 * You must have Gulp installed globally. (Run `npm i -g gulp`.)
 * It's also a good idea to have Bunyan installed globally for viewing log output. (`npm i -g bunyan`.)
@@ -38,6 +38,27 @@ developing locally.
 To stop and remove the previously created Docker containers run
 
 ``` ./deploy/teardown-local.sh ```
+
+### The Mail Client
+
+Some functions of the application involve the sending of templated e-mails. In order for the app's
+mail client to work, certain environment varialbes need to be set.
+
+* `DIVELOG_MAIL_FROM_ADDRESS` - The address from which e-mail messages from the app will appear to originate from.
+* `DIVELOG_MAIL_HOST` - The host name or URL of the SMTP server that will deliver the app's mail messages.
+* `DIVELOG_MAIL_PORT` - The port number on which the SMTP host listens for connections.
+* `DIVELOG_MAIL_USERNAME` - The username to use when authenticating with the SMTP server.
+* `DIVELOG_MAIL_PASSWORD` - The password to use when authenticating with the SMTP server.
+
+#### Testing the Mail Client
+
+To test to see if the e-mail client is configured correctly, there is a test script that can be run.
+
+```
+node deploy/mail-test.js <destination>
+```
+
+The script will invoke the app's mail client to send a test e-mail to the address specified as `<destination>`.
 
 ### Common Gulp Tasks
 

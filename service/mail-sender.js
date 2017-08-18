@@ -16,7 +16,10 @@ const transporter = nodemailer.createTransport({
 Bluebird.promisifyAll(transporter);
 
 const sender = (recipient, subject, view, params) => {
-	const html = pug.renderFile(view, params);
+	let html;
+
+	try { html = pug.renderFile(view, params); }
+	catch (err) { return Bluebird.reject(err); }
 
 	const mailOptions = {
 		from: config.mail.fromAddress,
@@ -31,4 +34,4 @@ const sender = (recipient, subject, view, params) => {
 sender.transporter = transporter;
 
 export default sender;
-module.exports = sender; 
+module.exports = sender;

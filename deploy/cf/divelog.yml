@@ -69,11 +69,13 @@ Parameters:
   MailHost:
     Description: The SMTP host through which emails will be sent.
     Type: String
-    Default: "email-smtp.us-east-1.amazonaws.com"
+  MailPort:
+    Description: The port on which the SMTP host listens for connections.
+    Type: Number
+    Default: '25'
   MailUserName:
     Description: The user name to use when authenticating with the SMTP host.
     Type: String
-    Default: "AKIAJNVGTSUAFBYYKEUQ"
   MailPassword:
     Description: The password to use when authenticating with the SMTP host.
     Type: String
@@ -412,12 +414,12 @@ Resources:
             Value: !Ref AwsSecretKey
           - Name: DIVELOG_AWS_REGION
             Value: !Ref AWS::Region
-          - Name: DIVELOG_FORCE_SSL
-            Value: true
           - Name: DIVELOG_MAIL_FROM_ADDRES
             Value: !Ref MailFromAddress
           - Name: DIVELOG_MAIL_HOST
             Value: !Ref MailHost
+          - Name: DIVELOG_MAIL_PORT
+            Value: !Ref MailPort
           - Name: DIVELOG_MAIL_USERNAME
             Value: !Ref MailUserName
           - Name: DIVELOG_MAIL_PASSWORD

@@ -65,4 +65,16 @@ describe('Mail sender', () => {
 			})
 			.catch(done);
 	});
+
+	it('returns an error if Pug fails to render the template', done => {
+		const error = new Error('OMG! Pug failed!');
+		pugStub.throws(error);
+		sendMail('joe@email.com', 'This will not make it', 'my-template.pug')
+			.then(() => done('This should not have succeeded.'))
+			.catch(err => {
+				expect(err).to.equal(error);
+				done();
+			})
+			.catch(done);
+	});
 });
