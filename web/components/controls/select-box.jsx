@@ -32,7 +32,7 @@ class SelectBox extends React.Component {
 		return (
 			<FormGroup controlId={this.props.controlId} bsSize="small" validationState={ validationState }>
 				<Col sm={4}>
-					<ControlLabel>
+					<ControlLabel className="right-aligned">
 						{this.props.label}
 						{this.props.required ? <span className="text-danger"> * </span> : null}
 						{':'}

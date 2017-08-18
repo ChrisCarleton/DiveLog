@@ -46,7 +46,7 @@ class TextBox extends React.Component {
 		return (
 			<FormGroup bsSize="small" controlId={this.props.controlId} validationState={validationState}>
 				<Col sm={4}>
-					<ControlLabel>
+					<ControlLabel className="right-aligned">
 						<span className="text-right">
 							{this.props.label}
 							{this.props.required ? <span className="text-danger"> * </span> : null}

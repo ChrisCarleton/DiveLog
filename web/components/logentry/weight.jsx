@@ -68,7 +68,7 @@ class Weight extends React.Component {
 
 				<FormGroup bsSize="small" validationState={ weight.correctness ? 'success' : null }>
 					<Col xs={4}>
-						<ControlLabel>Correct Amount?</ControlLabel>
+						<ControlLabel className="right-aligned">Correct Amount?</ControlLabel>
 					</Col>
 					<Col xs={8}>
 						<Radio
@@ -97,7 +97,7 @@ class Weight extends React.Component {
 
 				<FormGroup bsSize="small" validationState={ weight.trim ? 'success' : null }>
 					<Col xs={4}>
-						<ControlLabel>Trim</ControlLabel>
+						<ControlLabel className="right-aligned">Trim:</ControlLabel>
 					</Col>
 					<Col xs={8}>
 						<Radio
