@@ -4,8 +4,8 @@ import nodemailer from 'nodemailer';
 import pug from 'pug';
 
 const transporter = nodemailer.createTransport({
-	host: congif.mail.host,
-	port: 465,
+	host: config.mail.host,
+	port: config.mail.port,
 	secure: true,
 	auth: {
 		user: config.mail.username,
@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 Bluebird.promisifyAll(transporter);
 
-export default function(recipient, subject, view, params) {
+const sender = (recipient, subject, view, params) => {
 	const html = pug.renderFile(view, params);
 
 	const mailOptions = {
@@ -26,4 +26,9 @@ export default function(recipient, subject, view, params) {
 	};
 
 	return transporter.sendMailAsync(mailOptions);
-}
+};
+
+sender.transporter = transporter;
+
+export default sender;
+module.exports = sender; 

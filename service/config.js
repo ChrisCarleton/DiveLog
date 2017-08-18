@@ -15,7 +15,8 @@ const config = {
 	mail: {
 		fromAddress: process.env.DIVELOG_MAIL_FROM_ADDRESS || 'no-reply@bottomtime.ca',
 		host: process.env.DIVELOG_MAIL_HOST || 'email-smtp.us-east-1.amazonaws.com',
-		username: process.env.DIVELOG_MAIL_USERNAME || 'AKIAJNVGTSUAFBYYKEUQ',
+		port: process.env.DIVELOG_MAIL_PORT || 465,
+		username: process.env.DIVELOG_MAIL_USERNAME || 'AKIAJAEXL2OMYEQBWE4A',
 		password: process.env.DIVELOG_MAIL_PASSWORD
 	},
 
