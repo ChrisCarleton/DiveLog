@@ -1,10 +1,10 @@
 import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
+import { Link, Redirect } from 'react-router-dom';
 import PageHeader from './controls/page-header.jsx';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import SignInWithProvider from './controls/sign-in-with-provider.jsx';
 import TextBox from './controls/text-box.jsx';
 import UserActions from '../actions/user-actions';
@@ -14,6 +14,7 @@ import { withRouter } from 'react-router';
 import {
 	Col,
 	Button,
+	Glyphicon,
 	Grid,
 	Row
 } from 'react-bootstrap';
@@ -83,6 +84,11 @@ class LogIn extends React.Component {
 									Log In
 								</Button>
 							</Formsy.Form>
+							<div className="forgotten-password-link">
+								<Glyphicon glyph="exclamation-sign" />
+								{ ' ' }
+								<Link to="/resetPassword">Forgot your username or password?</Link>
+							</div>
 						</Col>
 						<Col md={2}>
 							<h4>- or -</h4>

@@ -2,6 +2,7 @@ import ConnectOAuth from './profile/connect-oauth.jsx';
 import GeneralInfo from './profile/general.jsx';
 import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
 import PageHeader from './controls/page-header.jsx';
+import Password from './profile/password.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
@@ -69,7 +70,10 @@ class Profile extends React.Component {
 									<NavItem>My Info</NavItem>
 								</IndexLinkContainer>
 								<NavItem>Settings</NavItem>
-								<NavItem>Change Password</NavItem>
+								<NavItem>Privacy</NavItem>
+								<LinkContainer to={ `/profile/${userName}/password` }>
+									<NavItem>Change Password</NavItem>
+								</LinkContainer>
 								<LinkContainer to={ `/profile/${userName}/oauth` }>
 									<NavItem>Manage OAuth</NavItem>
 								</LinkContainer>
@@ -78,6 +82,7 @@ class Profile extends React.Component {
 						<Col xs={ 9 }>
 							<Switch>
 								<Route exact path="/profile/:userName" component={ GeneralInfo } />
+								<Route exact path="/profile/:userName/password" component={ Password } />
 								<Route exact path="/profile/:userName/oauth" component={ ConnectOAuth } />
 								<Route>
 									<Redirect to="/errors/notfound" />
