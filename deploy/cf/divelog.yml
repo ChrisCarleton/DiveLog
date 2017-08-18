@@ -230,6 +230,9 @@ Resources:
         -
           AttributeName: "provider"
           AttributeType: "S"
+        -
+          AttributeName: "userId"
+          AttributeType: "S"
       KeySchema:
         -
           AttributeName: "providerId"

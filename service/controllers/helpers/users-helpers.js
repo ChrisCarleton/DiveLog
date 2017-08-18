@@ -150,3 +150,29 @@ export function getOrConnectOAuthAccount(user, profile) {
 			return user;
 		});
 }
+
+export function removeOAuthConnection(user, provider) {
+	return OAuth
+		.query(user.userId)
+		.usingIndex('UserIdIndex')
+		.loadAll()
+		.execAsync()
+		.then(results => {
+			if (results.Items.length === 0) return;
+
+			const items = _.remove(
+				results.Items,
+				i => { return i.get('provider') === provider; });
+
+			if (items.length === 0) return;
+
+			if (results.Items.length === 0 && !user.hasPassword) {
+				throw new ForbiddenActionError(
+					'Users who do not have passwords on their accounts may not remove all of their OAuth providers.');
+			}
+
+			return OAuth.destroyAsync(
+				items[0].get('providerId'),
+				items[0].get('provider'));
+		});
+}

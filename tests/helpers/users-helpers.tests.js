@@ -10,7 +10,8 @@ import uuid from 'uuid/v4';
 import {
 	getOrCreateOAuthAccount,
 	getOrConnectOAuthAccount,
-	getOAuthAccounts
+	getOAuthAccounts,
+	removeOAuthConnection
 } from '../../service/controllers/helpers/users-helpers';
 
 describe('Users helper methods', () => {
@@ -366,4 +367,116 @@ describe('Users helper methods', () => {
 
 	});
 
+	describe('removeOAuthConnection method', () => {
+
+		const user = generator.generateUser();
+		user.passwordHash = undefined;
+		before(done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					user.createdAt = u.get('createdAt');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will remove the requested connection', done => {
+			const oauth = [
+				{
+					providerId: uuid(),
+					provider: 'noogle',
+					userId: user.userId,
+					email: user.email
+				},
+				{
+					providerId: uuid(),
+					provider: 'faceblam',
+					userId: user.userId,
+					email: user.email
+				}
+			];
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return removeOAuthConnection(user, 'faceblam');
+				})
+				.then(() => {
+					return OAuth.getAsync(oauth[1].providerId, oauth[1].provider);
+				})
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will be a no-op if connection does not exist', done => {
+			const oauth = {
+				providerId: uuid(),
+				provider: 'noogle',
+				userId: user.userId,
+				email: user.email
+			};
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return removeOAuthConnection(user, 'faceblam');
+				})
+				.then(() => {
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail if user has no password set and has no other OAuth connections', done => {
+			const oauth = {
+				providerId: uuid(),
+				provider: 'noogle',
+				userId: user.userId,
+				email: user.email
+			};
+
+			OAuth.createAsync(oauth)
+				.then(() => {
+					return removeOAuthConnection(user, 'noogle');
+				})
+				.then(() => done('Action was not meant to succeed.'))
+				.catch(err => {
+					expect(err.name).to.equal('ForbiddenActionError');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will succeed if user has a password set and has no other OAuth connections', done => {
+			const passwordUser = generator.generateUser();
+			const oauth = {
+				providerId: uuid(),
+				provider: 'noogle',
+				email: passwordUser.email
+			};
+
+			Users.createAsync(passwordUser)
+				.then(u => {
+					passwordUser.userId = u.get('userId');
+					passwordUser.createdAt = u.get('createdAt');
+					passwordUser.hasPassword = true;
+					oauth.userId = passwordUser.userId;
+					return OAuth.createAsync(oauth);
+				})
+				.then(() => {
+					return removeOAuthConnection(passwordUser, 'noogle');
+				})
+				.then(() => {
+					return OAuth.getAsync(oauth.providerId, oauth.provider);
+				})
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
+		});
+
+	});
 });

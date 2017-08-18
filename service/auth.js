@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import config from './config';
 import { getOrConnectOAuthAccount, getOrCreateOAuthAccount } from './controllers/helpers/users-helpers';
@@ -16,7 +17,10 @@ const verifyOAuth = (req, profile, done) => {
 		// User is already logged in. We're just connecting their account to an alternate,
 		// OAuth provider.
 		return getOrConnectOAuthAccount(req.user, profile)
-			.then(() => done(null, req.user))
+			.then(() => {
+				req.accountConnected = true;
+				done(null, req.user);
+			})
 			.catch(done);
 	}
 
@@ -120,14 +124,9 @@ export default function(app) {
 					return done(null, null);
 				}
 
-				const user = {
-					userId: result.get('userId'),
-					userName: result.get('userName'),
-					email: result.get('email'),
-					displayName: result.get('displayName'),
-					role: result.get('role'),
-					createdAt: result.get('createdAt')
-				};
+				const user = Object.assign({}, result.attrs);
+				user.hasPassword = _.isNil(user.passwordHash) ? false : true;
+				user.passwordHash = undefined;
 
 				done(null, user);
 			})

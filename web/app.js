@@ -1,6 +1,7 @@
 import alt from './alt';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Chrome from './components/chrome.jsx';
+import EmailInUse from './components/errors/email-in-use.jsx';
 import Home from './components/home.jsx';
 import LogEntries from './components/log-entries.jsx';
 import LogEntry from './components/log-entry.jsx';
@@ -30,6 +31,7 @@ class AppRouter extends React.Component {
 						<Route path="/profile/:userName" component={ Profile } />
 						<Route exact path="/error/notFound" component={ NotFound } />
 						<Route exact path="/error/server" component={ ServerError } />
+						<Route exact path="/error/emailInUse" component={ EmailInUse } />
 						<Route component={ NotFound } />
 					</Switch>
 				</Chrome>
