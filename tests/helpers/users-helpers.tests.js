@@ -412,14 +412,12 @@ describe('Users helper methods', () => {
 		});
 
 		it('will be a no-op if connection does not exist', done => {
-			const oauth = [
-				{
-					providerId: uuid(),
-					provider: 'noogle',
-					userId: user.userId,
-					email: user.email
-				}
-			];
+			const oauth = {
+				providerId: uuid(),
+				provider: 'noogle',
+				userId: user.userId,
+				email: user.email
+			};
 
 			OAuth.createAsync(oauth)
 				.then(() => {

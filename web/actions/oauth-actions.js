@@ -8,12 +8,8 @@ class OAuthActions {
 			dispatch();
 			request
 				.get(`/api/auth/${userName}/oauth`)
-				.then(res => {
-					this.fetchOAuthAccountsSucceeded(res.body);
-				})
-				.catch(err => {
-					AlertActions.handleErrorResponse('profile', err);
-				});
+				.then(res => this.fetchOAuthAccountsSucceeded(res.body))
+				.catch(err => AlertActions.handleErrorResponse('profile', err));
 		};
 	}
 
@@ -27,9 +23,7 @@ class OAuthActions {
 			request
 				.delete(`/api/auth/${userName}/oauth/${provider}`)
 				.then(() => this.removeOAuthAccountSucceeded(provider))
-				.catch(err => {
-					AlertActions.handleErrorResponse('profile', err);
-				});
+				.catch(err => AlertActions.handleErrorResponse('profile', err));
 		};
 	}
 
