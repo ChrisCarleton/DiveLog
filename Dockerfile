@@ -1,4 +1,4 @@
-FROM node:6.11
+FROM node:8.4.0
 
 RUN mkdir -p /usr/src/divelog
 WORKDIR /usr/src/divelog
@@ -8,7 +8,6 @@ RUN npm install --loglevel error
 
 COPY . .
 RUN gulp bundle
-RUN deploy/install-phantomjs.sh
 
 CMD ["npm", "run", "server"]
 EXPOSE 8100

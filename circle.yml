@@ -15,5 +15,6 @@ deployment:
   staging:
     branch: master
     commands:
-      - deploy/push-docker-image.sh Build$CIRCLE_BUILD_NUM
-      - deploy/run-blue-green.sh Build$CIRCLE_BUILD_NUM
+      - deploy/push-docker-image.sh
+      - aws configure set default.region us-east-1
+      - aws codepipeline start-pipeline-execution --name DiveLog

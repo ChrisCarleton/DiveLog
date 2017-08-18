@@ -6,6 +6,7 @@ import gulp from 'gulp';
 import istanbul from 'gulp-istanbul';
 import mkdirp from 'mkdirp';
 import mocha from 'gulp-mocha';
+import nsp from 'gulp-nsp';
 import path from 'path';
 import util from 'gulp-util';
 import webpack from 'webpack';
@@ -57,6 +58,10 @@ gulp.task('ensure-dynamo-tables', done => {
 	database.createTables(done);
 });
 
+gulp.task('nsp', done => {
+	nsp({ package: path.resolve(__dirname, 'package.json') }, done);
+});
+
 gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-tables'], () => {
 	process.env.DIVELOG_LOG_LEVEL = 'trace';
 	process.env.DIVELOG_LOG_FILE = path.resolve(__dirname, 'logs/tests.log');
@@ -72,10 +77,13 @@ gulp.task('test', ['lint', 'cover', 'ensure-log-directory', 'ensure-dynamo-table
 		.pipe(istanbul.writeReports({
 			dir: './coverage',
 			reporters: ['lcov', 'text-summary']
-		}));
+		}))
+		.on('end', process.exit.bind(process, 0));
 });
 
-gulp.task('report-coverage', ['test'], () => {
+gulp.task('test-full', ['nsp', 'test']);
+
+gulp.task('report-coverage', () => {
 	return gulp
 		.src('coverage/lcov.info')
 		.pipe(coveralls());
@@ -127,7 +135,7 @@ gulp.task('webpack-server', done => {
 				throw new util.PluginError('webpack-dev-server', err);
 			}
 
-			util.log('[webpack-dev-server]', "Webpack Dev Server started on port 3002.");
+			util.log('[webpack-dev-server]', 'Webpack Dev Server started on port 3002.');
 
 			done();
 		});

@@ -1,7 +1,7 @@
 doctype html
 html
 	head
-		title Dive Log
+		title Bottom Time - An Online Logbook for Divers
 		link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css")
 		link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap-theme.min.css")
 		if styleLocation
@@ -13,6 +13,8 @@ html
 	script(type="text/javascript").
 		window.baseUrl = '!{baseUrl}';
 		window.initialState = !{initialState};
+		function initMap() {}	// Required for Google Map component to work!
 
+	script(type="text/javascript", src=googleMapsLocation)
 	script(type="text/javascript", src=bundleLocation)
 	

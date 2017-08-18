@@ -4,6 +4,10 @@ Circle CI build: [![CircleCI](https://circleci.com/gh/ChrisCarleton/DiveLog.svg?
 
 Code Coverage: [![Coverage Status](https://coveralls.io/repos/github/ChrisCarleton/DiveLog/badge.svg?branch=master)](https://coveralls.io/github/ChrisCarleton/DiveLog?branch=master)
 
+Dependencies: [![dependencies Status](https://david-dm.org/ChrisCarleton/DiveLog/status.svg)](https://david-dm.org/ChrisCarleton/DiveLog)
+
+Security: [![NSP Status](https://nodesecurity.io/orgs/chriscarleton/projects/fb6819e8-628b-4139-a228-1ed5b93d9ae7/badge)](https://nodesecurity.io/orgs/chriscarleton/projects/fb6819e8-628b-4139-a228-1ed5b93d9ae7)
+
 An online scuba diving log book.
 
 ## Developing Against Bottom Time.

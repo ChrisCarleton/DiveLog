@@ -3,6 +3,7 @@ import Formsy from 'formsy-react';
 import PageHeader from './controls/page-header.jsx';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import SignInWithProvider from './controls/sign-in-with-provider.jsx';
 import TextBox from './controls/text-box.jsx';
 import UserActions from '../actions/user-actions';
 import UserStore from '../stores/user-store';
@@ -68,7 +69,7 @@ class SignUp extends React.Component {
 					<Row>
 						<Col md={5}>
 							<h4>Create an Account</h4>
-							<Formsy.Form onValidSubmit={ this.submit } onValid={ this.enableButton } onInvalid={ this.disableButton }>
+							<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit } onValid={ this.enableButton } onInvalid={ this.disableButton }>
 								<TextBox
 									label="User name"
 									controlId="userName"
@@ -114,7 +115,7 @@ class SignUp extends React.Component {
 									isPassword
 									required />
 								<TextBox
-									label="Confirm Password"
+									label="Retype Password"
 									controlId="confirmPassword"
 									name="confirmPassword"
 									isPassword
@@ -134,7 +135,7 @@ class SignUp extends React.Component {
 							<h4>- or -</h4>
 						</Col>
 						<Col md={5}>
-							<h4>Sign In Using One of These Providers</h4>
+							<SignInWithProvider />
 						</Col>
 					</Row>
 				</Grid>

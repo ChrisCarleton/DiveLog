@@ -49,13 +49,19 @@ Parameters:
     Default: info
     AllowedValues: [trace, debug, info, warn, error, fatal]
     ConstraintDescription: Please choose one of the recognized log levels.
+  SessionSecret:
+    Description: The secret string used to secure session cookies.
+    Type: String
+  BaseUrl:
+    Description: The base URL for this instance of the application.
+    Type: String
+    Default: https://dev.bottomtime.ca/
   AwsKeyId:
     Description: AWS API key Id
     Type: String
   AwsSecretKey:
     Description: AWS API secret key
     Type: String
-
   MailFromAddress:
     Description: The email address from which messages will be sent.
     Type: String
@@ -70,6 +76,27 @@ Parameters:
     Default: "AKIAJNVGTSUAFBYYKEUQ"
   MailPassword:
     Description: The password to use when authenticating with the SMTP host.
+    Type: String
+  GoogleClientId:
+    Description: Client ID for Google OAuth service.
+    Type: String
+    Default: 399113053541-k86gnd1eo92ochborjtuofikn6v37dja.apps.googleusercontent.com
+  GoogleClientSecret:
+    Description: Client Secret for Google OAuth service.
+    Type: String
+  GitHubClientId:
+    Description: Client ID for GitHub OAuth service.
+    Type: String
+    Default: f53bc482f795f83a8520
+  GitHubClientSecret:
+    Description: Client Secret for GitHub OAuth service.
+    Type: String
+  FacebookClientId:
+    Description: Client ID for Facebook OAuth service.
+    Type: String
+    Default: '1442189925869117'
+  FacebookClientSecret:
+    Description: Client Secret for Facebook OAuth service.
     Type: String
 
   UsersReadCapacity:
@@ -197,6 +224,55 @@ Resources:
             WriteCapacityUnits:
               Ref: UsersWriteCapacity
 
+  OAuthTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Fn::Join:
+          - '-'
+          - - divelog
+            - Ref: NodeEnv
+            - oauth
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: OAuthReadCapacity
+        WriteCapacityUnits:
+          Ref: OAuthWriteCapacity
+      AttributeDefinitions:
+        -
+          AttributeName: "providerId"
+          AttributeType: "S"
+        -
+          AttributeName: "provider"
+          AttributeType: "S"
+        -
+          AttributeName: "userId"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "providerId"
+          KeyType: "HASH"
+        -
+          AttributeName: "provider"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "UserIdIndex"
+          KeySchema:
+            -
+              AttributeName: "userId"
+              KeyType: "HASH"
+            -
+              AttributeName: "provider"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "KEYS_ONLY"
+          ProvisionedThroughput:
+            ReadCapacityUnits:
+              Ref: OAuthReadCapacity
+            WriteCapacityUnits:
+              Ref: OAuthWriteCapacity
+
   SessionsTable:
     Type: "AWS::DynamoDB::Table"
     Properties:
@@ -322,7 +398,7 @@ Resources:
       Family: !Join ['', [!Ref 'AWS::StackName', -divelog]]
       ContainerDefinitions:
       - Name: divelog-web
-        Cpu: '10'
+        Cpu: '20'
         Essential: 'true'
         Image: !Ref DockerImage
         Environment:
@@ -346,15 +422,44 @@ Resources:
             Value: !Ref MailUserName
           - Name: DIVELOG_MAIL_PASSWORD
             Value: !Ref MailPassword
+          - Name: DIVELOG_BASE_URL
+            Value: !Ref BaseUrl
+          - Name: DIVELOG_SESSION_SECRET
+            Value: !Ref SessionSecret
+          - Name: DIVELOG_GOOGLE_CONSUMER_ID
+            Value: !Ref GoogleClientId
+          - Name: DIVELOG_GOOGLE_CONSUMER_SECRET
+            Value: !Ref GoogleClientSecret
+          - Name: DIVELOG_GITHUB_CLIENT_ID
+            Value: !Ref GitHubClientId
+          - Name: DIVELOG_GITHUB_CLIENT_SECRET
+            Value: !Ref GitHubClientSecret
+          - Name: DIVELOG_FACEBOOK_CLIENT_ID
+            Value: !Ref FacebookClientId
+          - Name: DIVELOG_FACEBOOK_CLIENT_SECRET
+            Value: !Ref FacebookClientSecret
         Memory: '300'
         LogConfiguration:
           LogDriver: awslogs
           Options:
             awslogs-group: !Ref 'CloudwatchLogsGroup'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: ecs-demo-app
+            awslogs-stream-prefix: divelog
         PortMappings:
         - ContainerPort: 8100
+  redirecttaskdefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Join ['', [!Ref 'AWS::StackName', -redirect]]
+      ContainerDefinitions:
+      - Name: divelog-redirect
+        Cpu: '8'
+        Essential: 'true'
+        Image: geldim/https-redirect
+        Memory: '128'
+        PortMappings:
+        - ContainerPort: 80
+
   ECSALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -371,7 +476,7 @@ Resources:
     Properties:
       DefaultActions:
       - Type: forward
-        TargetGroupArn: !Ref 'ECSTG'
+        TargetGroupArn: !Ref 'ECSRedirectTG'
       LoadBalancerArn: !Ref 'ECSALB'
       Port: '80'
       Protocol: HTTP
@@ -393,7 +498,7 @@ Resources:
     Properties:
       Actions:
       - Type: forward
-        TargetGroupArn: !Ref 'ECSTG'
+        TargetGroupArn: !Ref 'ECSRedirectTG'
       Conditions:
       - Field: path-pattern
         Values: [/]
@@ -421,6 +526,22 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Name: ECSTG
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref 'VpcId'
+  ECSRedirectTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: ECSALB
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 3
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-399
+      Name: ECSRedirectTG
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2
@@ -465,6 +586,18 @@ Resources:
         TargetGroupArn: !Ref 'ECSTG'
       Role: !Ref 'ECSServiceRole'
       TaskDefinition: !Ref 'taskdefinition'
+  redirectservice:
+    Type: AWS::ECS::Service
+    DependsOn: ALBListener
+    Properties:
+      Cluster: !Ref 'ECSCluster'
+      DesiredCount: '1'
+      LoadBalancers:
+      - ContainerName: divelog-redirect
+        ContainerPort: '80'
+        TargetGroupArn: !Ref 'ECSRedirectTG'
+      Role: !Ref 'ECSServiceRole'
+      TaskDefinition: !Ref 'redirecttaskdefinition'
   ECSServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -488,7 +621,7 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: service
     Properties:
-      MaxCapacity: 2
+      MaxCapacity: 6
       MinCapacity: 1
       ResourceId: !Join ['', [service/, !Ref 'ECSCluster', /, !GetAtt [service, Name]]]
       RoleARN: !GetAtt [AutoscalingRole, Arn]
