@@ -60,5 +60,6 @@ typings/
 # dotenv environment variables file
 .env
 
-# my oauth creds
+# my secret creds
 .oauthcreds
+.emailcreds
