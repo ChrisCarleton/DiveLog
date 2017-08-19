@@ -1,9 +1,19 @@
 import _ from 'lodash';
+import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
-import { EmailInUseError, ForbiddenActionError, MissingEmailError } from '../../utils/exceptions';
 import faker from 'faker';
 import OAuth from '../../data/oauth.table';
 import Users from '../../data/users.table';
+
+import {
+	BadPasswordError,
+	EmailInUseError,
+	ForbiddenActionError,
+	MissingEmailError,
+	WeakPasswordError
+} from '../../utils/exceptions';
+
+export const PasswordStrengthRegex = /(?=^[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]{7,}$)(?=([!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*\W+){1,})[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*$/;
 
 export function getOAuthAccounts(userName) {
 	return getUserByName(userName)
@@ -175,4 +185,27 @@ export function removeOAuthConnection(user, provider) {
 				items[0].get('providerId'),
 				items[0].get('provider'));
 		});
+}
+
+export function doChangePassword(user, oldPassword, newPassword) {
+	const salt = bcrypt.genSaltSync(10);
+	const passwordHash = bcrypt.hashSync(newPassword, salt);
+
+	if (!PasswordStrengthRegex.test(newPassword)) {
+		return Bluebird.reject(new WeakPasswordError('New password did not meet strength criteria'));
+	}
+
+	if (!bcrypt.compareSync(oldPassword, user.passwordHash)) {
+		return Bluebird.reject(new BadPasswordError('Old password was incorrect.'));
+	}
+
+	return Users.updateAsync({ userId: user.userId, passwordHash: passwordHash });
+}
+
+export function doRequestPasswordReset(email) {
+	return Bluebird.resolve(email);
+}
+
+export function doPerformPasswordReset(user, token, newPassword) {
+	return Bluebird.resolve(newPassword);
 }

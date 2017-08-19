@@ -1,13 +1,16 @@
 import _ from 'lodash';
+import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import generator from '../generator';
 import { expect } from 'chai';
+import faker from 'faker';
 import OAuth from '../../service/data/oauth.table';
 import { purgeTable } from '../test-utils';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
 
 import {
+	doChangePassword,
 	getOrCreateOAuthAccount,
 	getOrConnectOAuthAccount,
 	getOAuthAccounts,
@@ -476,6 +479,117 @@ describe('Users helper methods', () => {
 					done();
 				})
 				.catch(done);
+		});
+
+	});
+
+	describe('doChangePassword method', () => {
+
+		const oldPassword = faker.internet.password(11);
+		let user;
+
+		beforeEach(() => {
+			user = generator.generateUser(oldPassword);
+		});
+
+		it('will change the user\'s password', done => {
+			const newPassword = 'OmFg@N3wP@srwrd.';
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doChangePassword(user, oldPassword, newPassword);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(userEntity => {
+					expect(bcrypt.compareSync(newPassword, userEntity.get('passwordHash')))
+						.to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail if old password is incorrect', done => {
+			const oldHash = user.passwordHash;
+			const newPassword = 'OmFg@N3wP@srwrd.';
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doChangePassword(user, 'WrongFreakinPassw0rd!', newPassword);
+				})
+				.catch(err => {
+					expect(err.name).to.equal('BadPasswordError');
+					return Users.getAsync(user.userId);
+				})
+				.then(userEntity => {
+					expect(userEntity.get('passwordHash')).to.equal(oldHash);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail if new password does not meet stength criteria', done => {
+			const oldHash = user.passwordHash;
+			const newPassword = 'too weak';
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doChangePassword(user, oldPassword, newPassword);
+				})
+				.catch(err => {
+					expect(err.name).to.equal('WeakPasswordError');
+					return Users.getAsync(user.userId);
+				})
+				.then(userEntity => {
+					expect(userEntity.get('passwordHash')).to.equal(oldHash);
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
+	describe('doRequestPasswordReset method', () => {
+
+		it('will assign the user a 24-hour reset token and return it', done => {
+			done();
+		});
+
+		it('will return null if e-mail address is not registered', done => {
+			done();
+		});
+
+		it('will return null if user does not have a password to reset (OAuth users)', done => {
+			done();
+		});
+
+	});
+
+	describe('doPerformPasswordReset method', () => {
+
+		it('will set the user\'s new password and remove their reset token', done => {
+			done();
+		});
+
+		it('will fail if user does not exist', done => {
+			done();
+		});
+
+		it('will fail if reset token is invalid', done => {
+			done();
+		});
+
+		it('will fail if user does not have a reset token set', done => {
+			done();
+		});
+
+		it('will fail if reset token is expired', done => {
+			done();
+		});
+
+		it('will fail if new password does not meet strength criteria', done => {
+			done();
 		});
 
 	});

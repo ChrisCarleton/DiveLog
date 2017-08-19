@@ -124,3 +124,20 @@ export function signUp(req, res) {
 export function me(req, res) {
 	res.json(req.user);
 }
+
+export function changePassword(req, res) {
+	res.json({ completed: false });
+}
+
+export function requestPasswordReset(req, res) {
+	res.json({ completed: false });
+}
+
+export function performPasswordReset(req, res) {
+	res.json({ completed: false });
+}
+
+export function requireAccountAuthority(req, res, next) {
+	next();
+}
+
