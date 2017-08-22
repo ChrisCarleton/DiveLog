@@ -520,7 +520,7 @@ Resources:
       Conditions:
       - Field: path-pattern
         Values: [/]
-      ListenerArn: !Ref 'ALBListener'
+      ListenerArn: !Ref 'ALBListenerHTTPS'
       Priority: 1
   ECSTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
