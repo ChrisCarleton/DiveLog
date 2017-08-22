@@ -551,7 +551,7 @@ Resources:
       HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-399
-      Name: ECSRedirectTG
+      Name:
         Fn::Join:
           - '-'
           - - ECSRedirectTG
