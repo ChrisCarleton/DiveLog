@@ -3,6 +3,7 @@ import Bluebird from 'bluebird';
 import errorResponse, { serverErrorResponse } from '../utils/error-response';
 import Joi from 'joi';
 import log from '../logger';
+import { sanitizeUserInfo } from './helpers/users-helpers';
 import Users from '../data/users.table';
 
 const signUpValidation = Joi.object().keys({
@@ -67,14 +68,7 @@ export function signUp(req, res) {
 				});
 		})
 		.then(result => {
-			const user = {
-				userId: result.get('userId'),
-				userName: result.get('userName'),
-				email: result.get('email'),
-				displayName: result.get('displayName'),
-				role: result.get('role'),
-				createdAt: result.get('createdAt')
-			};
+			const user = result.attrs;
 
 			req.login(user, loginError => {
 				if (loginError) {
@@ -83,10 +77,10 @@ export function signUp(req, res) {
 						result.get('userId'),
 						'Error:',
 						loginError);
-					return res.status(500).json({});	// TODO: Return a valid error.
+					return serverErrorResponse(res);
 				}
 
-				res.json(user);
+				res.json(sanitizeUserInfo(user));
 			});
 		})
 		.catch(err => {
@@ -122,7 +116,7 @@ export function signUp(req, res) {
 }
 
 export function me(req, res) {
-	res.json(req.user);
+	res.json(sanitizeUserInfo(req.user));
 }
 
 export function changePassword(req, res) {

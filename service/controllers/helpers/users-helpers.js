@@ -2,6 +2,7 @@ import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import faker from 'faker';
+import moment from 'moment';
 import OAuth from '../../data/oauth.table';
 import Users from '../../data/users.table';
 
@@ -10,6 +11,7 @@ import {
 	EmailInUseError,
 	ForbiddenActionError,
 	MissingEmailError,
+	RejectedPasswordResetError,
 	WeakPasswordError
 } from '../../utils/exceptions';
 
@@ -203,9 +205,70 @@ export function doChangePassword(user, oldPassword, newPassword) {
 }
 
 export function doRequestPasswordReset(email) {
-	return Bluebird.resolve(email);
+	return getUserByEmail(email)
+		.then(user => {
+			if (user === null) {
+				return null;
+			}
+
+			if (!user.passwordHash) {
+				return null;
+			}
+
+			return Users.updateAsync({
+				userId: user.userId,
+				passwordResetToken: faker.random.alphaNumeric(20),
+				passwordResetExpiration: moment().add(1, 'd').toISOString()
+			});
+		})
+		.then(result => {
+			if (!result) {
+				return null;
+			}
+
+			return result.attrs;
+		});
 }
 
 export function doPerformPasswordReset(user, token, newPassword) {
-	return Bluebird.resolve(newPassword);
+	if (!user.passwordResetToken || !user.passwordResetExpiration) {
+		return Bluebird.reject(new RejectedPasswordResetError(
+			`User "${user.userName}" has not requested a password reset.`));
+	}
+
+	if (user.passwordResetToken !== token) {
+		return Bluebird.reject(new RejectedPasswordResetError(
+			`Reset token did not match the one on file for user "${user.userName}".`));
+	}
+
+	if (moment().isAfter(user.passwordResetExpiration)) {
+		return Bluebird.reject(new RejectedPasswordResetError(
+			`Reset token has expired for user "${user.userName}".`));
+	}
+
+	const salt = bcrypt.genSaltSync(10);
+	const hash = bcrypt.hashSync(newPassword, salt);
+
+	return Users.updateAsync({
+		userId: user.userId,
+		passwordHash: hash,
+		passwordResetToken: null,
+		passwordResetExpiration: null })
+		.then(() => {
+			return true;
+		});
+}
+
+export function sanitizeUserInfo(user) {
+	const sanitized = _.pick(user, [
+		'userId',
+		'userName',
+		'email',
+		'displayName',
+		'role',
+		'imageUrl',
+		'createdAt']);
+	sanitized.hasPassword = !_.isNil(user.passwordHash);
+
+	return sanitized;
 }

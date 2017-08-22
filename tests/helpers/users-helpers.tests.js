@@ -4,6 +4,7 @@ import Bluebird from 'bluebird';
 import generator from '../generator';
 import { expect } from 'chai';
 import faker from 'faker';
+import moment from 'moment';
 import OAuth from '../../service/data/oauth.table';
 import { purgeTable } from '../test-utils';
 import Users from '../../service/data/users.table';
@@ -11,6 +12,8 @@ import uuid from 'uuid/v4';
 
 import {
 	doChangePassword,
+	doPerformPasswordReset,
+	doRequestPasswordReset,
 	getOrCreateOAuthAccount,
 	getOrConnectOAuthAccount,
 	getOAuthAccounts,
@@ -552,44 +555,167 @@ describe('Users helper methods', () => {
 
 	describe('doRequestPasswordReset method', () => {
 
+		let user;
+		beforeEach(() => {
+			user = generator.generateUser();
+		});
+
 		it('will assign the user a 24-hour reset token and return it', done => {
-			done();
+			let retValue;
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doRequestPasswordReset(user.email);
+				})
+				.then(result => {
+					retValue = result;
+					const dayFromNow = moment().add(1, 'd');
+					expect(result.passwordResetToken).to.exist;
+					expect(result.passwordResetExpiration).to.exist;
+					expect(moment(result.passwordResetExpiration).isBetween(moment(), dayFromNow))
+						.to.be.true;
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					expect(result.attrs).to.eql(retValue);
+					done();
+				})
+				.catch(done);
 		});
 
 		it('will return null if e-mail address is not registered', done => {
-			done();
+			doRequestPasswordReset('not_an@email.com')
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
 		});
 
 		it('will return null if user does not have a password to reset (OAuth users)', done => {
-			done();
+			user.passwordHash = undefined;
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doRequestPasswordReset(user.email);
+				})
+				.then(result => {
+					expect(result).to.be.null;
+					done();
+				})
+				.catch(done);
 		});
 
 	});
 
 	describe('doPerformPasswordReset method', () => {
 
-		it('will set the user\'s new password and remove their reset token', done => {
-			done();
+		let user;
+		beforeEach(() => {
+			user = generator.generateUser();
 		});
 
-		it('will fail if user does not exist', done => {
-			done();
+		it('will set the user\'s new password and remove their reset token', done => {
+			const resetToken = faker.random.alphaNumeric(20);
+			const newPassword = 'T0T@11y-Noo';
+			user.passwordResetToken = resetToken;
+			user.passwordResetExpiration = moment().add(10, 'm').toISOString();
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doPerformPasswordReset(user, resetToken, newPassword);
+				})
+				.then(result => {
+					expect(result).to.be.true;
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					expect(bcrypt.compareSync(newPassword, result.get('passwordHash'))).to.be.true;
+					expect(result.get('passwordResetExpiration')).to.not.exist;
+					expect(result.get('passwordResetToken')).to.not.exist;
+					done();
+				})
+				.catch(done);
 		});
 
 		it('will fail if reset token is invalid', done => {
-			done();
+			const newPassword = 'T0T@11y-Noo';
+
+			user.passwordResetToken = faker.random.alphaNumeric(20);
+			user.passwordResetExpiration = moment().add(4, 'h').toISOString();
+
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doPerformPasswordReset(user, 'notcorrecttoken', newPassword);
+				})
+				.then(() => {
+					throw 'Action was not meant to succeed.';
+				})
+				.catch(err => {
+					expect(err.name).to.equal('RejectedPasswordResetError');
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					expect(result.get('passwordHash')).to.equal(user.passwordHash);
+					expect(result.get('passwordResetExpiration')).to.equal(user.passwordResetExpiration);
+					expect(result.get('passwordResetToken')).to.equal(user.passwordResetToken);
+					done();
+				})
+				.catch(done);
 		});
 
 		it('will fail if user does not have a reset token set', done => {
-			done();
+			const newPassword = 'T0T@11y-Noo';
+			const token = faker.random.alphaNumeric(20);
+
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doPerformPasswordReset(user, token, newPassword);
+				})
+				.then(() => {
+					throw 'Action was not meant to succeed.';
+				})
+				.catch(err => {
+					expect(err.name).to.equal('RejectedPasswordResetError');
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					expect(result.get('passwordHash')).to.equal(user.passwordHash);
+					expect(result.get('passwordResetExpiration')).to.equal(user.passwordResetExpiration);
+					expect(result.get('passwordResetToken')).to.equal(user.passwordResetToken);
+					done();
+				})
+				.catch(done);
 		});
 
 		it('will fail if reset token is expired', done => {
-			done();
-		});
+			const newPassword = 'T0T@11y-Noo';
+			const token = faker.random.alphaNumeric(20);
 
-		it('will fail if new password does not meet strength criteria', done => {
-			done();
+			user.passwordResetToken = token;
+			user.passwordResetExpiration = moment().subtract(20, 'm').toISOString();
+
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doPerformPasswordReset(user, token, newPassword);
+				})
+				.then(() => {
+					throw 'Action was not meant to succeed.';
+				})
+				.catch(err => {
+					expect(err.name).to.equal('RejectedPasswordResetError');
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					expect(result.get('passwordHash')).to.equal(user.passwordHash);
+					expect(result.get('passwordResetExpiration')).to.equal(user.passwordResetExpiration);
+					expect(result.get('passwordResetToken')).to.equal(user.passwordResetToken);
+					done();
+				})
+				.catch(done);
 		});
 
 	});

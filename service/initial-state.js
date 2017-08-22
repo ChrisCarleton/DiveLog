@@ -1,17 +1,9 @@
-const initialState = {
-	AlertStore: {
-		alertVisible: false
-	},
-	UserStore: {}
-};
+import { sanitizeUserInfo } from './controllers/helpers/users-helpers';
 
 export default function(req) {
-	return Object.assign(
-		{},
-		initialState,
-		{
-			UserStore: {
-				currentUser: req.user
-			}
-		});
+	return {
+		UserStore: {
+			currentUser: req.user ? sanitizeUserInfo(req.user) : undefined
+		}
+	};
 }

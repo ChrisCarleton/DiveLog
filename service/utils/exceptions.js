@@ -60,3 +60,10 @@ export class NoSuchUserError extends ExtendableError {
 		this.name = 'NoSuchUserError';
 	}
 }
+
+export class RejectedPasswordResetError extends ExtendableError {
+	constructor(message) {
+		super(message);
+		this.name = 'RejectedPasswordResetError';
+	}
+}

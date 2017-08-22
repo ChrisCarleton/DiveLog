@@ -8,7 +8,12 @@ import errorRespone, {
 } from '../utils/error-response';
 import log from '../logger';
 import passport from 'passport';
-import { getUserByName, getOAuthAccounts, removeOAuthConnection } from './helpers/users-helpers';
+import {
+	getUserByName,
+	getOAuthAccounts,
+	removeOAuthConnection,
+	sanitizeUserInfo
+} from './helpers/users-helpers';
 
 const KNOWN_OAUTH_PROVIDERS = ['google', 'facebook', 'github'];
 
@@ -27,8 +32,8 @@ export function login(req, res) {
 					return serverErrorResponse(res);
 				}
 
-				log.info('User', user.userName, 'has been successfully authenticated.');
-				res.json(user);
+				log.trace('User', user.userName, 'has been successfully authenticated.');
+				res.json(sanitizeUserInfo(user));
 			});
 		}
 
