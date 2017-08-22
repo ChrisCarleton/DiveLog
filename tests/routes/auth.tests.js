@@ -858,3 +858,238 @@ describe('Authentication routes', () => {
 	});
 
 });
+
+describe('Password routes:', () => {
+	const TEST_USER_PASSWORD = 'OmG!!@_Passw3rd4ME.';
+	const
+		user1 = generator.generateUser(TEST_USER_PASSWORD),
+		user2 = generator.generateUser(TEST_USER_PASSWORD),
+		admin = generator.generateUser(TEST_USER_PASSWORD),
+		cookies = {};
+	admin.role = 'admin';
+
+	const purgeUserTable = done => {
+		purgeTable(Users, 'userId')
+			.then(() => done())
+			.catch(done);
+	};
+
+	const loginUser = user => {
+		if (cookies[user.userName]) {
+			return Bluebird.resolve(cookies[user.userName]);
+		}
+
+		return request
+			.post(LOGIN_ROUTE)
+			.send({
+				username: user.userName,
+				password: TEST_USER_PASSWORD
+			})
+			.expect(200)
+			.then(res => {
+				cookies[user.userName] = res.headers['set-cookie'];
+				return cookies[user.userName];
+			});
+	};
+
+	before(purgeUserTable);
+	afterEach(purgeUserTable);
+
+	describe('Change password:', () => {
+		it('will change the user\'s password and return 200', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: TEST_USER_PASSWORD,
+							newPassword: newPassword
+						})
+						.expect(200);
+				})
+				.then(() => {
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if old password is incorrect', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: 'Wr0nNg--Pss',
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if new password does not meet strength requirements', done => {
+			const newPassword = 'granny1';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: 'Wr0nNg--Pss',
+							newPassword: newPassword
+						})
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user tries to change someone else\'s password', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return Users.createAsync(user2);
+				})
+				.then(u => {
+					user2.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user2.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: TEST_USER_PASSWORD,
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is unauthenticated', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			request
+				.post(`/api/auth/${user1.userName}/password`)
+				.send({
+					oldPassword: TEST_USER_PASSWORD,
+					newPassword: newPassword
+				})
+				.expect(401)
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will allow admins to change passwords without oldPassword', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return Users.createAsync(admin);
+				})
+				.then(a => {
+					admin.userId = a.get('userId');
+					return loginUser(admin);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							newPassword: newPassword
+						})
+						.expect(200);
+				})
+				.then(() => {
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if an administrator tries to change the password of a non-existent user', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(admin)
+				.then(a => {
+					admin.userId = a.get('userId');
+					return loginUser(admin);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							newPassword: newPassword
+						})
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+	});
+});

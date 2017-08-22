@@ -551,6 +551,23 @@ describe('Users helper methods', () => {
 				.catch(done);
 		});
 
+		it('will allow privileged users (admins) to change passwords without "oldPassword"', done => {
+			const newPassword = 'OmFg@N3wP@srwrd.';
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return doChangePassword(user, null, newPassword, true);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(userEntity => {
+					expect(bcrypt.compareSync(newPassword, userEntity.get('passwordHash')))
+						.to.be.true;
+					done();
+				})
+				.catch(done);
+		});
 	});
 
 	describe('doRequestPasswordReset method', () => {

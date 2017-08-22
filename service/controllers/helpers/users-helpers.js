@@ -189,7 +189,7 @@ export function removeOAuthConnection(user, provider) {
 		});
 }
 
-export function doChangePassword(user, oldPassword, newPassword) {
+export function doChangePassword(user, oldPassword, newPassword, privileged = false) {
 	const salt = bcrypt.genSaltSync(10);
 	const passwordHash = bcrypt.hashSync(newPassword, salt);
 
@@ -197,7 +197,7 @@ export function doChangePassword(user, oldPassword, newPassword) {
 		return Bluebird.reject(new WeakPasswordError('New password did not meet strength criteria'));
 	}
 
-	if (!bcrypt.compareSync(oldPassword, user.passwordHash)) {
+	if (!privileged && !bcrypt.compareSync(oldPassword, user.passwordHash)) {
 		return Bluebird.reject(new BadPasswordError('Old password was incorrect.'));
 	}
 

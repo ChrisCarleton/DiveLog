@@ -49,7 +49,7 @@ export function signUp(req, res) {
 			if (emailTaken.Items.length > 0) {
 				throw 'email taken';
 			}
-		}).then(() => {
+
 			const salt = bcrypt.genSaltSync(10);
 			const passwordHash = bcrypt.hashSync(req.body.password, salt);
 
@@ -118,20 +118,3 @@ export function signUp(req, res) {
 export function me(req, res) {
 	res.json(sanitizeUserInfo(req.user));
 }
-
-export function changePassword(req, res) {
-	res.json({ completed: false });
-}
-
-export function requestPasswordReset(req, res) {
-	res.json({ completed: false });
-}
-
-export function performPasswordReset(req, res) {
-	res.json({ completed: false });
-}
-
-export function requireAccountAuthority(req, res, next) {
-	next();
-}
-

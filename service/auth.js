@@ -2,8 +2,7 @@ import bcrypt from 'bcrypt';
 import config from './config';
 import {
 	getOrConnectOAuthAccount,
-	getOrCreateOAuthAccount,
-	sanitizeUserInfo
+	getOrCreateOAuthAccount
 } from './controllers/helpers/users-helpers';
 import log from './logger';
 import passport from 'passport';
@@ -127,7 +126,7 @@ export default function(app) {
 					return done(null, null);
 				}
 
-				done(null, sanitizeUserInfo(result.attrs));
+				done(null, result.attrs);
 			})
 			.catch(done);
 	});

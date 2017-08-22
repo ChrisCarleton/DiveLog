@@ -109,6 +109,40 @@ The details of the newly-created user account are returned.
   * __Error ID 1020:__ Email is taken. The selected e-mail address already belongs to a user in the database. Perhaps an account recovery is in order?
 * __Status Code 500:__ Internal server error.
 
+## Change User Password
+
+Changes the password for a given user account.
+
+### Route
+```
+POST /api/auth/:user/password
+```
+
+* __:user__ The user name indicating the user whose password should be changed.
+
+### Data Params
+```javascript
+{
+	oldPassword: [string],
+	newPassword: [string]
+}
+```
+
+* __oldPassword:__ The user's current password. This is needed to verify the user's identity.
+* __newPassword:__ The new password to assign to the user's account.
+
+### Success Response
+* __Status Code:__ 200
+
+An HTTP 200 response indicates that the password has been successfully changed.
+
+### Error Response
+* __Status Code 400:__ Bad request. The change was rejected because `newPassword` did not meet password strength requirements.
+* __Status Code 401:__ Not authorized. This response can result from any of the following conditions:
+  * The current user is unauthenticated.
+  * The current user is not authorized to change the password of the user requested in the `:user` parameter of the route path.
+* __Status Code 404:__ Not found. Returned to administrative users who try to change the password for a user that does not exist.
+
 ## List Connected OAuth Providers
 
 Lists the connected OAuth providers for a given user.

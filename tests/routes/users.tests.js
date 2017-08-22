@@ -1,12 +1,18 @@
 import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
-import Bluebird from 'bluebird';
 import { expect } from 'chai';
 import { purgeTable } from '../test-utils';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
 
 const request = supertest(app);
+
+const purgeUserTable = done => {
+	purgeTable(Users, 'userId')
+		.then(() => done())
+		.catch(done);
+};
+
 const testValidation = (route, data, expectedErr, done) => {
 	request
 		.post(route)
@@ -22,19 +28,15 @@ const testValidation = (route, data, expectedErr, done) => {
 
 const USERS_ROUTE = '/api/users/';
 
-describe('User routes', () => {
+describe('User routes:', () => {
 
-	describe('create user', () => {
+	describe('create user:', () => {
 
 		const password = 'j0esP@ssw0rd';
-		let idsToDestroy = [];
 		let testUser;
 
-		before(done => {
-			purgeTable(Users, 'userId')
-				.then(() => { done(); })
-				.catch(done);
-		});
+		before(purgeUserTable);
+		afterEach(purgeUserTable);
 
 		beforeEach(() => {
 			testUser = {
@@ -43,19 +45,6 @@ describe('User routes', () => {
 				email: 'test@testerson.ca',
 				password: password
 			};
-		});
-
-		afterEach(done => {
-			const promises = [];
-			idsToDestroy.forEach(id => {
-				promises.push(Users.destroyAsync(id));
-			});
-
-			idsToDestroy = [];
-
-			Bluebird.all(promises)
-				.then(() => done())
-				.catch(done);
 		});
 
 		it('users can be created', done => {
@@ -76,7 +65,6 @@ describe('User routes', () => {
 					expect(result.role).to.equal('user');
 
 					userId = result.userId;
-					idsToDestroy.push(userId);
 					return Users.getAsync(result.userId);
 				})
 				.then(savedUser => {
@@ -105,8 +93,6 @@ describe('User routes', () => {
 					const result = res.body;
 					expect(result).to.exist;
 					expect(result.userId).to.exist;
-
-					idsToDestroy.push(result.userId);
 
 					return request
 						.get('/api/user/')
@@ -300,8 +286,7 @@ describe('User routes', () => {
 				passwordHash: passwordHash,
 				displayName: testUser.displayName,
 				email: testUser.email })
-				.then(result => {
-					idsToDestroy.push(result.get('userId'));
+				.then(() => {
 					testUser.email = 'different_now@email.com';
 
 					return request
@@ -331,8 +316,7 @@ describe('User routes', () => {
 				passwordHash: passwordHash,
 				displayName: testUser.displayName,
 				email: testUser.email })
-				.then(result => {
-					idsToDestroy.push(result.get('userId'));
+				.then(() => {
 					testUser.userName = 'DifferentUserName';
 
 					return request

@@ -9,6 +9,7 @@ import errorRespone, {
 import log from '../logger';
 import passport from 'passport';
 import {
+	doChangePassword,
 	getUserByName,
 	getOAuthAccounts,
 	removeOAuthConnection,
@@ -131,4 +132,70 @@ export function requireAdminUser(req, res, next) {
 	}
 
 	notAuthroizedResponse(res);
+}
+
+export function changePassword(req, res) {
+	return doChangePassword(
+		req.selectedUser,
+		req.body.oldPassword,
+		req.body.newPassword,
+		req.user.role === 'admin')
+		.then(() =>  {
+			res.send('ok');
+		})
+		.catch(err => {
+			if (err.name === 'BadPasswordError') {
+				log.debug(
+					`Attempt to change password for user "${req.selectedUser.userName}" failed because of a password mismatch.`);
+				return notAuthroizedResponse(res);
+			}
+
+			if (err.name === 'WeakPasswordError') {
+				log.debug(
+					`Attempt to change password for user "${req.selectedUser.userName}" failed because the new password was too weak.`);
+				return badRequestResponse(
+					res,
+					'New password did not meet strength requirements. It should contain upper- and lower-case letters, numbers, and symbols.');
+			}
+
+			log.error(
+				`An error occurred while attempting to change password for user "${req.selectedUser.userName}":`,
+				err);
+			serverErrorResponse(res);
+		});
+}
+
+export function requestPasswordReset(req, res) {
+	res.json({ completed: false });
+}
+
+export function performPasswordReset(req, res) {
+	res.json({ completed: false });
+}
+
+export function requireAccountAuthority(req, res, next) {
+	if (req.user.userName === req.params.user) {
+		req.selectedUser = JSON.parse(JSON.stringify(req.user));
+		return next();
+	}
+
+	if (req.user.role !== 'admin') {
+		return notAuthroizedResponse(res);
+	}
+
+	getUserByName(req.params.user)
+		.then(u => {
+			if (u === null) {
+				return resourceNotFoundResponse(res);
+			}
+
+			req.selectedUser = u;
+			next();
+		})
+		.catch(err => {
+			log.error(
+				`An error occurred while trying to retrieve data on user "${req.params.user}":`,
+				err);
+			serverErrorResponse(res);
+		});
 }
