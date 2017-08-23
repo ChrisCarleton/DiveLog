@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import config from '../config';
 import errorRespone, {
 	badRequestResponse,
 	forbiddenActionResponse,
@@ -6,15 +7,22 @@ import errorRespone, {
 	resourceNotFoundResponse,
 	serverErrorResponse
 } from '../utils/error-response';
+import Joi from 'joi';
 import log from '../logger';
+import mailSender from '../mail-sender';
+import moment from 'moment';
 import passport from 'passport';
+import path from 'path';
 import {
 	doChangePassword,
+	doRequestPasswordReset,
 	getUserByName,
 	getOAuthAccounts,
 	removeOAuthConnection,
 	sanitizeUserInfo
 } from './helpers/users-helpers';
+import queryString from 'query-string';
+import url from 'url';
 
 const KNOWN_OAUTH_PROVIDERS = ['google', 'facebook', 'github'];
 
@@ -166,7 +174,48 @@ export function changePassword(req, res) {
 }
 
 export function requestPasswordReset(req, res) {
-	res.json({ completed: false });
+	if (!req.query.email) {
+		return badRequestResponse(res, 'The "email" query parameter was missing but is required.');
+	}
+
+	const validation = Joi.validate(req.query.email, Joi.string().email());
+	if (validation.error) {
+		return badRequestResponse(res, 'The supplied e-mail address was invalid');
+	}
+
+	const userNotFound = 'user not found';
+	doRequestPasswordReset(req.query.email)
+		.then(user => {
+			if (user === null) {
+				throw userNotFound;
+			}
+
+			const resetUrl = url.resolve(config.baseUrl, '/confirmPasswordReset')
+				+ '?'
+				+ queryString.stringify({ user: user.userName, token: user.passwordResetToken });
+			return mailSender(
+				req.query.email,
+				'Password reset request',
+				path.resolve(__dirname, '../views/reset-email.pug'),
+				{
+					userName: user.displayName || user.userName,
+					resetUrl: resetUrl,
+					year: moment().year()
+				});
+		})
+		.then(() => {
+			res.send('ok');
+		})
+		.catch(err => {
+			if (err === userNotFound) {
+				return res.send('ok');
+			}
+
+			log.error(
+				'An error occured while requesting a password reset:',
+				err);
+			serverErrorResponse(res);
+		});
 }
 
 export function performPasswordReset(req, res) {

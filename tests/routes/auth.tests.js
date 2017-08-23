@@ -5,9 +5,12 @@ import Bluebird from 'bluebird';
 import { expect } from 'chai';
 import generator from '../generator';
 import log from '../../service/logger';
+import moment from 'moment';
 import OAuth from '../../service/data/oauth.table';
 import { purgeTable } from '../test-utils';
+import sinon from 'sinon';
 import supertest from 'supertest';
+import { transporter } from '../../service/mail-sender';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
 
@@ -1092,4 +1095,103 @@ describe('Password routes:', () => {
 				.catch(done);
 		});
 	});
+
+	describe('Request password reset:', () => {
+
+		let mailStub;
+		beforeEach(() => {
+			mailStub = sinon.stub(transporter, 'sendMailAsync');
+			mailStub.usingPromise(Bluebird.Promise);
+			mailStub.resolves(true);
+		});
+
+		afterEach(() => {
+			mailStub.restore();
+		});
+
+		after(purgeUserTable);
+
+		const REQUEST_RESET_ROUTE = '/api/auth/resetPassword';
+
+		it('will return 200 and send an email if successful', done => {
+			const user = generator.generateUser();
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.get(REQUEST_RESET_ROUTE)
+						.query({ email: user.email })
+						.expect(200);
+				})
+				.then(() => {
+					expect(mailStub.calledOnce).to.be.true;
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const expectedExpiration = moment().add(1, 'd');
+					const actualExpiration = moment(result.get('passwordResetExpiration'));
+					expect(result.get('passwordResetToken'))
+						.to
+						.match(/^[a-z0-9]{20}$/i);
+					expect(actualExpiration.isSame(expectedExpiration, 'minute')).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail silently (200) if the e-mail address is not registered', done => {
+			request
+				.get(REQUEST_RESET_ROUTE)
+				.query({ email: 'jake@gmail.com' })
+				.expect(200)
+				.then(() => {
+					expect(mailStub.called).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if the email parameter is missing from the query string', done => {
+			request
+				.get(REQUEST_RESET_ROUTE)
+				.expect(400)
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if the email parameter is not a valid address', done => {
+			request
+				.get(REQUEST_RESET_ROUTE)
+				.query({ email: 'not valid' })
+				.expect(400)
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 500 if email cannot be delivered', done => {
+			const user = generator.generateUser();
+			mailStub.rejects('OMG! Email error!!');
+
+			Users.createAsync(user)
+				.then(() => {
+					return request
+						.get(REQUEST_RESET_ROUTE)
+						.query({ email: user.email })
+						.expect(500);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2000);
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
 });

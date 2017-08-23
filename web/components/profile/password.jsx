@@ -1,5 +1,6 @@
 import AlertActions from '../../actions/alert-actions';
 import Formsy from 'formsy-react';
+import PropTypes from 'prop-types';
 import React from 'react';
 import request from '../../request-agent';
 import TextBox from '../controls/text-box.jsx';
@@ -127,5 +128,9 @@ class Password extends React.Component {
 			</div>);
 	}
 }
+
+Password.propTypes = {
+	match: PropTypes.object.isRequired
+};
 
 export default Password;
