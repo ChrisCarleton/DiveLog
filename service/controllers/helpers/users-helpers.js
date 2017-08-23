@@ -4,6 +4,7 @@ import Bluebird from 'bluebird';
 import faker from 'faker';
 import moment from 'moment';
 import OAuth from '../../data/oauth.table';
+import passwordStrengthRegex from '../../utils/password-strength-regex';
 import Users from '../../data/users.table';
 
 import {
@@ -15,7 +16,7 @@ import {
 	WeakPasswordError
 } from '../../utils/exceptions';
 
-export const PasswordStrengthRegex = /(?=^[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]{7,}$)(?=([!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*\W+){1,})[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*$/;
+export const PasswordStrengthRegex = passwordStrengthRegex;
 
 export function getOAuthAccounts(userName) {
 	return getUserByName(userName)

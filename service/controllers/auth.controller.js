@@ -12,9 +12,11 @@ import log from '../logger';
 import mailSender from '../mail-sender';
 import moment from 'moment';
 import passport from 'passport';
+import passwordStrengthRegex from '../utils/password-strength-regex';
 import path from 'path';
 import {
 	doChangePassword,
+	doPerformPasswordReset,
 	doRequestPasswordReset,
 	getUserByName,
 	getOAuthAccounts,
@@ -25,6 +27,10 @@ import queryString from 'query-string';
 import url from 'url';
 
 const KNOWN_OAUTH_PROVIDERS = ['google', 'facebook', 'github'];
+const performPasswordResetValidation = Joi.object().keys({
+	token: Joi.string().required(),
+	newPassword: Joi.string().regex(passwordStrengthRegex).required()
+}).required();
 
 export function login(req, res) {
 	passport.authenticate('local', (err, user) => {
@@ -219,7 +225,35 @@ export function requestPasswordReset(req, res) {
 }
 
 export function performPasswordReset(req, res) {
-	res.json({ completed: false });
+	const userNotFound = 'user not found';
+	const validation = Joi.validate(req.body, performPasswordResetValidation);
+	if (validation.error) {
+		return badRequestResponse(res, validation.error);
+	}
+
+	getUserByName(req.params.user)
+		.then(user => {
+			if (user === null) {
+				throw userNotFound;
+			}
+
+			return doPerformPasswordReset(user, req.body.token, req.body.newPassword);
+		})
+		.then(() => {
+			res.send('ok');
+		})
+		.catch(err => {
+			if (err === userNotFound) {
+				return notAuthroizedResponse(res);
+			}
+
+			if (err.name === 'RejectedPasswordResetError') {
+				return notAuthroizedResponse(res);
+			}
+
+			log.error('An error occurred while attempting to reset a user\'s password:', err);
+			serverErrorResponse(res);
+		});
 }
 
 export function requireAccountAuthority(req, res, next) {

@@ -1,6 +1,7 @@
 import alt from './alt';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Chrome from './components/chrome.jsx';
+import ConfirmPasswordReset from './components/confirm-password-reset.jsx';
 import EmailInUse from './components/errors/email-in-use.jsx';
 import Home from './components/home.jsx';
 import LogEntries from './components/log-entries.jsx';
@@ -27,6 +28,7 @@ class AppRouter extends React.Component {
 						<Route exact path="/login" component={ LogIn } />
 						<Route exact path="/signup" component={ SignUp } />
 						<Route exact path="/resetPassword" component={ ResetPassword } />
+						<Route exact path="/confirmPasswordReset" component={ ConfirmPasswordReset } />
 						<Route exact path="/logbook/:userName" component={ LogEntries } />
 						<Route exact path="/logbook/:userName/new" component={ LogEntry } />
 						<Route exact path="/logbook/:userName/:logId" component={ LogEntry } />

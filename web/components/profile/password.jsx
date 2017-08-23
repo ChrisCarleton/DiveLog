@@ -1,5 +1,6 @@
 import AlertActions from '../../actions/alert-actions';
 import Formsy from 'formsy-react';
+import passwordStrengthRegex from '../../../service/utils/password-strength-regex';
 import PropTypes from 'prop-types';
 import React from 'react';
 import request from '../../request-agent';
@@ -62,7 +63,7 @@ class Password extends React.Component {
 
 	renderForUsersWithPasswords() {
 		const passwordValidations = {
-			matchRegexp: /(?=^[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]{7,}$)(?=([!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*\W+){1,})[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*$/,
+			matchRegexp: passwordStrengthRegex,
 			minLength: 7,
 			maxLength: 30
 		};

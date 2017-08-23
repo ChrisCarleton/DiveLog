@@ -3,6 +3,7 @@ import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import { expect } from 'chai';
+import faker from 'faker';
 import generator from '../generator';
 import log from '../../service/logger';
 import moment from 'moment';
@@ -1192,6 +1193,172 @@ describe('Password routes:', () => {
 				.catch(done);
 		});
 
+	});
+
+	describe('Perform password reset:', () => {
+		const newPassword = 'L3t--ThmEAt.C@k3';
+		let user;
+		beforeEach(() => {
+			user = generator.generateUser();
+			user.passwordResetToken = faker.random.alphaNumeric(20);
+			user.passwordResetExpiration = moment().add(1, 'd').toISOString();
+		});
+		after(purgeUserTable);
+
+		it('will change the users password', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: user.passwordResetToken,
+							newPassword: newPassword
+						})
+						.expect(200);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if new password is missing', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: user.passwordResetToken
+						})
+						.expect(400);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if token is missing', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							newPassword: newPassword
+						})
+						.expect(400);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if new password does not meet strength requirements', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							newPassword: 'too weak',
+							token: user.passwordResetToken
+						})
+						.expect(400);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user does not exist', done => {
+			user.userId = uuid();
+			request
+				.post(`/api/auth/${user.userName}/resetPassword`)
+				.send({
+					token: user.passwordResetToken,
+					newPassword: newPassword
+				})
+				.expect(401)
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if token is incorrect', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: 'badtoken1234',
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if token is expired', done => {
+			user.passwordResetExpiration = moment().subtract(5, 'm').toISOString();
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: user.passwordResetToken,
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
 	});
 
 });
