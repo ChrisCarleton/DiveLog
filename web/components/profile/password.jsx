@@ -1,5 +1,7 @@
+import AlertActions from '../../actions/alert-actions';
 import Formsy from 'formsy-react';
 import React from 'react';
+import request from '../../request-agent';
 import TextBox from '../controls/text-box.jsx';
 import UserStore from '../../stores/user-store';
 
@@ -32,8 +34,29 @@ class Password extends React.Component {
 		this.setState(UserStore.getState());
 	}
 
-	changePassword(model) {
-		console.log(model);
+	changePassword(model, reset, invalidate) {
+		request
+			.post(`/api/auth/${this.props.match.params.userName}/password`)
+			.send({
+				oldPassword: model.oldPassword,
+				newPassword: model.newPassword
+			})
+			.then(() => {
+				reset();
+				AlertActions.showSuccess(
+					'profile',
+					'Password Changed',
+					'Your password has been changed successfully.');
+			})
+			.catch(err => {
+				if (err.status === 401) {
+					return invalidate({
+						oldPassword: 'Failed to reset password. Current password was incorrect.'
+					});
+				}
+
+				AlertActions.handleErrorResponse('profile', err);
+			});
 	}
 
 	renderForUsersWithPasswords() {
