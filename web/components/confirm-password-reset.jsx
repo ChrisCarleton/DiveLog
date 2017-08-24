@@ -1,3 +1,4 @@
+import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
 import PageHeader from './controls/page-header.jsx';
 import passwordStrengthRegex from '../../service/utils/password-strength-regex';
@@ -5,6 +6,7 @@ import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import request from '../request-agent';
 import Spinner from './controls/spinner.jsx';
 import TextBox from './controls/text-box.jsx';
 import { withRouter } from 'react-router';
@@ -30,7 +32,43 @@ class ConfirmPasswordReset extends React.Component {
 		this.submit = this.submit.bind(this);
 	}
 
-	submit(model, reset) {
+	submit(model, reset, invalidate) {
+		AlertActions.dismissAlert(ALERT_KEY);
+		this.setState(
+			Object.assign(
+				{},
+				this.state,
+				{ submitting: true }));
+		request
+			.post(`/api/auth/${this.state.user}/resetPassword`)
+			.send({
+				token: this.state.token,
+				newPassword: model.newPassword
+			})
+			.then(() => {
+				reset();
+				this.props.history.push('/login');
+				AlertActions.showSuccess(
+					'login',
+					'Password Has Been Reset',
+					'Your password has been reset. You may now use your new password to log in.');
+			})
+			.catch(err => {
+				if (err.status === 400) {
+					return invalidate({
+						newPassword: 'New password did not meet strength requirements.'
+					});
+				}
+
+				AlertActions.handleErrorResponse(ALERT_KEY, err);
+			})
+			.finally(() => {
+				this.setState(
+					Object.assign(
+						{},
+						this.state,
+						{ submitting: false }));
+			});
 		reset();
 	}
 
@@ -92,6 +130,7 @@ class ConfirmPasswordReset extends React.Component {
 }
 
 ConfirmPasswordReset.propTypes = {
+	history: PropTypes.object.isRequired,
 	location: PropTypes.object.isRequired
 };
 
