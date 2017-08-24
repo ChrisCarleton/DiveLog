@@ -143,6 +143,67 @@ An HTTP 200 response indicates that the password has been successfully changed.
   * The current user is not authorized to change the password of the user requested in the `:user` parameter of the route path.
 * __Status Code 404:__ Not found. Returned to administrative users who try to change the password for a user that does not exist.
 
+## Request Password Reset
+
+Requests that a URL containing a password reset token be e-mailed to the user so that they can change a forgotten password.
+
+### Route
+```
+GET /api/auth/resetPassword
+```
+### Query Params
+* __email:__ The e-mail address to which the password-reset URL will be e-mailed to.
+
+_NOTE:_ The e-mail will only be sent out if the e-mail address belongs to a user account in the app. The API will return
+a 200 success HTTP code regardless!
+
+### Success Response
+* __Status Code:__ 200
+
+The reset e-mail was sent out successfully (or the e-mail address was not registered in the app and the API has failed silently.)
+
+### Error Response
+* __Status Code 400:__ Bad request. The `email` query parameter was missing or was not a valid e-mail address.
+* __Status Code 500:__ Server error. The e-mail could not be delivered or some other unexpected server-side error occurred.
+
+## Confirm Password Reset
+
+Changes the password for the specified user account given a valid reset token.
+
+### Route
+```
+POST /api/auth/:user/resetPassword
+```
+
+* __:user__ The user name indicating the user whose password should be changed.
+
+### Data Params
+```javascript
+{
+	token: [string],
+	newPassword: [string]
+}
+```
+
+* __token:__ A temporary password reset token. These get e-mailed out when users request a password reset. The token needs to be correct in order to successfully change the password.
+* __newPassword:__ The new password to assign to the user's account.
+
+### Success Response
+* __Status Code:__ 200
+
+An HTTP 200 response indicates that the password has been successfully changed.
+
+### Error Response
+* __Status Code 400:__ Bad request. The change was rejected because of one of the following reasons:
+  * The `token` parameter was missing.
+  * The `newPassword` parameter was missing.
+  * The `newPassword` parameter did not meet strength requirements.
+* __Status Code 401:__ Not authorized. This response can result from any of the following conditions:
+  * The indicated user account does not exist.
+  * The reset token is incorrect.
+  * The reset token has expired.
+* __Status Code 500:__ Server error. Returned in the event of an unexpected server error.
+
 ## List Connected OAuth Providers
 
 Lists the connected OAuth providers for a given user.
