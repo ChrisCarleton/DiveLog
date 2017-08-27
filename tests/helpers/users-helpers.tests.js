@@ -585,11 +585,12 @@ describe('Users helper methods', () => {
 					return doRequestPasswordReset(user.email);
 				})
 				.then(result => {
+					const almostADayFromNow = moment().add(23, 'h').add(59, 'm');
 					retValue = result;
 					const dayFromNow = moment().add(1, 'd');
 					expect(result.passwordResetToken).to.exist;
 					expect(result.passwordResetExpiration).to.exist;
-					expect(moment(result.passwordResetExpiration).isBetween(moment(), dayFromNow))
+					expect(moment(result.passwordResetExpiration).isBetween(almostADayFromNow, dayFromNow))
 						.to.be.true;
 					return Users.getAsync(user.userId);
 				})

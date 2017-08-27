@@ -196,8 +196,7 @@ export function requestPasswordReset(req, res) {
 				throw userNotFound;
 			}
 
-			const resetUrl = url.resolve(config.baseUrl, '/confirmPasswordReset')
-				+ '?'
+			const resetUrl = url.resolve(config.baseUrl, '/confirmPasswordReset?')
 				+ queryString.stringify({ user: user.userName, token: user.passwordResetToken });
 			return mailSender(
 				req.query.email,
@@ -258,7 +257,7 @@ export function performPasswordReset(req, res) {
 
 export function requireAccountAuthority(req, res, next) {
 	if (req.user.userName === req.params.user) {
-		req.selectedUser = JSON.parse(JSON.stringify(req.user));
+		req.selectedUser = req.user;
 		return next();
 	}
 

@@ -36,7 +36,8 @@ class ResetPassword extends React.Component {
 				AlertActions.showSuccess(
 					ALERT_KEY,
 					'Password Reset Request Sent',
-					'Check your e-mail for a message containing a link to a page where you can reset your password.');
+					'Check your e-mail for a message containing a link to a page where you can reset your password. '
+						+ 'If you don\'t receive an e-mail it may be because the e-mail address you specified is not registered with the system.');
 				reset();
 			})
 			.catch(err => {

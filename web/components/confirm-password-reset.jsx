@@ -1,11 +1,11 @@
 import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
+import NotFound from './errors/not-found.jsx';
 import PageHeader from './controls/page-header.jsx';
 import passwordStrengthRegex from '../../service/utils/password-strength-regex';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import request from '../request-agent';
 import Spinner from './controls/spinner.jsx';
 import TextBox from './controls/text-box.jsx';
@@ -22,7 +22,7 @@ const ALERT_KEY = 'confirm-password-reset';
 
 class ConfirmPasswordReset extends React.Component {
 	constructor(props) {
-		super();
+		super(props);
 		const query = queryString.parse(props.location.search);
 		this.state = {
 			user: query.user,
@@ -69,12 +69,11 @@ class ConfirmPasswordReset extends React.Component {
 						this.state,
 						{ submitting: false }));
 			});
-		reset();
 	}
 
 	render() {
 		if (!this.state.user || !this.state.token) {
-			return <Redirect to="/error/notFound" />;
+			return <NotFound />;
 		}
 
 		return (

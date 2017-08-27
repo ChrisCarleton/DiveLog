@@ -16,8 +16,6 @@ import {
 	WeakPasswordError
 } from '../../utils/exceptions';
 
-export const PasswordStrengthRegex = passwordStrengthRegex;
-
 export function getOAuthAccounts(userName) {
 	return getUserByName(userName)
 		.then(user => {
@@ -194,7 +192,7 @@ export function doChangePassword(user, oldPassword, newPassword, privileged = fa
 	const salt = bcrypt.genSaltSync(10);
 	const passwordHash = bcrypt.hashSync(newPassword, salt);
 
-	if (!PasswordStrengthRegex.test(newPassword)) {
+	if (!passwordStrengthRegex.test(newPassword)) {
 		return Bluebird.reject(new WeakPasswordError('New password did not meet strength criteria'));
 	}
 
@@ -261,6 +259,10 @@ export function doPerformPasswordReset(user, token, newPassword) {
 }
 
 export function sanitizeUserInfo(user) {
+	// Be careful with _.pick(). It does not do true deep copies of properties. It only
+	// copies a reference to the property on the original object! That should be good enough
+	// for this use case but modifications to the original object can impact the sanitized
+	// object.
 	const sanitized = _.pick(user, [
 		'userId',
 		'userName',

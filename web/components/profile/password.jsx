@@ -16,16 +16,13 @@ import {
 class Password extends React.Component {
 	constructor() {
 		super();
-		this.state = {
-			currentUser: null
-		};
+		this.state = UserStore.getState();
 		this.onUserChanged = this.onUserChanged.bind(this);
 		this.changePassword = this.changePassword.bind(this);
 	}
 
 	componentDidMount() {
 		UserStore.listen(this.onUserChanged);
-		this.onUserChanged();
 	}
 
 	componentWillUnmount() {
@@ -53,7 +50,7 @@ class Password extends React.Component {
 			.catch(err => {
 				if (err.status === 401) {
 					return invalidate({
-						oldPassword: 'Failed to reset password. Current password was incorrect.'
+						oldPassword: 'Failed to change password. Current password was incorrect.'
 					});
 				}
 
@@ -119,7 +116,7 @@ class Password extends React.Component {
 	}
 
 	render() {
-		const currentUser = this.state.currentUser || { hasPassword: true };
+		const currentUser = this.state.currentUser;
 		return (
 			<div>
 				<h3>Change Password</h3>

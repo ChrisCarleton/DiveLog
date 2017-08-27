@@ -953,7 +953,7 @@ describe('Password routes:', () => {
 				})
 				.then(result => {
 					const hash = result.get('passwordHash');
-					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					expect(bcrypt.compareSync(TEST_USER_PASSWORD, hash)).to.be.true;
 					done();
 				})
 				.catch(done);
@@ -983,7 +983,7 @@ describe('Password routes:', () => {
 				})
 				.then(result => {
 					const hash = result.get('passwordHash');
-					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					expect(bcrypt.compareSync(TEST_USER_PASSWORD, hash)).to.be.true;
 					done();
 				})
 				.catch(done);
@@ -1015,9 +1015,9 @@ describe('Password routes:', () => {
 					expect(res.body.errorId).to.equal(3100);
 					return Users.getAsync(user1.userId);
 				})
-				.then(result => {
-					const hash = result.get('passwordHash');
-					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+				.then(res => {
+					expect(bcrypt.compareSync(TEST_USER_PASSWORD, res.get('passwordHash')))
+						.to.be.true;
 					done();
 				})
 				.catch(done);
@@ -1026,13 +1026,17 @@ describe('Password routes:', () => {
 		it('will return 401 if user is unauthenticated', done => {
 			const newPassword = 'Am@Zng__M3!';
 
-			request
-				.post(`/api/auth/${user1.userName}/password`)
-				.send({
-					oldPassword: TEST_USER_PASSWORD,
-					newPassword: newPassword
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.userId;
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.send({
+							oldPassword: TEST_USER_PASSWORD,
+							newPassword: newPassword
+						})
+						.expect(401);
 				})
-				.expect(401)
 				.then(res => {
 					expect(res.body.errorId).to.equal(3100);
 					done();
