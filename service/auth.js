@@ -1,7 +1,9 @@
-import _ from 'lodash';
 import bcrypt from 'bcrypt';
 import config from './config';
-import { getOrConnectOAuthAccount, getOrCreateOAuthAccount } from './controllers/helpers/users-helpers';
+import {
+	getOrConnectOAuthAccount,
+	getOrCreateOAuthAccount
+} from './controllers/helpers/users-helpers';
 import log from './logger';
 import passport from 'passport';
 import url from 'url';
@@ -124,11 +126,7 @@ export default function(app) {
 					return done(null, null);
 				}
 
-				const user = Object.assign({}, result.attrs);
-				user.hasPassword = _.isNil(user.passwordHash) ? false : true;
-				user.passwordHash = undefined;
-
-				done(null, user);
+				done(null, result.attrs);
 			})
 			.catch(done);
 	});

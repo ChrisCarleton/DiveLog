@@ -1,9 +1,14 @@
 import {
+	changePassword,
 	ensureOAuthAccountAccess,
 	listOAuthAccounts,
 	login,
 	logout,
-	removeOAuthAccount
+	performPasswordReset,
+	removeOAuthAccount,
+	requestPasswordReset,
+	requireAccountAuthority,
+	requireUser
 } from '../controllers/auth.controller';
 
 module.exports = function(app) {
@@ -15,7 +20,13 @@ module.exports = function(app) {
 
 	app.get(baseUserRoute + 'oauth/', ensureOAuthAccountAccess, listOAuthAccounts);
 	app.delete(
-		baseUserRoute + 'oauth/:provider',
+		baseUserRoute + 'oauth/:provider/',
 		ensureOAuthAccountAccess,
 		removeOAuthAccount);
+
+	app.post(baseUserRoute + 'password/', requireUser, requireAccountAuthority, changePassword);
+
+	app.get(baseRoute + 'resetPassword/', requestPasswordReset);
+	app.post(baseUserRoute + 'resetPassword/', performPasswordReset);
+
 };

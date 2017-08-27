@@ -15,6 +15,9 @@ class AppNavbar extends React.Component {
 		this.state = {
 			user: UserStore.getState().currentUser
 		};
+		if (this.state.user && (!this.state.user.hasPassword || this.state.user.passwordHash)) {
+			console.error('Error: Unsanitized user information!');
+		}
 		this.onUserChanged = this.onUserChanged.bind(this);
 		this.onLogOutClicked = this.onLogOutClicked.bind(this);
 		this.renderUserNav = this.renderUserNav.bind(this);
@@ -31,6 +34,9 @@ class AppNavbar extends React.Component {
 	onUserChanged(userInfo) {
 		const state = Object.assign({}, this.state, { user: userInfo.currentUser });
 		this.setState(state);
+		if (this.state.user && (!this.state.user.hasPassword || this.state.user.passwordHash)) {
+			console.error('Error: Unsanitized user information!');
+		}
 	}
 
 	onLogOutClicked() {

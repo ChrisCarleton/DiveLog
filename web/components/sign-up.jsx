@@ -1,6 +1,7 @@
 import AlertActions from '../actions/alert-actions';
 import Formsy from 'formsy-react';
 import PageHeader from './controls/page-header.jsx';
+import passwordStrengthRegex from '../../service/utils/password-strength-regex';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import SignInWithProvider from './controls/sign-in-with-provider.jsx';
@@ -103,7 +104,7 @@ class SignUp extends React.Component {
 									controlId="password"
 									name="password"
 									validations={{
-										matchRegexp: /(?=^[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]{7,}$)(?=([!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*\W+){1,})[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*$/,
+										matchRegexp: passwordStrengthRegex,
 										minLength: 7,
 										maxLength: 30
 									}}

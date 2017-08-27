@@ -68,7 +68,7 @@ class TimePicker extends React.Component {
 		return (
 			<FormGroup bsSize="small" validationState="success">
 				<Col xs={4}>
-					<ControlLabel>
+					<ControlLabel className="right-aligned">
 						{ this.props.label }
 						<span className="text-danger"> * </span>
 						{':'}

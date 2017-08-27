@@ -58,6 +58,9 @@ class Chrome extends React.Component {
 				{ this.renderGlobalAlert() }
 				<div className="container">
 					{ this.props.children }
+					<div className="text-right footer">
+						<small><em>Copyright &copy; Chris Carleton, 2017</em></small>
+					</div>
 				</div>
 			</div>);
 	}

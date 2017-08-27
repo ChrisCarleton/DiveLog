@@ -1,9 +1,20 @@
 import _ from 'lodash';
+import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
-import { EmailInUseError, ForbiddenActionError, MissingEmailError } from '../../utils/exceptions';
 import faker from 'faker';
+import moment from 'moment';
 import OAuth from '../../data/oauth.table';
+import passwordStrengthRegex from '../../utils/password-strength-regex';
 import Users from '../../data/users.table';
+
+import {
+	BadPasswordError,
+	EmailInUseError,
+	ForbiddenActionError,
+	MissingEmailError,
+	RejectedPasswordResetError,
+	WeakPasswordError
+} from '../../utils/exceptions';
 
 export function getOAuthAccounts(userName) {
 	return getUserByName(userName)
@@ -175,4 +186,92 @@ export function removeOAuthConnection(user, provider) {
 				items[0].get('providerId'),
 				items[0].get('provider'));
 		});
+}
+
+export function doChangePassword(user, oldPassword, newPassword, privileged = false) {
+	const salt = bcrypt.genSaltSync(10);
+	const passwordHash = bcrypt.hashSync(newPassword, salt);
+
+	if (!passwordStrengthRegex.test(newPassword)) {
+		return Bluebird.reject(new WeakPasswordError('New password did not meet strength criteria'));
+	}
+
+	if (!privileged && !bcrypt.compareSync(oldPassword, user.passwordHash)) {
+		return Bluebird.reject(new BadPasswordError('Old password was incorrect.'));
+	}
+
+	return Users.updateAsync({ userId: user.userId, passwordHash: passwordHash });
+}
+
+export function doRequestPasswordReset(email) {
+	return getUserByEmail(email)
+		.then(user => {
+			if (user === null) {
+				return null;
+			}
+
+			if (!user.passwordHash) {
+				return null;
+			}
+
+			return Users.updateAsync({
+				userId: user.userId,
+				passwordResetToken: faker.random.alphaNumeric(20),
+				passwordResetExpiration: moment().add(1, 'd').toISOString()
+			});
+		})
+		.then(result => {
+			if (!result) {
+				return null;
+			}
+
+			return result.attrs;
+		});
+}
+
+export function doPerformPasswordReset(user, token, newPassword) {
+	if (!user.passwordResetToken || !user.passwordResetExpiration) {
+		return Bluebird.reject(new RejectedPasswordResetError(
+			`User "${user.userName}" has not requested a password reset.`));
+	}
+
+	if (user.passwordResetToken !== token) {
+		return Bluebird.reject(new RejectedPasswordResetError(
+			`Reset token did not match the one on file for user "${user.userName}".`));
+	}
+
+	if (moment().isAfter(user.passwordResetExpiration)) {
+		return Bluebird.reject(new RejectedPasswordResetError(
+			`Reset token has expired for user "${user.userName}".`));
+	}
+
+	const salt = bcrypt.genSaltSync(10);
+	const hash = bcrypt.hashSync(newPassword, salt);
+
+	return Users.updateAsync({
+		userId: user.userId,
+		passwordHash: hash,
+		passwordResetToken: null,
+		passwordResetExpiration: null })
+		.then(() => {
+			return true;
+		});
+}
+
+export function sanitizeUserInfo(user) {
+	// Be careful with _.pick(). It does not do true deep copies of properties. It only
+	// copies a reference to the property on the original object! That should be good enough
+	// for this use case but modifications to the original object can impact the sanitized
+	// object.
+	const sanitized = _.pick(user, [
+		'userId',
+		'userName',
+		'email',
+		'displayName',
+		'role',
+		'imageUrl',
+		'createdAt']);
+	sanitized.hasPassword = !_.isNil(user.passwordHash);
+
+	return sanitized;
 }

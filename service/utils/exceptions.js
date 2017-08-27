@@ -39,3 +39,31 @@ export class MissingEmailError extends ExtendableError {
 		this.name = 'MissingEmailError';
 	}
 }
+
+export class BadPasswordError extends ExtendableError {
+	constructor(message) {
+		super(message);
+		this.name = 'BadPasswordError';
+	}
+}
+
+export class WeakPasswordError extends ExtendableError {
+	constructor(message) {
+		super(message);
+		this.name = 'WeakPasswordError';
+	}
+}
+
+export class NoSuchUserError extends ExtendableError {
+	constructor(message) {
+		super(message);
+		this.name = 'NoSuchUserError';
+	}
+}
+
+export class RejectedPasswordResetError extends ExtendableError {
+	constructor(message) {
+		super(message);
+		this.name = 'RejectedPasswordResetError';
+	}
+}

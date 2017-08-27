@@ -3,11 +3,15 @@ import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import { expect } from 'chai';
+import faker from 'faker';
 import generator from '../generator';
 import log from '../../service/logger';
+import moment from 'moment';
 import OAuth from '../../service/data/oauth.table';
 import { purgeTable } from '../test-utils';
+import sinon from 'sinon';
 import supertest from 'supertest';
+import { transporter } from '../../service/mail-sender';
 import Users from '../../service/data/users.table';
 import uuid from 'uuid/v4';
 
@@ -855,6 +859,510 @@ describe('Authentication routes', () => {
 				.catch(done);
 		});
 
+	});
+
+});
+
+describe('Password routes:', () => {
+	const TEST_USER_PASSWORD = 'OmG!!@_Passw3rd4ME.';
+	const
+		user1 = generator.generateUser(TEST_USER_PASSWORD),
+		user2 = generator.generateUser(TEST_USER_PASSWORD),
+		admin = generator.generateUser(TEST_USER_PASSWORD),
+		cookies = {};
+	admin.role = 'admin';
+
+	const purgeUserTable = done => {
+		purgeTable(Users, 'userId')
+			.then(() => done())
+			.catch(done);
+	};
+
+	const loginUser = user => {
+		if (cookies[user.userName]) {
+			return Bluebird.resolve(cookies[user.userName]);
+		}
+
+		return request
+			.post(LOGIN_ROUTE)
+			.send({
+				username: user.userName,
+				password: TEST_USER_PASSWORD
+			})
+			.expect(200)
+			.then(res => {
+				cookies[user.userName] = res.headers['set-cookie'];
+				return cookies[user.userName];
+			});
+	};
+
+	before(purgeUserTable);
+	afterEach(purgeUserTable);
+
+	describe('Change password:', () => {
+		it('will change the user\'s password and return 200', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: TEST_USER_PASSWORD,
+							newPassword: newPassword
+						})
+						.expect(200);
+				})
+				.then(() => {
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if old password is incorrect', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: 'Wr0nNg--Pss',
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(TEST_USER_PASSWORD, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if new password does not meet strength requirements', done => {
+			const newPassword = 'granny1';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: 'Wr0nNg--Pss',
+							newPassword: newPassword
+						})
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(TEST_USER_PASSWORD, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user tries to change someone else\'s password', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return Users.createAsync(user2);
+				})
+				.then(u => {
+					user2.userId = u.get('userId');
+					return loginUser(user1);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user2.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							oldPassword: TEST_USER_PASSWORD,
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user1.userId);
+				})
+				.then(res => {
+					expect(bcrypt.compareSync(TEST_USER_PASSWORD, res.get('passwordHash')))
+						.to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is unauthenticated', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.userId;
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.send({
+							oldPassword: TEST_USER_PASSWORD,
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will allow admins to change passwords without oldPassword', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(user1)
+				.then(u => {
+					user1.userId = u.get('userId');
+					return Users.createAsync(admin);
+				})
+				.then(a => {
+					admin.userId = a.get('userId');
+					return loginUser(admin);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							newPassword: newPassword
+						})
+						.expect(200);
+				})
+				.then(() => {
+					return Users.getAsync(user1.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if an administrator tries to change the password of a non-existent user', done => {
+			const newPassword = 'Am@Zng__M3!';
+
+			Users.createAsync(admin)
+				.then(a => {
+					admin.userId = a.get('userId');
+					return loginUser(admin);
+				})
+				.then(cookie => {
+					return request
+						.post(`/api/auth/${user1.userName}/password`)
+						.set('cookie', cookie)
+						.send({
+							newPassword: newPassword
+						})
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+	});
+
+	describe('Request password reset:', () => {
+
+		let mailStub;
+		beforeEach(() => {
+			mailStub = sinon.stub(transporter, 'sendMailAsync');
+			mailStub.usingPromise(Bluebird.Promise);
+			mailStub.resolves(true);
+		});
+
+		afterEach(() => {
+			mailStub.restore();
+		});
+
+		after(purgeUserTable);
+
+		const REQUEST_RESET_ROUTE = '/api/auth/resetPassword';
+
+		it('will return 200 and send an email if successful', done => {
+			const user = generator.generateUser();
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.get(REQUEST_RESET_ROUTE)
+						.query({ email: user.email })
+						.expect(200);
+				})
+				.then(() => {
+					expect(mailStub.calledOnce).to.be.true;
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const expectedExpiration = moment().add(1, 'd');
+					const actualExpiration = moment(result.get('passwordResetExpiration'));
+					expect(result.get('passwordResetToken'))
+						.to
+						.match(/^[a-z0-9]{20}$/i);
+					expect(actualExpiration.isSame(expectedExpiration, 'minute')).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail silently (200) if the e-mail address is not registered', done => {
+			request
+				.get(REQUEST_RESET_ROUTE)
+				.query({ email: 'jake@gmail.com' })
+				.expect(200)
+				.then(() => {
+					expect(mailStub.called).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if the email parameter is missing from the query string', done => {
+			request
+				.get(REQUEST_RESET_ROUTE)
+				.expect(400)
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if the email parameter is not a valid address', done => {
+			request
+				.get(REQUEST_RESET_ROUTE)
+				.query({ email: 'not valid' })
+				.expect(400)
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 500 if email cannot be delivered', done => {
+			const user = generator.generateUser();
+			mailStub.rejects('OMG! Email error!!');
+
+			Users.createAsync(user)
+				.then(() => {
+					return request
+						.get(REQUEST_RESET_ROUTE)
+						.query({ email: user.email })
+						.expect(500);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2000);
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
+	describe('Perform password reset:', () => {
+		const newPassword = 'L3t--ThmEAt.C@k3';
+		let user;
+		beforeEach(() => {
+			user = generator.generateUser();
+			user.passwordResetToken = faker.random.alphaNumeric(20);
+			user.passwordResetExpiration = moment().add(1, 'd').toISOString();
+		});
+		after(purgeUserTable);
+
+		it('will change the users password', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: user.passwordResetToken,
+							newPassword: newPassword
+						})
+						.expect(200);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.true;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if new password is missing', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: user.passwordResetToken
+						})
+						.expect(400);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if token is missing', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							newPassword: newPassword
+						})
+						.expect(400);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if new password does not meet strength requirements', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							newPassword: 'too weak',
+							token: user.passwordResetToken
+						})
+						.expect(400);
+				})
+				.then(() => {
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user does not exist', done => {
+			user.userId = uuid();
+			request
+				.post(`/api/auth/${user.userName}/resetPassword`)
+				.send({
+					token: user.passwordResetToken,
+					newPassword: newPassword
+				})
+				.expect(401)
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if token is incorrect', done => {
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: 'badtoken1234',
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if token is expired', done => {
+			user.passwordResetExpiration = moment().subtract(5, 'm').toISOString();
+			Users.createAsync(user)
+				.then(u => {
+					user.userId = u.get('userId');
+					return request
+						.post(`/api/auth/${user.userName}/resetPassword`)
+						.send({
+							token: user.passwordResetToken,
+							newPassword: newPassword
+						})
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					return Users.getAsync(user.userId);
+				})
+				.then(result => {
+					const hash = result.get('passwordHash');
+					expect(bcrypt.compareSync(newPassword, hash)).to.be.false;
+					done();
+				})
+				.catch(done);
+		});
 	});
 
 });

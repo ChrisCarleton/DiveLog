@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import config from '../config';
 import errorRespone, {
 	badRequestResponse,
 	forbiddenActionResponse,
@@ -6,11 +7,30 @@ import errorRespone, {
 	resourceNotFoundResponse,
 	serverErrorResponse
 } from '../utils/error-response';
+import Joi from 'joi';
 import log from '../logger';
+import mailSender from '../mail-sender';
+import moment from 'moment';
 import passport from 'passport';
-import { getUserByName, getOAuthAccounts, removeOAuthConnection } from './helpers/users-helpers';
+import passwordStrengthRegex from '../utils/password-strength-regex';
+import path from 'path';
+import {
+	doChangePassword,
+	doPerformPasswordReset,
+	doRequestPasswordReset,
+	getUserByName,
+	getOAuthAccounts,
+	removeOAuthConnection,
+	sanitizeUserInfo
+} from './helpers/users-helpers';
+import queryString from 'query-string';
+import url from 'url';
 
 const KNOWN_OAUTH_PROVIDERS = ['google', 'facebook', 'github'];
+const performPasswordResetValidation = Joi.object().keys({
+	token: Joi.string().required(),
+	newPassword: Joi.string().regex(passwordStrengthRegex).required()
+}).required();
 
 export function login(req, res) {
 	passport.authenticate('local', (err, user) => {
@@ -27,8 +47,8 @@ export function login(req, res) {
 					return serverErrorResponse(res);
 				}
 
-				log.info('User', user.userName, 'has been successfully authenticated.');
-				res.json(user);
+				log.trace('User', user.userName, 'has been successfully authenticated.');
+				res.json(sanitizeUserInfo(user));
 			});
 		}
 
@@ -126,4 +146,138 @@ export function requireAdminUser(req, res, next) {
 	}
 
 	notAuthroizedResponse(res);
+}
+
+export function changePassword(req, res) {
+	return doChangePassword(
+		req.selectedUser,
+		req.body.oldPassword,
+		req.body.newPassword,
+		req.user.role === 'admin')
+		.then(() =>  {
+			res.send('ok');
+		})
+		.catch(err => {
+			if (err.name === 'BadPasswordError') {
+				log.debug(
+					`Attempt to change password for user "${req.selectedUser.userName}" failed because of a password mismatch.`);
+				return notAuthroizedResponse(res);
+			}
+
+			if (err.name === 'WeakPasswordError') {
+				log.debug(
+					`Attempt to change password for user "${req.selectedUser.userName}" failed because the new password was too weak.`);
+				return badRequestResponse(
+					res,
+					'New password did not meet strength requirements. It should contain upper- and lower-case letters, numbers, and symbols.');
+			}
+
+			log.error(
+				`An error occurred while attempting to change password for user "${req.selectedUser.userName}":`,
+				err);
+			serverErrorResponse(res);
+		});
+}
+
+export function requestPasswordReset(req, res) {
+	if (!req.query.email) {
+		return badRequestResponse(res, 'The "email" query parameter was missing but is required.');
+	}
+
+	const validation = Joi.validate(req.query.email, Joi.string().email());
+	if (validation.error) {
+		return badRequestResponse(res, 'The supplied e-mail address was invalid');
+	}
+
+	const userNotFound = 'user not found';
+	doRequestPasswordReset(req.query.email)
+		.then(user => {
+			if (user === null) {
+				throw userNotFound;
+			}
+
+			const resetUrl = url.resolve(config.baseUrl, '/confirmPasswordReset?')
+				+ queryString.stringify({ user: user.userName, token: user.passwordResetToken });
+			return mailSender(
+				req.query.email,
+				'Password reset request',
+				path.resolve(__dirname, '../views/reset-email.pug'),
+				{
+					userName: user.displayName || user.userName,
+					resetUrl: resetUrl,
+					year: moment().year()
+				});
+		})
+		.then(() => {
+			res.send('ok');
+		})
+		.catch(err => {
+			if (err === userNotFound) {
+				return res.send('ok');
+			}
+
+			log.error(
+				'An error occured while requesting a password reset:',
+				err);
+			serverErrorResponse(res);
+		});
+}
+
+export function performPasswordReset(req, res) {
+	const userNotFound = 'user not found';
+	const validation = Joi.validate(req.body, performPasswordResetValidation);
+	if (validation.error) {
+		return badRequestResponse(res, validation.error);
+	}
+
+	getUserByName(req.params.user)
+		.then(user => {
+			if (user === null) {
+				throw userNotFound;
+			}
+
+			return doPerformPasswordReset(user, req.body.token, req.body.newPassword);
+		})
+		.then(() => {
+			res.send('ok');
+		})
+		.catch(err => {
+			if (err === userNotFound) {
+				return notAuthroizedResponse(res);
+			}
+
+			if (err.name === 'RejectedPasswordResetError') {
+				return notAuthroizedResponse(res);
+			}
+
+			log.error('An error occurred while attempting to reset a user\'s password:', err);
+			serverErrorResponse(res);
+		});
+}
+
+export function requireAccountAuthority(req, res, next) {
+	if (req.user.userName === req.params.user) {
+		req.selectedUser = req.user;
+		return next();
+	}
+
+	if (req.user.role !== 'admin') {
+		return notAuthroizedResponse(res);
+	}
+
+	getUserByName(req.params.user)
+		.then(u => {
+			if (u === null) {
+				return resourceNotFoundResponse(res);
+			}
+
+			req.selectedUser = u;
+			next();
+		})
+		.catch(err => {
+			log.error(
+				`An error occurred while trying to retrieve data on user "${req.params.user}":`,
+				err);
+			serverErrorResponse(res);
+		});
 }
