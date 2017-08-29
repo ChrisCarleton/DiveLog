@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import config from './config';
 import {
+	getUserByName,
 	getOrConnectOAuthAccount,
 	getOrCreateOAuthAccount
 } from './controllers/helpers/users-helpers';
@@ -37,19 +38,14 @@ export default function(app) {
 	passport.use(
 		new LocalStrategy(
 			(username, password, done) => {
-				Users
-					.query(username)
-					.usingIndex('UserNameIndex')
-					.limit(1)
-					.execAsync()
-					.then(response => {
-						if (response.Items.length === 0) {
+				getUserByName(username)
+					.then(result => {
+						if (result === null) {
 							log.debug('Could not log in user "', username, '". User does not exist');
 							return done(null, null);
 						}
 
-						const result = response.Items[0];
-						const passwordHash = result.get('passwordHash');
+						const passwordHash = result.passwordHash;
 
 						if (!passwordHash) {
 							log.debug('Could not log in user "', username, '". This user has no password set.');
@@ -61,7 +57,7 @@ export default function(app) {
 							return done(null, null);
 						}
 
-						done(null, result.attrs);
+						done(null, result);
 					})
 					.catch(done);
 			}));

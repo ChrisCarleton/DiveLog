@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { app } from '../../service/server';
 import Bluebird from 'bluebird';
-import { createUser, purgeTable } from '../test-utils';
+import { purgeTable } from '../test-utils';
 import DiveLogs from '../../service/data/dive-logs.table';
 import { expect } from 'chai';
 import generator from '../generator';
@@ -13,55 +13,52 @@ const request = supertest(app);
 
 describe('Dive log routes:', () => {
 
-	let user1, user2, adminUser, testLog, user1Cookie, adminCookie;
+	const cookies = {};
+	const password = 'W@tW@tS0n!';
+	let user1, user2, adminUser, testLog;
 
-	function loginUser1() {
-		if (user1Cookie) {
-			return Bluebird.resolve(user1Cookie);
+	function loginUser(user) {
+		if (cookies[user.userName]) {
+			return Bluebird.resolve(cookies[user.userName]);
 		}
 
 		return request
 			.post('/api/auth/login/')
 			.send({
-				username: 'BoltSnap',
-				password: 'TehB0ltW3rd'
+				username: user.userName,
+				password: password
 			})
 			.expect(200)
 			.then(res => {
-				user1Cookie = res.headers['set-cookie'];
-				return user1Cookie;
+				cookies[user.userName] = res.headers['set-cookie'];
+				return cookies[user.userName];
 			});
+	}
+
+	function loginUser1() {
+		return loginUser(user1);
 	}
 
 	function loginAdmin() {
-		if (adminCookie) {
-			return Bluebird.resolve(adminCookie);
-		}
-
-		return request
-			.post('/api/auth/login/')
-			.send({
-				username: 'SeriousAdmin',
-				password: 'B!gAdm!nP@ssW0rd'
-			})
-			.expect(200)
-			.then(res => {
-				adminCookie = res.headers['set-cookie'];
-				return adminCookie;
-			});
+		return loginUser(adminUser);
 	}
 
 	before(done => {
+		user1 = generator.generateUser(password);
+		user2 = generator.generateUser(password);
+		adminUser = generator.generateUser(password);
+		adminUser.role = 'admin';
+
 		Bluebird
 			.all([
-				createUser('BoltSnap', 'jimmy1@yehaa.com', 'TehB0ltW3rd'),
-				createUser('UnderTow', 'ut@geemail.com', 'W@tW@tS0n!'),
-				createUser('SeriousAdmin', 'admin@thesite.com', 'B!gAdm!nP@ssW0rd', true)
+				Users.createAsync(user1),
+				Users.createAsync(user2),
+				Users.createAsync(adminUser)
 			])
-			.spread((u1, u2, admin) => {
-				user1 = u1;
-				user2 = u2;
-				adminUser = admin;
+			.spread((u1, u2, a) => {
+				user1.userId = u1.get('userId');
+				user2.userId = u2.get('userId');
+				adminUser.userId = a.get('userId');
 				done();
 			})
 			.catch(done);

@@ -5,10 +5,12 @@ import geolib from 'geolib';
 const salt = bcrypt.genSaltSync(10);
 
 function generateUser(password) {
+	const email = faker.internet.email();
 	return {
-		userName: faker.internet.userName(),
+		userName: faker.internet.userName().toLowerCase(),
 		displayName: faker.name.findName(),
-		email: faker.internet.email(),
+		email: email.toLowerCase(),
+		displayEmail: email,
 		passwordHash: bcrypt.hashSync(password || faker.internet.password(9), salt),
 		role: 'user'
 	};

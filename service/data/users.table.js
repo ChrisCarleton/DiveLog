@@ -11,6 +11,7 @@ const Users = db.define(
 			userId: db.types.uuid(),
 			userName: Joi.string(),
 			email: Joi.string().email(),
+			displayEmail: Joi.string().email(),
 			displayName: Joi.string(),
 			passwordHash: Joi.string(),
 			role: Joi.string().valid(['user', 'admin']),
