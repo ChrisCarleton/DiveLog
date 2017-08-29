@@ -1,0 +1,15 @@
+coverage/	
+deploy/
+docs/
+logs/
+node_modules/
+.git/
+
+.dockerignore
+Dockerfile
+.editorconfig
+.emailcreds
+.oauthcreds
+LICENSE
+README.md
+circle.yml

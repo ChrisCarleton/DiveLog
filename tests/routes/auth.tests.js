@@ -27,16 +27,9 @@ describe('Authentication routes', () => {
 	let idsToDestroy = [];
 
 	const password = 'S3cr3tWrdz';
-	const salt = bcrypt.genSaltSync(10);
-	const passwordHash = bcrypt.hashSync(password, salt);
 
 	beforeEach(() => {
-		testUser = {
-			userName: 'LegitUser2121',
-			displayName: 'Vlad A. Count',
-			email: 'honest_user2121@hotmail.com',
-			passwordHash: passwordHash
-		};
+		testUser = generator.generateUser(password);
 	});
 
 	afterEach(done => {
@@ -91,7 +84,47 @@ describe('Authentication routes', () => {
 					expect(result.userId).to.exist;
 					expect(result.userName).to.equal(testUser.userName);
 					expect(result.displayName).to.equal(testUser.displayName);
-					expect(result.email).to.equal(testUser.email);
+					expect(result.email).to.equal(testUser.displayEmail);
+					expect(result.password).to.not.exist;
+					expect(result.passwordHash).to.not.exist;
+
+					done();
+				})
+				.catch(done);
+		});
+
+		it('does not treat user name with case-sensitivity', done => {
+			let userId;
+
+			Users
+				.createAsync(testUser)
+				.then(result => {
+					userId = result.get('userId');
+					idsToDestroy.push(userId);
+
+					return request
+						.post(LOGIN_ROUTE)
+						.send({
+							username: testUser.userName.toUpperCase(),
+							password: password
+						})
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					return request
+						.get('/api/user/')
+						.set('cookie', res.headers['set-cookie'])
+						.expect('Content-Type', /json/)
+						.expect(200);
+				})
+				.then(res => {
+					const result = res.body;
+					expect(result).to.exist;
+					expect(result.userId).to.exist;
+					expect(result.userName).to.equal(testUser.userName);
+					expect(result.displayName).to.equal(testUser.displayName);
+					expect(result.email).to.equal(testUser.displayEmail);
 					expect(result.password).to.not.exist;
 					expect(result.passwordHash).to.not.exist;
 

@@ -112,7 +112,7 @@ describe('Users helper methods', () => {
 				id: uuid(),
 				provider: 'facegram',
 				displayName: 'David Smith',
-				emails: [{ type: 'main', value: 'davey666@gmail.com' }]
+				emails: [{ type: 'main', value: 'Davey666@gmail.com' }]
 			};
 		});
 
@@ -120,8 +120,9 @@ describe('Users helper methods', () => {
 			getOrCreateOAuthAccount(profile)
 				.then(user => {
 					expect(user).to.exist;
-					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
-					expect(user.email).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/);
+					expect(user.email).to.equal(profile.emails[0].value.toLowerCase());
+					expect(user.displayEmail).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
 					expect(user.displayName).to.equal(profile.displayName);
@@ -134,8 +135,9 @@ describe('Users helper methods', () => {
 					expect(user).to.exist;
 					user = user.attrs;
 					expect(user.userId).to.exist;
-					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
-					expect(user.email).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/);
+					expect(user.email).to.equal(profile.emails[0].value.toLowerCase());
+					expect(user.displayEmail).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
 					expect(user.displayName).to.equal(profile.displayName);
@@ -153,12 +155,9 @@ describe('Users helper methods', () => {
 		});
 
 		it('will return an existing account', done => {
-			const user = {
-				userName: profile.emails[0].value,
-				email: profile.emails[0].value,
-				role: 'user',
-				displayName: profile.displayName
-			};
+			const user = generator.generateUser();
+			profile.emails[0].value = user.email;
+			profile.displayName = user.displayName;
 
 			Users.createAsync(user)
 				.then(result => {
@@ -170,7 +169,7 @@ describe('Users helper methods', () => {
 						providerId: profile.id,
 						provider: profile.provider,
 						userId: user.userId,
-						email: user.email
+						email: user.displayEmail
 					});
 				})
 				.then(() => {
@@ -186,7 +185,7 @@ describe('Users helper methods', () => {
 
 		it('will fail if the profile email address is already registered', done => {
 			const user = generator.generateUser();
-			user.email = profile.emails[0].value;
+			profile.emails[0].value = user.displayEmail;
 
 			Users.createAsync(user)
 				.then(() => {
@@ -225,8 +224,9 @@ describe('Users helper methods', () => {
 				})
 				.then(user => {
 					expect(user).to.exist;
-					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
-					expect(user.email).to.equal(profile.emails[0].value);
+					expect(user.userName).to.match(/^[a-z0-9]{12}$/);
+					expect(user.email).to.equal(profile.emails[0].value.toLowerCase());
+					expect(user.displayEmail).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
 					expect(user.displayName).to.equal(profile.displayName);
@@ -240,7 +240,8 @@ describe('Users helper methods', () => {
 					user = user.attrs;
 					expect(user.userId).to.exist;
 					expect(user.userName).to.match(/^[a-z0-9]{12}$/i);
-					expect(user.email).to.equal(profile.emails[0].value);
+					expect(user.email).to.equal(profile.emails[0].value.toLowerCase());
+					expect(user.displayEmail).to.equal(profile.emails[0].value);
 					expect(user.passwordHash).to.not.exist;
 					expect(user.role).to.equal('user');
 					expect(user.displayName).to.equal(profile.displayName);

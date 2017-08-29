@@ -1,6 +1,8 @@
 import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
 import { expect } from 'chai';
+import faker from 'faker';
+import generator from '../generator';
 import { purgeTable } from '../test-utils';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
@@ -20,7 +22,7 @@ const testValidation = (route, data, expectedErr, done) => {
 		.expect('Content-Type', /json/)
 		.expect(400)
 		.then(res => {
-			expect(res.body).to.eql(expectedErr);
+			expect(res.body.errorId).to.eql(expectedErr);
 			done();
 		})
 		.catch(done);
@@ -40,10 +42,10 @@ describe('User routes:', () => {
 
 		beforeEach(() => {
 			testUser = {
-				userName: 'JoeTesterson',
-				displayName: 'Joe C Testerson',
-				email: 'test@testerson.ca',
-				password: password
+				userName: faker.internet.userName(),
+				email: faker.internet.email(),
+				password: password,
+				displayName: faker.name.findName()
 			};
 		});
 
@@ -58,7 +60,7 @@ describe('User routes:', () => {
 				.then(res => {
 					const result = res.body;
 					expect(result.userId).to.exist;
-					expect(result.userName).to.equal(testUser.userName);
+					expect(result.userName).to.equal(testUser.userName.toLowerCase());
 					expect(result.displayName).to.equal(testUser.displayName);
 					expect(result.passwordHash).to.not.exist;
 					expect(result.email).to.equal(testUser.email);
@@ -70,9 +72,48 @@ describe('User routes:', () => {
 				.then(savedUser => {
 					expect(savedUser).to.exist;
 					expect(savedUser.get('userId')).to.equal(userId);
-					expect(savedUser.get('userName')).to.equal(testUser.userName);
+					expect(savedUser.get('userName')).to.equal(testUser.userName.toLowerCase());
 					expect(savedUser.get('displayName')).to.equal(testUser.displayName);
-					expect(savedUser.get('email')).to.equal(testUser.email);
+					expect(savedUser.get('email')).to.equal(testUser.email.toLowerCase());
+					expect(savedUser.get('displayEmail')).to.equal(testUser.email);
+					expect(savedUser.get('role')).to.equal('user');
+
+					const passwordHash = savedUser.get('passwordHash');
+					expect(bcrypt.compareSync(testUser.password, passwordHash)).to.be.true;
+
+					done();
+				})
+				.catch(done);
+		});
+
+		it('treats user names as case-insensitive', done => {
+			let userId;
+			testUser.userName = testUser.userName.toUpperCase();
+
+			request
+				.post(USERS_ROUTE)
+				.send(testUser)
+				.expect('Content-Type', /json/)
+				.expect(200)
+				.then(res => {
+					const result = res.body;
+					expect(result.userId).to.exist;
+					expect(result.userName).to.equal(testUser.userName.toLowerCase());
+					expect(result.displayName).to.equal(testUser.displayName);
+					expect(result.passwordHash).to.not.exist;
+					expect(result.email).to.equal(testUser.email);
+					expect(result.role).to.equal('user');
+
+					userId = result.userId;
+					return Users.getAsync(result.userId);
+				})
+				.then(savedUser => {
+					expect(savedUser).to.exist;
+					expect(savedUser.get('userId')).to.equal(userId);
+					expect(savedUser.get('userName')).to.equal(testUser.userName.toLowerCase());
+					expect(savedUser.get('displayName')).to.equal(testUser.displayName);
+					expect(savedUser.get('email')).to.equal(testUser.email.toLowerCase());
+					expect(savedUser.get('displayEmail')).to.equal(testUser.email);
 					expect(savedUser.get('role')).to.equal('user');
 
 					const passwordHash = savedUser.get('passwordHash');
@@ -103,7 +144,7 @@ describe('User routes:', () => {
 				.then(res => {
 					const result = res.body;
 					expect(result.userId).to.exist;
-					expect(result.userName).to.equal(testUser.userName);
+					expect(result.userName).to.equal(testUser.userName.toLowerCase());
 					expect(result.displayName).to.equal(testUser.displayName);
 					expect(result.passwordHash).to.not.exist;
 					expect(result.email).to.equal(testUser.email);
@@ -119,20 +160,7 @@ describe('User routes:', () => {
 			testValidation(
 				USERS_ROUTE,
 				testUser,
-				{
-					errorId: 1000,
-					error: 'Bad request: Validation failed.',
-					details: [
-						{
-							context: {
-								key: 'userName'
-							},
-							message: '"userName" is required',
-							path: 'userName',
-							type: 'any.required'
-						}
-					]
-				},
+				1000,
 				done);
 		});
 
@@ -141,22 +169,7 @@ describe('User routes:', () => {
 			testValidation(
 				USERS_ROUTE,
 				testUser,
-				{
-					errorId: 1000,
-					error: 'Bad request: Validation failed.',
-					details: [
-						{
-							context: {
-								key: 'userName',
-								pattern: {},
-								value: '@@ NOtl Va!!lid atALL'
-							},
-							message: '"userName" with value "&#x40;&#x40; NOtl Va&#x21;&#x21;lid atALL" fails to match the required pattern: /^[0-9a-zA-Z][0-9a-zA-Z.-_]*[0-9a-zA-Z]$/',
-							path: 'userName',
-							type: 'string.regex.base'
-						}
-					]
-				},
+				1000,
 				done);
 		});
 
@@ -165,20 +178,7 @@ describe('User routes:', () => {
 			testValidation(
 				USERS_ROUTE,
 				testUser,
-				{
-					errorId: 1000,
-					error: 'Bad request: Validation failed.',
-					details: [
-						{
-							context: {
-								key: 'email'
-							},
-							message: '"email" is required',
-							path: 'email',
-							type: 'any.required'
-						}
-					]
-				},
+				1000,
 				done);
 		});
 
@@ -187,21 +187,7 @@ describe('User routes:', () => {
 			testValidation(
 				USERS_ROUTE,
 				testUser,
-				{
-					errorId: 1000,
-					error: 'Bad request: Validation failed.',
-					details: [
-						{
-							context: {
-								key: 'email',
-								value: 'this is not an e-mail address'
-							},
-							message: '"email" must be a valid email',
-							path: 'email',
-							type: 'string.email'
-						}
-					]
-				},
+				1000,
 				done);
 		});
 
@@ -210,20 +196,7 @@ describe('User routes:', () => {
 			testValidation(
 				USERS_ROUTE,
 				testUser,
-				{
-					errorId: 1000,
-					error: 'Bad request: Validation failed.',
-					details: [
-						{
-							context: {
-								key: 'password'
-							},
-							message: '"password" is required',
-							path: 'password',
-							type: 'any.required'
-						}
-					]
-				},
+				1000,
 				done);
 		});
 
@@ -232,63 +205,25 @@ describe('User routes:', () => {
 			testValidation(
 				USERS_ROUTE,
 				testUser,
-				{
-					errorId: 1000,
-					error: 'Bad request: Validation failed.',
-					details: [
-						{
-							context: {
-								key: 'password',
-								pattern: {},
-								value: 'TooWeak'
-							},
-							message: '"password" with value "TooWeak" fails to match the required pattern: '
-								+ /(?=^[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]{7,}$)(?=([!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*\W+){1,})[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*$/.toString(),
-							path: 'password',
-							type: 'string.regex.base'
-						}
-					]
-				},
+				1000,
 				done);
 		});
 
 		it('user is rejected if display name is too long', done => {
-			testUser.displayName
-				= 'OMFG, this is a really long display name. I mean, seriously, this is long, isn\'t? I should really think about shortening this.';
+			testUser.displayName = faker.lorem.paragraph(3);
 			testValidation(
 				USERS_ROUTE,
 				testUser,
-				{
-					errorId: 1000,
-					error: 'Bad request: Validation failed.',
-					details: [
-						{
-							context: {
-								key: 'displayName',
-								limit: 100,
-								value: testUser.displayName
-							},
-							message: '"displayName" length must be less than or equal to 100 characters long',
-							path: 'displayName',
-							type: 'string.max'
-						}
-					]
-				},
+				1000,
 				done);
 		});
 
 		it('user creation is rejected if user name is taken', done => {
-			const salt = bcrypt.genSaltSync(10);
-			const passwordHash = bcrypt.hashSync(testUser.password, salt);
+			const userEntity = generator.generateUser();
+			userEntity.userName = testUser.userName.toLowerCase();
 
-			Users.createAsync({
-				userName: testUser.userName,
-				passwordHash: passwordHash,
-				displayName: testUser.displayName,
-				email: testUser.email })
+			Users.createAsync(userEntity)
 				.then(() => {
-					testUser.email = 'different_now@email.com';
-
 					return request
 						.post(USERS_ROUTE)
 						.send(testUser)
@@ -308,17 +243,12 @@ describe('User routes:', () => {
 		});
 
 		it('user creation is rejected if email address is taken', done => {
-			const salt = bcrypt.genSaltSync(10);
-			const passwordHash = bcrypt.hashSync(testUser.password, salt);
+			const userEntity = generator.generateUser();
+			userEntity.email = testUser.email.toLowerCase();
+			userEntity.displayEmail = testUser.email;
 
-			Users.createAsync({
-				userName: testUser.userName,
-				passwordHash: passwordHash,
-				displayName: testUser.displayName,
-				email: testUser.email })
+			Users.createAsync(userEntity)
 				.then(() => {
-					testUser.userName = 'DifferentUserName';
-
 					return request
 						.post(USERS_ROUTE)
 						.send(testUser)
