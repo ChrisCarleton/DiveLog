@@ -21,11 +21,7 @@ describe('Dive log helpers', () => {
 
 	before(done => {
 		Users
-			.createAsync({
-				userName: 'DiverJoe',
-				passwordHash: '333',
-				email: 'joediver@diverjoe.mx'
-			})
+			.createAsync(generator.generateUser())
 			.then(result => {
 				logOwner = result.attrs;
 				done();
