@@ -1,22 +1,23 @@
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import errorResponse, { serverErrorResponse } from '../utils/error-response';
+import { getUserByEmail, getUserByName, sanitizeUserInfo } from './helpers/users-helpers';
 import Joi from 'joi';
 import log from '../logger';
-import { sanitizeUserInfo } from './helpers/users-helpers';
+import passwordStrengthRegex from '../utils/password-strength-regex';
 import Users from '../data/users.table';
 
 const signUpValidation = Joi.object().keys({
 	userName: Joi
 		.string()
-		.regex(/^[0-9a-zA-Z][0-9a-zA-Z.-_]*[0-9a-zA-Z]$/)
+		.regex(/^[0-9a-z][0-9a-z.-_]*[0-9a-z]$/i)
 		.min(3)
 		.max(30)
 		.required(),
 	email: Joi.string().email().max(150).required(),
 	password: Joi
 		.string()
-		.regex(/(?=^[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]{7,}$)(?=([!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*\W+){1,})[!@#$%^&*()_\-+=[{\]};:<>|./?a-zA-Z\d]*$/)
+		.regex(passwordStrengthRegex)
 		.min(7)
 		.max(30)
 		.required(),
@@ -39,14 +40,14 @@ export function signUp(req, res) {
 	}
 
 	Bluebird.all([
-		Users.query(req.body.userName).usingIndex('UserNameIndex').limit(1).execAsync(),
-		Users.query(req.body.email).usingIndex('EmailIndex').limit(1).execAsync() ])
+		getUserByName(req.body.userName),
+		getUserByEmail(req.body.email)])
 		.spread((userNameTaken, emailTaken) => {
-			if (userNameTaken.Items.length > 0) {
+			if (userNameTaken) {
 				throw 'user name taken';
 			}
 
-			if (emailTaken.Items.length > 0) {
+			if (emailTaken) {
 				throw 'email taken';
 			}
 
@@ -60,9 +61,10 @@ export function signUp(req, res) {
 
 			return Users
 				.createAsync({
-					userName: req.body.userName,
-					displayName: req.body.displayName,
-					email: req.body.email,
+					userName: req.body.userName.toLowerCase(),
+					displayName: req.body.displayName || req.body.userName,
+					email: req.body.email.toLowerCase(),
+					displayEmail: req.body.email,
 					passwordHash: passwordHash,
 					role: 'user'
 				});

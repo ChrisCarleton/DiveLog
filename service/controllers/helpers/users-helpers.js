@@ -38,7 +38,7 @@ export function getOAuthAccounts(userName) {
 
 export function getUserByName(userName) {
 	return Users
-		.query(userName)
+		.query(userName.toLowerCase())
 		.usingIndex('UserNameIndex')
 		.limit(1)
 		.execAsync()
@@ -53,7 +53,7 @@ export function getUserByName(userName) {
 
 export function getUserByEmail(email) {
 	return Users
-		.query(email)
+		.query(email.toLowerCase())
 		.usingIndex('EmailIndex')
 		.limit(1)
 		.execAsync()
@@ -92,7 +92,8 @@ const createNewOAuthAccount = (profile) => {
 
 			return Users.createAsync({
 				userName: faker.random.alphaNumeric(12),
-				email: profile.emails[0].value,
+				email: profile.emails[0].value.toLowerCase(),
+				displayEmail: profile.emails[0].value,
 				displayName: profile.displayName,
 				role: 'user',
 				imageUrl: imageUrl
@@ -266,12 +267,12 @@ export function sanitizeUserInfo(user) {
 	const sanitized = _.pick(user, [
 		'userId',
 		'userName',
-		'email',
 		'displayName',
 		'role',
 		'imageUrl',
 		'createdAt']);
 	sanitized.hasPassword = !_.isNil(user.passwordHash);
+	sanitized.email = user.displayEmail;
 
 	return sanitized;
 }
