@@ -1,7 +1,7 @@
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 var extractStyles = new ExtractTextPlugin({
-	filename: 'bundle.css'
+	filename: 'bundle.min.css'
 });
 
 var path = require('path');
@@ -57,7 +57,7 @@ module.exports = {
 				]
 			},
 			{
-				test: /\.less$/,
+				test: /(\.less|\.css)$/,
 				include: appDir,
 				use: extractStyles.extract({
 					use: [
@@ -69,6 +69,13 @@ module.exports = {
 						}
 					]
 				})
+			},
+			{
+				test: /\.(eot|svg|ttf|woff|woff2)$/,
+				loader: 'file-loader',
+				query: {
+					name: 'fonts/[name].[ext]'
+				}
 			}
 		]
 	}

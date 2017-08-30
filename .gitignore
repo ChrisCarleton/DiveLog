@@ -36,8 +36,8 @@ build/Release
 node_modules/
 jspm_packages/
 
-# Compiled bundle output directory
-dist/bundle*
+# Dist directory
+dist/
 
 # Typescript v1 declaration files
 typings/

@@ -57,7 +57,7 @@ class AppNavbar extends React.Component {
 
 	render() {
 		return (
-			<Navbar fixedTop inverse collapseOnSelect>
+			<Navbar fixedTop collapseOnSelect>
 				<Navbar.Header>
 					<Navbar.Brand>
 						<IndexLinkContainer to="/">

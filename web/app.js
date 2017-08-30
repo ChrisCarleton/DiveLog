@@ -16,7 +16,8 @@ import ServerError from './components/errors/server-error.jsx';
 import SignUp from './components/sign-up.jsx';
 
 require('./validations');
-require('./styles/divelog.less');
+//require('./styles/divelog.less');
+require('./styles/bootstrap.less');
 
 class AppRouter extends React.Component {
 	render() {
