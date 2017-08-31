@@ -55,13 +55,15 @@ class DecoStop extends React.Component {
 				<Col xs={8}>
 					<input
 						id={ this.props.controlId + '_depth' }
-						className="form-control deco-stop-text"
+						className="form-control"
+						style={{ width: '30%', float: 'left' }}
 						onChange={ this.onValueChanged }
 						value={ _.isNil(value.depth) ? '' : value.depth } />
 					<span className="deco-stop-spacer">{ 'ft for ' }</span>
 					<input
 						id={ this.props.controlId + '_duration' }
-						className="form-control deco-stop-text"
+						className="form-control"
+						style={{ width: '30%', float: 'left' }}
 						onChange={ this.onValueChanged }
 						value={ _.isNil(value.duration) ? '' : value.duration } />
 					<span className="deco-stop-spacer">{ 'mins' }</span>
