@@ -14,8 +14,8 @@ class Home extends React.Component {
 					<h1>Bottom Time<br/>
 						<small>An online log book for scuba divers</small>
 					</h1>
-					<Button bsStyle="primary" bsSize="large">Log In Now</Button>&nbsp;
-					Don't have an account? <Link to="/signup">Sign up!</Link>
+					<Button bsStyle="primary" bsSize="large">Log In Now</Button>
+					{ ' Don\'t have an account? ' }<Link to="/signup">Sign up!</Link>
 				</Jumbotron>
 
 				<p>

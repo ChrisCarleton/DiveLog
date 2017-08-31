@@ -20,6 +20,7 @@ import React from 'react';
 import RequireAuth from './controls/require-auth.jsx';
 import ServerError from './errors/server-error.jsx';
 import SiteMap from './logentry/site-map.jsx';
+import Sticky from 'react-sticky-el';
 import Temperature from './logentry/temperature.jsx';
 import Weight from './logentry/weight.jsx';
 import { withRouter } from 'react-router';
@@ -29,6 +30,8 @@ import {
 	Button,
 	Col,
 	Grid,
+	Nav,
+	NavItem,
 	Row
 } from 'react-bootstrap';
 
@@ -145,78 +148,65 @@ class LogEntry extends React.Component {
 				<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit } onInvalidSubmit={ this.onValidationFailed }>
 					<Grid>
 						<Row>
-							<Col xs={12}>
-								<h3>Time and Location</h3>
+							<Col xsHidden md={3}>
+								<Sticky topOffset={-60} stickyStyle={{ marginTop: '60px' }}>
+									<Nav bsStyle="pills" stacked>
+										<NavItem>Time and Location</NavItem>
+										<NavItem>Air and Weight</NavItem>
+										<NavItem>Dive Info</NavItem>
+										<NavItem>Notes</NavItem>
+									</Nav>
+									<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
+										{ this.state.isSaving ? 'Saving...' : 'Save Log Entry' }
+									</Button>
+									{ ' ' }
+									<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
+								</Sticky>
 							</Col>
-						</Row>
-						<Row>
-							<Col xs={12} md={4}>
-								<DiveTime entry={ this.state.currentEntry } />
-							</Col>
-							<Col xs={12} md={4}>
-								<DiveLocation entry={ this.state.currentEntry } />
-							</Col>
-							<Col xsHidden md={4}>
-								<SiteMap
-									containerElement={
-										<div style={{ height: '280px' }} />
-									}
-									mapElement={
-										<div style={{ height: '100%' }} />
-									}
-									site={ this.state.currentEntry.site }
-									gps={ this.state.currentEntry.gps } />
-							</Col>
-						</Row>
-						<Row>
-							<Col xs={12}>
-								<h3>Air and Weight</h3>
-							</Col>
-						</Row>
-						<Row>
-							<Col xs={12} md={4}>
-								<Weight entry={ this.state.currentEntry } />
-							</Col>
-							<Col xs={12} md={4}>
-								<Air entry={ this.state.currentEntry } />
-							</Col>
-							<Col xs={12} md={4}>
-								<DecoStops entry={ this.state.currentEntry } />
-								<Nitrox entry={ this.state.currentEntry } />
-							</Col>
-						</Row>
-						<Row>
-							<Col xs={12}>
-								<h3>Dive Info</h3>
-							</Col>
-						</Row>
-						<Row>
-							<Col xs={12} md={4}>
-								<Conditions entry={ this.state.currentEntry } />
-							</Col>
-							<Col xs={12} md={4}>
-								<DiveType entry={ this.state.currentEntry } />
-							</Col>
-							<Col xs={12} md={4}>
-								<Equipment entry={this.state.currentEntry } />
-							</Col>
-						</Row>
-						<Row>
-							<Col xs={12} md={4}>
-								<Temperature entry={ this.state.currentEntry } />
-							</Col>
-							<Col xs={12} md={8}>
-								<Notes
-									controlId="notes"
-									value={this.state.currentEntry.notes} />
+							<Col xs={12} md={9}>
+								<section>
+									<h3>Time and Location</h3>
+									<DiveTime entry={ this.state.currentEntry } />
+									<SiteMap
+										containerElement={
+											<div style={{
+												marginLeft: '260px',
+												marginRight: '12px',
+												height: '280px'
+											}} />
+										}
+										mapElement={
+											<div style={{ height: '100%' }} />
+										}
+										site={ this.state.currentEntry.site }
+										gps={ this.state.currentEntry.gps } />
+									<DiveLocation entry={ this.state.currentEntry } />
+								</section>
+
+								<section>
+									<h3>Air and Weight</h3>
+									<Weight entry={ this.state.currentEntry } />
+									<Air entry={ this.state.currentEntry } />
+									<DecoStops entry={ this.state.currentEntry } />
+									<Nitrox entry={ this.state.currentEntry } />
+								</section>
+
+								<section>
+									<h3>Dive Info</h3>
+									<Conditions entry={ this.state.currentEntry } />
+									<DiveType entry={ this.state.currentEntry } />
+									<Equipment entry={this.state.currentEntry } />
+									<Temperature entry={ this.state.currentEntry } />
+								</section>
+
+								<section>
+									<Notes
+										controlId="notes"
+										value={this.state.currentEntry.notes} />
+								</section>
 							</Col>
 						</Row>
 					</Grid>
-					<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
-						{ this.state.isSaving ? 'Saving...' : 'Save Log Entry' }
-					</Button>
-					{ ' ' }
-					<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
 				</Formsy.Form>
 				<ConfirmDialog
 					confirmText="Discard"
