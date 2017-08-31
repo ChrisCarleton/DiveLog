@@ -23,7 +23,7 @@
 // Scaffolding
 @body-bg: #eeeeff;
 @text-color: @gray-dark;
-@link-color: @brand-warning;
+@link-color: @brand-primary;
 @link-hover-color: darken(@link-color, 15%);
 @padding-base-vertical: 6px;
 @padding-base-horizontal: 12px;
@@ -36,13 +36,13 @@
 @border-radius-small: 3px;
 @line-height-large: 1.33;
 @line-height-small: 1.5;
-@component-active-bg: @brand-warning;
+@component-active-bg: @brand-info;
 
 
 // Typography
-@font-family-sans-serif: Cabin;
-@font-family-serif: Arapey;
-@font-family-monospace: Monaco;
+@font-family-sans-serif: 'CabinRegular',Helvetica,Arial,sans serif;
+@font-family-serif: 'Arapey',Times New Roman;
+@font-family-monospace: 'Monaco',Courier New;
 @font-family-base: @font-family-sans-serif;
 @font-size-base: 14px;
 @font-size-large: ceil(@font-size-base * 1.25);
@@ -135,11 +135,11 @@
 @navbar-border-radius: @border-radius-base;
 @navbar-padding-horizontal: floor(@grid-gutter-width / 2);
 @navbar-padding-vertical: ((@navbar-height - @line-height-computed) / 2);
-@navbar-default-link-color: #bbbbff;
-@navbar-default-link-hover-color: #ffffff;
+@navbar-default-link-color: #ffffff;
+@navbar-default-link-hover-color: #ddddff;
 @navbar-default-link-hover-bg: transparent;
 @navbar-default-link-active-color: #ffffff;
-@navbar-default-link-active-bg: lighten(@navbar-default-bg, 20%);
+@navbar-default-link-active-bg: @brand-primary;
 @navbar-default-link-disabled-color:  #ccc;
 @navbar-default-link-disabled-bg: transparent;
 @navbar-default-brand-color: @navbar-default-link-color;
@@ -148,6 +148,9 @@
 @navbar-default-toggle-hover-bg: #ddd;
 @navbar-default-toggle-icon-bar-bg: #888;
 @navbar-default-toggle-border-color: #ddd;
+
+// Breadcrumbs
+@breadcrumb-bg: darken(@brand-info, 5%):
 
 
 // Navs Tabs
