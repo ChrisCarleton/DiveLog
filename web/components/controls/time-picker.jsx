@@ -32,10 +32,19 @@ class TimePicker extends React.Component {
 	}
 
 	onValueChanged(e) {
-		const time = moment(this.props.getValue());
-		const isPm = (time.format('a') === 'pm');
-		let hour = time.hour();
-		let minute = time.minute();
+		const currentValue = this.props.getValue();
+
+		let time = null;
+		let isPm = false;
+		let hour = 0;
+		let minute = 0;
+
+		if (currentValue) {
+			time = moment(this.props.getValue());
+			isPm = (time.format('a') === 'pm');
+			hour = time.hour();
+			minute = time.minute();
+		}
 
 		switch (e.target.id) {
 			case this.props.controlId + '_hours':
@@ -66,7 +75,7 @@ class TimePicker extends React.Component {
 		const time = moment(this.props.getValue());
 
 		return (
-			<FormGroup bsSize="small" validationState="success">
+			<FormGroup bsSize="small">
 				<Col xs={4}>
 					<ControlLabel className="right-aligned">
 						{ this.props.label }
@@ -77,7 +86,8 @@ class TimePicker extends React.Component {
 				<Col xs={8}>
 					<select
 						id={this.props.controlId + '_hours'}
-						className="form-control time-picker-select"
+						className="form-control"
+						style={{ width: '20%', float: 'left' }}
 						value={time.format('h')}
 						onChange={this.onValueChanged}>
 						{ this.hours }
@@ -85,7 +95,8 @@ class TimePicker extends React.Component {
 					<span className="time-picker-spacer">{' : '}</span>
 					<select
 						id={this.props.controlId + '_minutes'}
-						className="form-control time-picker-select"
+						className="form-control"
+						style={{ width: '20%', float: 'left' }}
 						value={time.format('m')}
 						onChange={this.onValueChanged}>
 						{ this.minutes }
@@ -93,7 +104,8 @@ class TimePicker extends React.Component {
 					<span className="time-picker-spacer">{' '}</span>
 					<select
 						id={this.props.controlId + '_ampm'}
-						className="form-control time-picker-select"
+						className="form-control"
+						style={{ width: '20%', float: 'left' }}
 						value={time.format('a')}
 						onChange={this.onValueChanged}>
 						<option key="am" value="am">am</option>

@@ -32,6 +32,7 @@ import {
 	Grid,
 	Nav,
 	NavItem,
+	Panel,
 	Row
 } from 'react-bootstrap';
 
@@ -151,20 +152,26 @@ class LogEntry extends React.Component {
 							<Col xsHidden md={3}>
 								<Sticky topOffset={-60} stickyStyle={{ marginTop: '60px' }}>
 									<Nav bsStyle="pills" stacked>
-										<NavItem>Time and Location</NavItem>
-										<NavItem>Air and Weight</NavItem>
-										<NavItem>Dive Info</NavItem>
-										<NavItem>Notes</NavItem>
+										{/*<Scrollspy>*/}
+											<NavItem href="#timeAndPlace">Time and Location</NavItem>
+											<NavItem href="#airAndWeight">Air and Weight</NavItem>
+											<NavItem href="#diveInfo">Dive Info</NavItem>
+											<NavItem href="#notes">Notes</NavItem>
+										{/*</Scrollspy>*/}
 									</Nav>
-									<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
-										{ this.state.isSaving ? 'Saving...' : 'Save Log Entry' }
-									</Button>
-									{ ' ' }
-									<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
 								</Sticky>
 							</Col>
 							<Col xs={12} md={9}>
-								<section>
+								<Sticky topOffset={-60} stickyStyle={{ marginTop: '60px', zIndex: 1000 }}>
+									<Panel>
+										<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
+											{ this.state.isSaving ? 'Saving...' : 'Save Log Entry' }
+										</Button>
+										{ ' ' }
+										<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
+									</Panel>
+								</Sticky>
+								<section id="timeAndPlace">
 									<h3>Time and Location</h3>
 									<DiveTime entry={ this.state.currentEntry } />
 									<SiteMap
@@ -183,7 +190,7 @@ class LogEntry extends React.Component {
 									<DiveLocation entry={ this.state.currentEntry } />
 								</section>
 
-								<section>
+								<section id="airAndWeight">
 									<h3>Air and Weight</h3>
 									<Weight entry={ this.state.currentEntry } />
 									<Air entry={ this.state.currentEntry } />
@@ -191,7 +198,7 @@ class LogEntry extends React.Component {
 									<Nitrox entry={ this.state.currentEntry } />
 								</section>
 
-								<section>
+								<section id="diveInfo">
 									<h3>Dive Info</h3>
 									<Conditions entry={ this.state.currentEntry } />
 									<DiveType entry={ this.state.currentEntry } />
@@ -199,11 +206,16 @@ class LogEntry extends React.Component {
 									<Temperature entry={ this.state.currentEntry } />
 								</section>
 
-								<section>
+								<section id="notes">
 									<Notes
 										controlId="notes"
 										value={this.state.currentEntry.notes} />
 								</section>
+								<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
+									{ this.state.isSaving ? 'Saving...' : 'Save Log Entry' }
+								</Button>
+								{ ' ' }
+								<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
 							</Col>
 						</Row>
 					</Grid>
