@@ -31,7 +31,6 @@ import {
 	Button,
 	Col,
 	Grid,
-	Nav,
 	NavItem,
 	Panel,
 	Row

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { HOC } from 'formsy-react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
@@ -86,7 +85,7 @@ class TimePicker extends React.Component {
 		if (currentState.ampm === 'pm') {
 			time.add(12, 'h');
 		}
-			
+
 		time = time.toISOString();
 		this.props.setValue(time);
 
@@ -108,7 +107,6 @@ class TimePicker extends React.Component {
 			minute = this.state.minute;
 			ampm = this.state.ampm;
 		}
-		const time = moment(this.props.getValue());
 		const isValid = this.props.isValid();
 
 		if (this.props.isPristine()) {
@@ -169,9 +167,13 @@ class TimePicker extends React.Component {
 
 TimePicker.propTypes = {
 	controlId: PropTypes.string.isRequired,
+	getErrorMessage: PropTypes.func.isRequired,
 	getValue: PropTypes.func.isRequired,
+	isPristine: PropTypes.func.isRequired,
+	isValid: PropTypes.func.isRequired,
 	label: PropTypes.string.isRequired,
 	onChange: PropTypes.func,
+	required: PropTypes.bool,
 	setValue: PropTypes.func.isRequired
 };
 
