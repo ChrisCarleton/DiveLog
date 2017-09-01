@@ -18,7 +18,7 @@
     "VpcId": "vpc-f2e0518b",
     "MaxSize": "3",
     "DesiredCapacity": "1",
-    "DockerImage": "961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:Build239"
+    "DockerImage": "961445962603.dkr.ecr.us-east-1.amazonaws.com/divelog:Build246"
   },
   "StackPolicy": {
     "Statement": [
