@@ -19,6 +19,7 @@ class MyPageHeader extends React.Component {
 
 		this.onStateChange = this.onStateChange.bind(this);
 		this.dismissAlert = this.dismissAlert.bind(this);
+		this.getSubHeading = this.getSubHeading.bind(this);
 	}
 
 	componentDidMount() {
@@ -48,6 +49,14 @@ class MyPageHeader extends React.Component {
 			|| { alertVisible: false });
 	}
 
+	getSubHeading() {
+		if (!this.props.subHeading) {
+			return null;
+		}
+
+		return <small><br />{ this.props.subHeading }</small>;
+	}
+
 	renderAlert() {
 		if (!this.state.alertVisible) {
 			return null;
@@ -66,7 +75,7 @@ class MyPageHeader extends React.Component {
 	render() {
 		return (
 			<div>
-				<PageHeader>{ this.props.heading }</PageHeader>
+				<PageHeader>{ this.props.heading }{ this.getSubHeading() }</PageHeader>
 				{ this.renderAlert() }
 			</div>);
 	}
@@ -75,7 +84,8 @@ class MyPageHeader extends React.Component {
 
 MyPageHeader.propTypes = {
 	alertKey: PropTypes.string.isRequired,
-	heading: PropTypes.string.isRequired
+	heading: PropTypes.string.isRequired,
+	subHeading: PropTypes.string
 };
 
 export default MyPageHeader;
