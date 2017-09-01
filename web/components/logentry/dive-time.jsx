@@ -74,8 +74,22 @@ class DiveTime extends React.Component {
 		});
 	}
 
-	onEntryTimeChanged(time) {
-		CurrentEntryActions.doPartialUpdate({ entryTime: time });
+	onEntryTimeChanged(value) {
+		if (!value) return;
+
+		let time = this.props.entry.entryTime;
+		if (!time) {
+			return CurrentEntryActions.doPartialUpdate({ entryTime: value });
+		}
+
+		time = moment(time);
+		CurrentEntryActions.doPartialUpdate({
+			entryTime: moment(value)
+				.year(time.year())
+				.month(time.month())
+				.date(time.date())
+				.toISOString()
+		});
 	}
 
 	render() {

@@ -39,6 +39,20 @@ class TimePicker extends React.Component {
 		this.onValueChanged = this.onValueChanged.bind(this);
 	}
 
+	componentWillReceiveProps(nextProps) {
+		const value = nextProps.getValue();
+
+		if (value) {
+			const time = moment(value);
+
+			this.setState({
+				hour: time.format('h'),
+				minute: time.format('m'),
+				ampm: time.format('a')
+			});
+		}
+	}
+
 	onValueChanged(e) {
 		const currentState = Object.assign({}, this.state);
 		switch (e.target.id) {
@@ -100,7 +114,7 @@ class TimePicker extends React.Component {
 		if (this.props.isPristine()) {
 			validationState = null;
 			errorMessage = null;
-		} else if (this.props.required && (!this.state.hour || !this.state.minute)) {
+		} else if (this.props.required && (!hour || !minute)) {
 			validationState = 'error';
 			errorMessage = this.props.label + ' is required.';
 		} else {
