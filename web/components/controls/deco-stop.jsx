@@ -45,14 +45,14 @@ class DecoStop extends React.Component {
 
 		return (
 			<FormGroup bsSize="small" controlId={ this.props.controlId } validationState={ validationState }>
-				<Col xs={4}>
+				<Col xs={3}>
 					<ControlLabel className="right-aligned">
 						{ this.props.label }
 						{ this.props.required ? <span className="text-danger"> * </span> : null }
 						{ ':' }
 					</ControlLabel>
 				</Col>
-				<Col xs={8}>
+				<Col xs={9}>
 					<input
 						id={ this.props.controlId + '_depth' }
 						className="form-control"

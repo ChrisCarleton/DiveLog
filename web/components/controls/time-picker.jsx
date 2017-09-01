@@ -110,14 +110,14 @@ class TimePicker extends React.Component {
 
 		return (
 			<FormGroup bsSize="small" validationState={ validationState }>
-				<Col xs={4}>
+				<Col xs={3}>
 					<ControlLabel className="right-aligned">
 						{ this.props.label }
 						<span className="text-danger"> * </span>
 						{':'}
 					</ControlLabel>
 				</Col>
-				<Col xs={8}>
+				<Col xs={9}>
 					<select
 						id={this.props.controlId + '_hours'}
 						className="form-control"

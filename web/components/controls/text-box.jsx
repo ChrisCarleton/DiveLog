@@ -45,7 +45,7 @@ class TextBox extends React.Component {
 
 		return (
 			<FormGroup bsSize="small" controlId={this.props.controlId} validationState={validationState}>
-				<Col sm={4}>
+				<Col sm={3}>
 					<ControlLabel className="right-aligned">
 						<span className="text-right">
 							{this.props.label}
@@ -63,7 +63,7 @@ class TextBox extends React.Component {
 					<FormControl.Feedback />
 					{ errorMessage ? <HelpBlock>{errorMessage}</HelpBlock> : null }
 				</Col>
-				<Col sm={1}>
+				<Col sm={2}>
 					<span className="tb-unit">{ this.props.unit }</span>
 					{ this.props.helpText
 						? <div className="tb-help-bubble"><HelpBubble id={this.props.controlId + '_help'}>{this.props.helpText}</HelpBubble></div>

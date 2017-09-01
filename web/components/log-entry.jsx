@@ -18,6 +18,7 @@ import PageHeader from './controls/page-header.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
 import RequireAuth from './controls/require-auth.jsx';
+import Scrollspy from 'react-scrollspy';
 import ServerError from './errors/server-error.jsx';
 import SiteMap from './logentry/site-map.jsx';
 import Sticky from 'react-sticky-el';
@@ -125,6 +126,11 @@ class LogEntry extends React.Component {
 	}
 
 	render() {
+		const sectionOffset = {
+			marginTop: '-105px',
+			paddingTop: '105px'
+		};
+
 		if (this.state.currentEntry === 'not found') {
 			return <NotFound />;
 		}
@@ -151,18 +157,16 @@ class LogEntry extends React.Component {
 						<Row>
 							<Col xsHidden md={3}>
 								<Sticky topOffset={-60} stickyStyle={{ marginTop: '60px' }}>
-									<Nav bsStyle="pills" stacked>
-										{/*<Scrollspy>*/}
-											<NavItem href="#timeAndPlace">Time and Location</NavItem>
-											<NavItem href="#airAndWeight">Air and Weight</NavItem>
-											<NavItem href="#diveInfo">Dive Info</NavItem>
-											<NavItem href="#notes">Notes</NavItem>
-										{/*</Scrollspy>*/}
-									</Nav>
+									<Scrollspy className="nav nav-pill nav-stacked" items={ ['timeAndPlace', 'airAndWeight', 'diveInfo', 'notes'] } currentClassName="active">
+										<NavItem href="#timeAndPlace">Time and Location</NavItem>
+										<NavItem href="#airAndWeight">Air and Weight</NavItem>
+										<NavItem href="#diveInfo">Dive Info</NavItem>
+										<NavItem href="#notes">Notes</NavItem>
+									</Scrollspy>
 								</Sticky>
 							</Col>
 							<Col xs={12} md={9}>
-								<Sticky topOffset={-60} stickyStyle={{ marginTop: '60px', zIndex: 1000 }}>
+								<Sticky topOffset={-48} stickyStyle={{ marginTop: '48px', zIndex: 1000 }}>
 									<Panel>
 										<Button type="submit" bsStyle="primary" disabled={ this.state.isSaving }>
 											{ this.state.isSaving ? 'Saving...' : 'Save Log Entry' }
@@ -171,15 +175,16 @@ class LogEntry extends React.Component {
 										<Button onClick={ this.showConfirmReset } disabled={ this.state.isSaving }>Discard changes</Button>
 									</Panel>
 								</Sticky>
-								<section id="timeAndPlace">
+								<section id="timeAndPlace" style={ sectionOffset }>
 									<h3>Time and Location</h3>
 									<DiveTime entry={ this.state.currentEntry } />
 									<SiteMap
 										containerElement={
 											<div style={{
-												marginLeft: '260px',
-												marginRight: '12px',
-												height: '280px'
+												marginLeft: '180px',
+												marginRight: '20px',
+												marginBottom: '14px',
+												height: '280px',
 											}} />
 										}
 										mapElement={
@@ -190,7 +195,7 @@ class LogEntry extends React.Component {
 									<DiveLocation entry={ this.state.currentEntry } />
 								</section>
 
-								<section id="airAndWeight">
+								<section id="airAndWeight" style={ sectionOffset }>
 									<h3>Air and Weight</h3>
 									<Weight entry={ this.state.currentEntry } />
 									<Air entry={ this.state.currentEntry } />
@@ -198,7 +203,7 @@ class LogEntry extends React.Component {
 									<Nitrox entry={ this.state.currentEntry } />
 								</section>
 
-								<section id="diveInfo">
+								<section id="diveInfo" style={ sectionOffset }>
 									<h3>Dive Info</h3>
 									<Conditions entry={ this.state.currentEntry } />
 									<DiveType entry={ this.state.currentEntry } />
@@ -206,7 +211,7 @@ class LogEntry extends React.Component {
 									<Temperature entry={ this.state.currentEntry } />
 								</section>
 
-								<section id="notes">
+								<section id="notes" style={ sectionOffset }>
 									<Notes
 										controlId="notes"
 										value={this.state.currentEntry.notes} />

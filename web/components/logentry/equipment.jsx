@@ -124,18 +124,18 @@ class Equipment extends React.Component {
 				</SelectBox>
 				{ this.getThicknessSelectBox(exposure) }
 				<FormGroup bsSize="small">
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Also wearing:</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						{exposureCheckboxes}
 					</Col>
 				</FormGroup>
 				<FormGroup bsSize="small">
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Other:</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						{equipmentCheckboxes}
 					</Col>
 				</FormGroup>
