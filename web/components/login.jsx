@@ -66,7 +66,7 @@ class LogIn extends React.Component {
 				<PageHeader heading="Log In" alertKey={ ALERT_KEY } />
 				<Grid>
 					<Row>
-						<Col md={5}>
+						<Col md={6}>
 							<h4>Log In</h4>
 							<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit }>
 								<TextBox
@@ -90,7 +90,7 @@ class LogIn extends React.Component {
 								<Link to="/resetPassword">Forgot your username or password?</Link>
 							</div>
 						</Col>
-						<Col md={2}>
+						<Col md={1}>
 							<h4>- or -</h4>
 						</Col>
 						<Col md={5}>

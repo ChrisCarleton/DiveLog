@@ -84,10 +84,10 @@ class Air extends React.Component {
 					}} />
 
 				<FormGroup bsSize="small" validationState={ cylinder.type ? 'success' : null }>
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Type:</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						<Radio
 							name="tankType"
 							value="aluminum"

@@ -1,8 +1,20 @@
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+var extractStyles = new ExtractTextPlugin({
+	filename: 'bundle.css'
+});
+
 var path = require('path');
 var webpack = require('webpack');
 
 var appDir = path.resolve(__dirname, 'web/');
 var outputDir = path.resolve(__dirname, 'dist/');
+
+var copyImages = new CopyWebpackPlugin([{
+	from: path.resolve(appDir, 'img/'),
+	to: path.resolve(outputDir, 'img/')
+}]);
 
 module.exports = {
 	entry: path.resolve(appDir, 'app.js'),
@@ -12,7 +24,9 @@ module.exports = {
 		publicPath: 'http://localhost:3000/public/'
 	},
 	plugins: [
-		new webpack.HotModuleReplacementPlugin()
+		new webpack.HotModuleReplacementPlugin(),
+		extractStyles,
+		copyImages
 	],
 	devtool: 'cheap-module-source-map',
 	devServer: {
@@ -39,18 +53,25 @@ module.exports = {
 				]
 			},
 			{
-				test: /\.less$/,
-				use: [
-					{
-						loader: 'style-loader'
-					},
-					{
-						loader: 'css-loader'
-					},
-					{
-						loader: 'less-loader'
-					}
-				]
+				test: /(\.less|\.css)$/,
+				include: appDir,
+				use: extractStyles.extract({
+					use: [
+						{
+							loader: 'css-loader'
+						},
+						{
+							loader: 'less-loader'
+						}
+					]
+				})
+			},
+			{
+				test: /\.(eot|svg|ttf|woff|woff2)$/,
+				loader: 'file-loader',
+				query: {
+					name: 'fonts/[name].[ext]'
+				}
 			}
 		]
 	}

@@ -68,7 +68,7 @@ class SignUp extends React.Component {
 				<PageHeader heading="Sign Up" alertKey={ ALERT_KEY } />
 				<Grid>
 					<Row>
-						<Col md={5}>
+						<Col md={6}>
 							<h4>Create an Account</h4>
 							<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit } onValid={ this.enableButton } onInvalid={ this.disableButton }>
 								<TextBox
@@ -132,7 +132,7 @@ class SignUp extends React.Component {
 								</Button>
 							</Formsy.Form>
 						</Col>
-						<Col md={2}>
+						<Col md={1}>
 							<h4>- or -</h4>
 						</Col>
 						<Col md={5}>

@@ -56,10 +56,15 @@ class Chrome extends React.Component {
 			<div>
 				<Navbar />
 				{ this.renderGlobalAlert() }
-				<div className="container">
+				<div className="container chrome">
 					{ this.props.children }
 					<div className="text-right footer">
-						<small><em>Copyright &copy; Chris Carleton, 2017</em></small>
+						<small>
+							<em>
+								Copyright &copy; Chris Carleton, 2017<br />
+								<a href="http://www.freepik.com/free-vector/realistic-diving-background-with-scuba-diver-and-seaweeds_885912.htm">Background image designed by Freepik</a>
+							</em>
+						</small>
 					</div>
 				</div>
 			</div>);

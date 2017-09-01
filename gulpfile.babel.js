@@ -42,6 +42,10 @@ gulp.task('ensure-log-directory', done => {
 	mkdirp(path.join(__dirname, 'logs'), done);
 });
 
+gulp.task('ensure-dist-directory', done => {
+	mkdirp(path.join(__dirname, 'dist'), done);
+});
+
 gulp.task('ensure-dynamo-tables', done => {
 	if (process.env.NODE_ENV === 'system-test') {
 		return done();
@@ -116,15 +120,15 @@ function bundle(config, done) {
 		});
 }
 
-gulp.task('bundle-dev', done => {
+gulp.task('bundle-dev', ['ensure-dist-directory'], done => {
 	bundle(require('./webpack.dev.js'), done);
 });
 
-gulp.task('bundle-prod', done => {
+gulp.task('bundle-prod', ['bundle-dev'], done => {
 	bundle(require('./webpack.prod.js'), done);
 });
 
-gulp.task('bundle', ['bundle-dev', 'bundle-prod']);
+gulp.task('bundle', ['bundle-prod']);
 
 gulp.task('webpack-server', done => {
 	const compiler = webpack(require('./webpack.dev.js'));

@@ -58,7 +58,10 @@ switch (config.env) {
 		break;
 }
 
-const styleLocation = config.env === 'production' ? '/public/bundle.css' : null;
+const styleLocation =
+	config.env === 'production'
+		? '/public/bundle.min.css'
+		: '/public/bundle.css';
 
 app.use(
 	'/public',
