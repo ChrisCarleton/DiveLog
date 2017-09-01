@@ -67,14 +67,15 @@ class Weight extends React.Component {
 					}} />
 
 				<FormGroup bsSize="small" validationState={ weight.correctness ? 'success' : null }>
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Correct Amount?</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						<Radio
 							name="weight"
 							value="good"
 							checked={ weight.correctness === 'good' }
+							inline
 							onChange={ this.onValueChanged }>
 								Good
 						</Radio>
@@ -82,6 +83,7 @@ class Weight extends React.Component {
 							name="weight"
 							value="too much"
 							checked={ weight.correctness === 'too much' }
+							inline
 							onChange={ this.onValueChanged }>
 								Too much
 						</Radio>
@@ -89,6 +91,7 @@ class Weight extends React.Component {
 							name="weight"
 							value="too little"
 							checked={ weight.correctness === 'too little' }
+							inline
 							onChange={ this.onValueChanged }>
 								Too little
 						</Radio>
@@ -96,14 +99,15 @@ class Weight extends React.Component {
 				</FormGroup>
 
 				<FormGroup bsSize="small" validationState={ weight.trim ? 'success' : null }>
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Trim:</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						<Radio
 							name="trim"
 							value="good"
 							checked={ weight.trim === 'good' }
+							inline
 							onChange={ this.onValueChanged }>
 								Good
 						</Radio>
@@ -111,6 +115,7 @@ class Weight extends React.Component {
 							name="trim"
 							value="feet down"
 							checked={ weight.trim === 'feet down' }
+							inline
 							onChange={ this.onValueChanged }>
 								Feet down
 						</Radio>
@@ -118,6 +123,7 @@ class Weight extends React.Component {
 							name="trim"
 							value="head down"
 							checked={ weight.trim === 'head down' }
+							inline
 							onChange={ this.onValueChanged }>
 								Head down
 						</Radio>

@@ -70,10 +70,10 @@ class DiveType extends React.Component {
 					</Col>
 				</Row>
 				<FormGroup bsSize="small" controlId="boatDive">
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Entry type:</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						<Radio
 							id="boat"
 							name="entryType"
@@ -95,10 +95,10 @@ class DiveType extends React.Component {
 					</Col>
 				</FormGroup>
 				<FormGroup bsSize="small" controlId="saltWater">
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Water:</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						<Radio
 							id="salt"
 							name="water"
@@ -120,10 +120,10 @@ class DiveType extends React.Component {
 					</Col>
 				</FormGroup>
 				<FormGroup bsSize="small">
-					<Col xs={4}>
+					<Col xs={3}>
 						<ControlLabel className="right-aligned">Type of Dive:</ControlLabel>
 					</Col>
-					<Col xs={8}>
+					<Col xs={9}>
 						{checkboxes}
 					</Col>
 				</FormGroup>

@@ -45,23 +45,25 @@ class DecoStop extends React.Component {
 
 		return (
 			<FormGroup bsSize="small" controlId={ this.props.controlId } validationState={ validationState }>
-				<Col xs={4}>
+				<Col xs={3}>
 					<ControlLabel className="right-aligned">
 						{ this.props.label }
 						{ this.props.required ? <span className="text-danger"> * </span> : null }
 						{ ':' }
 					</ControlLabel>
 				</Col>
-				<Col xs={8}>
+				<Col xs={9}>
 					<input
 						id={ this.props.controlId + '_depth' }
-						className="form-control deco-stop-text"
+						className="form-control"
+						style={{ width: '30%', float: 'left' }}
 						onChange={ this.onValueChanged }
 						value={ _.isNil(value.depth) ? '' : value.depth } />
 					<span className="deco-stop-spacer">{ 'ft for ' }</span>
 					<input
 						id={ this.props.controlId + '_duration' }
-						className="form-control deco-stop-text"
+						className="form-control"
+						style={{ width: '30%', float: 'left' }}
 						onChange={ this.onValueChanged }
 						value={ _.isNil(value.duration) ? '' : value.duration } />
 					<span className="deco-stop-spacer">{ 'mins' }</span>

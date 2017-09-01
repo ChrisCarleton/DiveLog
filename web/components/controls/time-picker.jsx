@@ -6,12 +6,19 @@ import React from 'react';
 import {
 	Col,
 	ControlLabel,
-	FormGroup
+	FormGroup,
+	HelpBlock
 } from 'react-bootstrap';
 
 class TimePicker extends React.Component {
 	constructor() {
 		super();
+
+		this.state = {
+			hour: '',
+			minute: '',
+			ampm: 'am'
+		};
 
 		this.hours = [];
 		for (let i = 1; i <= 12; i++) {
@@ -31,74 +38,128 @@ class TimePicker extends React.Component {
 		this.onValueChanged = this.onValueChanged.bind(this);
 	}
 
-	onValueChanged(e) {
-		const time = moment(this.props.getValue());
-		const isPm = (time.format('a') === 'pm');
-		let hour = time.hour();
-		let minute = time.minute();
+	componentWillReceiveProps(nextProps) {
+		const value = nextProps.getValue();
 
+		if (value) {
+			const time = moment(value);
+
+			this.setState({
+				hour: time.format('h'),
+				minute: time.format('m'),
+				ampm: time.format('a')
+			});
+		}
+	}
+
+	onValueChanged(e) {
+		const currentState = Object.assign({}, this.state);
 		switch (e.target.id) {
 			case this.props.controlId + '_hours':
-				hour = Number.parseInt(e.target.value) % 12;
-				if (isPm) hour += 12;
+				currentState.hour = e.target.value;
 				break;
 
 			case this.props.controlId + '_minutes':
-				minute = Number.parseInt(e.target.value);
+				currentState.minute = e.target.value;
 				break;
 
 			case this.props.controlId + '_ampm':
-				if (e.target.value === 'am') hour -= 12;
-				else hour += 12;
+				currentState.ampm = e.target.value;
 				break;
 		}
 
-		const value = time.hour(hour).minute(minute).toISOString();
+		this.setState(currentState);
 
-		if (!this.props.onChange) {
-			this.props.setValue(value);
-		} else {
-			this.props.onChange(value);
+		if (!currentState.hour || !currentState.minute) {
+			// Don't show the "Required Field" error until a value has been set or the form
+			// has been submitted.
+			if (this.props.isPristine()) return;
+
+			return this.props.setValue(null);
+		}
+
+		let time = moment()
+			.hour(currentState.hour)
+			.minute(currentState.minute);
+
+		if (currentState.ampm === 'pm') {
+			time.add(12, 'h');
+		}
+
+		time = time.toISOString();
+		this.props.setValue(time);
+
+		if (this.props.onChange) {
+			this.props.onChange(time);
 		}
 	}
 
 	render() {
-		const time = moment(this.props.getValue());
+		const currentValue = this.props.getValue();
+		let hour, minute, ampm, validationState, errorMessage;
+		if (currentValue) {
+			const time = moment(currentValue);
+			hour = time.format('h');
+			minute = time.format('m');
+			ampm = time.format('a');
+		} else {
+			hour = this.state.hour;
+			minute = this.state.minute;
+			ampm = this.state.ampm;
+		}
+		const isValid = this.props.isValid();
+
+		if (this.props.isPristine()) {
+			validationState = null;
+			errorMessage = null;
+		} else if (this.props.required && (!hour || !minute)) {
+			validationState = 'error';
+			errorMessage = this.props.label + ' is required.';
+		} else {
+			validationState = isValid ? 'success' : 'error';
+			errorMessage = isValid ? null : this.props.getErrorMessage();
+		}
 
 		return (
-			<FormGroup bsSize="small" validationState="success">
-				<Col xs={4}>
+			<FormGroup bsSize="small" validationState={ validationState }>
+				<Col xs={3}>
 					<ControlLabel className="right-aligned">
 						{ this.props.label }
 						<span className="text-danger"> * </span>
 						{':'}
 					</ControlLabel>
 				</Col>
-				<Col xs={8}>
+				<Col xs={9}>
 					<select
 						id={this.props.controlId + '_hours'}
-						className="form-control time-picker-select"
-						value={time.format('h')}
+						className="form-control"
+						style={{ width: '20%', float: 'left' }}
+						value={hour}
 						onChange={this.onValueChanged}>
+						<option value=""></option>
 						{ this.hours }
 					</select>
 					<span className="time-picker-spacer">{' : '}</span>
 					<select
 						id={this.props.controlId + '_minutes'}
-						className="form-control time-picker-select"
-						value={time.format('m')}
+						className="form-control"
+						style={{ width: '20%', float: 'left' }}
+						value={minute}
 						onChange={this.onValueChanged}>
+						<option value=""></option>
 						{ this.minutes }
 					</select>
 					<span className="time-picker-spacer">{' '}</span>
 					<select
 						id={this.props.controlId + '_ampm'}
-						className="form-control time-picker-select"
-						value={time.format('a')}
+						className="form-control"
+						style={{ width: '20%', float: 'left' }}
+						value={ampm}
 						onChange={this.onValueChanged}>
 						<option key="am" value="am">am</option>
 						<option key="pm" value="pm">pm</option>
 					</select>
+					{ errorMessage ? <HelpBlock>{errorMessage}</HelpBlock> : null }
 				</Col>
 			</FormGroup>);
 	}
@@ -106,9 +167,13 @@ class TimePicker extends React.Component {
 
 TimePicker.propTypes = {
 	controlId: PropTypes.string.isRequired,
+	getErrorMessage: PropTypes.func.isRequired,
 	getValue: PropTypes.func.isRequired,
+	isPristine: PropTypes.func.isRequired,
+	isValid: PropTypes.func.isRequired,
 	label: PropTypes.string.isRequired,
 	onChange: PropTypes.func,
+	required: PropTypes.bool,
 	setValue: PropTypes.func.isRequired
 };
 
