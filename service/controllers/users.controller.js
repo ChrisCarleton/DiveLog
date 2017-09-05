@@ -1,11 +1,17 @@
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
 import errorResponse, { serverErrorResponse } from '../utils/error-response';
-import { getUserByEmail, getUserByName, sanitizeUserInfo } from './helpers/users-helpers';
 import Joi from 'joi';
 import log from '../logger';
 import passwordStrengthRegex from '../utils/password-strength-regex';
 import Users from '../data/users.table';
+
+import {
+	doUpdateProfile,
+	getUserByEmail,
+	getUserByName,
+	sanitizeUserInfo
+} from './helpers/users-helpers';
 
 const signUpValidation = Joi.object().keys({
 	userName: Joi
@@ -119,4 +125,9 @@ export function signUp(req, res) {
 
 export function me(req, res) {
 	res.json(sanitizeUserInfo(req.user));
+}
+
+export function updateProfile(req, res) {
+	doUpdateProfile();
+	res.send('ok');
 }

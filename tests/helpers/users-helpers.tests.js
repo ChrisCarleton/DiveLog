@@ -14,6 +14,7 @@ import {
 	doChangePassword,
 	doPerformPasswordReset,
 	doRequestPasswordReset,
+	doUpdateProfile,
 	getOrCreateOAuthAccount,
 	getOrConnectOAuthAccount,
 	getOAuthAccounts,
@@ -737,5 +738,88 @@ describe('Users helper methods', () => {
 				.catch(done);
 		});
 
+	});
+
+	describe('doUpdateProfile method', () => {
+		const newInfo = {
+			location: 'London, UK',
+			certificationAgencies: 'PADI, BSAC',
+			diverType: 'typical',
+			numberOfDives: '<500'
+		};
+		let user;
+
+		beforeEach(() => {
+			user = generator.generateUser();
+		});
+
+		after(done => {
+			purgeTable(Users, 'userId')
+				.then(() => done())
+				.catch(done);
+		});
+
+		it('will update user\'s profile', done => {
+			Users.createAsync(user)
+				.then(result => {
+					user.userId = result.get('userId');
+					return doUpdateProfile(user, newInfo);
+				})
+				.then(result => {
+					expect(result).to.exist;
+					const expected = {
+						createdAt: result.createdAt,
+						updatedAt: result.updatedAt
+					};
+					Object.assign(expected, user, newInfo);
+					expect(result).to.eql(expected);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will fail if new e-mail address is taken', done => {
+			const otherUser = generator.generateUser();
+
+			Bluebird.all([
+				Users.createAsync(user),
+				Users.createAsync(otherUser)])
+				.spread((u, o) => {
+					user.userId = u.get('userId');
+					otherUser.userId = o.get('userId');
+					return doUpdateProfile(user, { email: otherUser.displayEmail });
+				})
+				.then(() => {
+					done('Operation was not meant to succeed.');
+				})
+				.catch(err => {
+					expect(err.name).to.equal('EmailInUseError');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will change user\'s email address if it is available.', done => {
+			newInfo.email = faker.internet.email();
+
+			Users.createAsync(user)
+				.then(result => {
+					user.userId = result.get('userId');
+					return doUpdateProfile(user, newInfo);
+				})
+				.then(result => {
+					expect(result).to.exist;
+					const expected = {
+						createdAt: result.createdAt,
+						updatedAt: result.updatedAt,
+						email: newInfo.email.toLowerCase(),
+						displayEmail: newInfo.email
+					};
+					Object.assign(expected, user, newInfo);
+					expect(result).to.eql(expected);
+					done();
+				})
+				.catch(done);
+		});
 	});
 });

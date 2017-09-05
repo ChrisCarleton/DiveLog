@@ -1,6 +1,5 @@
 import DatePicker from '../controls/date-picker.jsx';
 import Formsy from 'formsy-react';
-import moment from 'moment';
 import React from 'react';
 import SelectBox from '../controls/select-box.jsx';
 import TextBox from '../controls/text-box.jsx';
@@ -119,7 +118,7 @@ class GeneralInfo extends React.Component {
 						name="numberOfDives"
 						label="# of dives">
 						<option value=""></option>
-						<option value="0">None yet! (I'm new!)</option>
+						<option value="0">{ 'None yet! (I\'m new!)' }</option>
 						<option value="<20">1-19</option>
 						<option value="<50">20-49</option>
 						<option value="<100">50-99</option>
@@ -127,8 +126,8 @@ class GeneralInfo extends React.Component {
 						<option value="<1000">500-999</option>
 						<option value="<5000">1000-4999</option>
 						<option value="<9000">5000-9000</option>
-						<option value="9000+">IT'S OVER 9000!!</option>
-						<option value="unkown">I've lost count!</option>
+						<option value="9000+">{ 'IT\'S OVER 9000!!' }</option>
+						<option value="unkown">{ 'I\'ve lost count!' }</option>
 						<option value="no logs">Logging dives is for chumps!</option>
 					</SelectBox>
 					<Button type="submit" bsStyle="primary">Save Changes</Button>
