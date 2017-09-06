@@ -60,7 +60,7 @@ class GeneralInfo extends React.Component {
 				if (this.state.currentUser.userName === this.props.match.params.userName) {
 					UserActions.updateProfile(res.body);
 				}
-				
+
 				AlertActions.showSuccess(
 					ALERT_KEY,
 					'Profile Saved',
