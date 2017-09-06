@@ -59,6 +59,10 @@ class UserActions {
 	signOutSucceeded() {
 		return {};
 	}
+
+	updateProfile(user) {
+		return user;
+	}
 }
 
 export default alt.createActions(UserActions);

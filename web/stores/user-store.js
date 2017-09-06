@@ -5,7 +5,7 @@ class UserStore {
 	constructor() {
 		this.currentUser = null;
 		this.bindListeners({
-			signInUser: UserActions.SIGN_IN_SUCCEEDED,
+			signInUser: [UserActions.SIGN_IN_SUCCEEDED, UserActions.UPDATE_PROFILE],
 			signOutUser: UserActions.SIGN_OUT_SUCCEEDED
 		});
 

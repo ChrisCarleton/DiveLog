@@ -1,23 +1,35 @@
+import AlertActions from '../../actions/alert-actions';
 import DatePicker from '../controls/date-picker.jsx';
 import Formsy from 'formsy-react';
+import PropTypes from 'prop-types';
 import React from 'react';
+import request from '../../request-agent';
 import SelectBox from '../controls/select-box.jsx';
+import Spinner from '../controls/spinner.jsx';
 import TextBox from '../controls/text-box.jsx';
+import UserActions from '../../actions/user-actions';
 import UserStore from '../../stores/user-store';
 
 import {
 	Button
 } from 'react-bootstrap';
 
+const ALERT_KEY = 'profile';
+
 class GeneralInfo extends React.Component {
 	constructor() {
 		super();
-		this.state = UserStore.getState();
+		this.state = {
+			currentUser: UserStore.getState().currentUser,
+			isSaving: false
+		};
 		this.onUserChanged = this.onUserChanged.bind(this);
+		this.submit = this.submit.bind(this);
 	}
 
 	componentDidMount() {
 		UserStore.listen(this.onUserChanged);
+		AlertActions.dismissAlert(ALERT_KEY);
 	}
 
 	componentWillUnmount() {
@@ -25,11 +37,51 @@ class GeneralInfo extends React.Component {
 	}
 
 	onUserChanged() {
-		this.setState(UserStore.getState());
+		this.setState({
+			currentUser: UserStore.getState().currentUser,
+			isSaving: this.state.isSaving
+		});
 	}
 
-	submit(model) {
-		console.log(model);
+	submit(model, reset, invalidate) {
+		AlertActions.dismissAlert(ALERT_KEY);
+		this.setState({
+			currentUser: this.state.currentUser,
+			isSaving: true
+		});
+
+		model.numberOfDives = model.numberOfDives || null;
+		model.diverType = model.diverType || null;
+
+		request
+			.put(`/api/users/${this.props.match.params.userName}/`)
+			.send(model)
+			.then(res => {
+				if (this.state.currentUser.userName === this.props.match.params.userName) {
+					UserActions.updateProfile(res.body);
+				}
+				
+				AlertActions.showSuccess(
+					ALERT_KEY,
+					'Profile Saved',
+					'Your profile information has been saved successfully.');
+			})
+			.catch(res => {
+				if (res.status === 403) {
+					// Attempt to change e-mail to one that already exists in the system.
+					return invalidate({
+						email: 'Unable to change e-mail address. This address is already taken!'
+					});
+				}
+
+				AlertActions.handleErrorResponse(ALERT_KEY, res);
+			})
+			.finally(() => {
+				this.setState({
+					currentUser: this.state.currentUser,
+					isSaving: false
+				});
+			});
 	}
 
 	render() {
@@ -73,7 +125,8 @@ class GeneralInfo extends React.Component {
 					<DatePicker
 						controlId="dateOfBirth"
 						name="dateOfBirth"
-						label="Date of birth" />
+						label="Date of birth"
+						value={ user.dateOfBirth } />
 					<TextBox
 						controlId="location"
 						name="location"
@@ -93,10 +146,10 @@ class GeneralInfo extends React.Component {
 						placeholder="Which agences have you received training from? (PADI, NAUI, etc.)"
 						value={ user.certificationAgencies }
 						validations={{
-							maxLength: 250
+							maxLength: 150
 						}}
 						validationErrors={{
-							maxLength: 'Certification agencies must be no more than 250 characters.'
+							maxLength: 'Certification agencies must be no more than 150 characters.'
 						}} />
 					<SelectBox
 						controlId="diverType"
@@ -116,7 +169,8 @@ class GeneralInfo extends React.Component {
 					<SelectBox
 						controlId="numberOfDives"
 						name="numberOfDives"
-						label="# of dives">
+						label="# of dives"
+						value={ user.numberOfDives }>
 						<option value=""></option>
 						<option value="0">{ 'None yet! (I\'m new!)' }</option>
 						<option value="<20">1-19</option>
@@ -130,10 +184,16 @@ class GeneralInfo extends React.Component {
 						<option value="unkown">{ 'I\'ve lost count!' }</option>
 						<option value="no logs">Logging dives is for chumps!</option>
 					</SelectBox>
-					<Button type="submit" bsStyle="primary">Save Changes</Button>
+					{ this.state.isSaving
+						? <Spinner message="Saving..." />
+						: <Button type="submit" bsStyle="primary">Save Changes</Button> }
 				</Formsy.Form>
 			</div>);
 	}
 }
+
+GeneralInfo.propTypes = {
+	match: PropTypes.object.isRequired
+};
 
 export default GeneralInfo;
