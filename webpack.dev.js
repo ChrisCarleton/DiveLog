@@ -21,7 +21,7 @@ module.exports = {
 	output: {
 		filename: 'bundle.js',
 		path: outputDir,
-		publicPath: 'http://localhost:3000/public/'
+		publicPath: '/public'
 	},
 	plugins: [
 		new webpack.HotModuleReplacementPlugin(),
@@ -36,7 +36,7 @@ module.exports = {
 		historyApiFallback: true,
 		hot: true,
 		hotOnly: true,
-		publicPath: 'http://localhost:3000/public/'
+		publicPath: '/public'
 	},
 	module: {
 		rules: [
