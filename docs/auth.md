@@ -63,52 +63,6 @@ than an error.
 ### Error Response
 * __Status Code 500:__ Internal server error.
 
-## Create New User (Local)
-
-Creates a new user account in the sytem.
-
-### Route
-```
-POST /api/users/
-```
-
-### Data Params
-```javascript
-{
-	usernName: [string],
-	email: [string],
-	password: [string],
-	displayName: [string]
-}
-```
-
-* __userName:__ Required. A unique user name to identify the new user. Must be alphanumeric though hyphens, underscores, and periods are allowed in the middle. Minimum lenght is 3 characters and maximum is 30.
-* __email:__ Required. The e-mail address at which the new user can be contacted. This must also be unique to the user. Only valid e-mail addresses are accepted.
-* __password:__ Required. A strong-ish password containing letters, numbers, and special characters. Minimum length is 7 characters and the maximum is 30.
-* __displayName:__ Optional. An optional display name (usually the user's full name) to display on the site in place of the user name.
-
-### Success Response
-* __Status Code:__ 200
-
-The details of the newly-created user account are returned.
-
-```javascript
-{
-	userId: [uuid],
-	userName: [string],
-	displayName: [string],
-	email: [string],
-	createdAt: [date/time]
-}
-```
-
-### Error Response
-* __Status Code 400:__ Bad request
-  * __Error ID 1000:__ Validation error. One of the required parameters was omitted or a parameter contained an invalid value. Check the error details for what the problem was.
-  * __Error ID 1010:__ User name is taken. The selected user name already belongs to a user in the database. Select a new user name and try again.
-  * __Error ID 1020:__ Email is taken. The selected e-mail address already belongs to a user in the database. Perhaps an account recovery is in order?
-* __Status Code 500:__ Internal server error.
-
 ## Change User Password
 
 Changes the password for a given user account.
