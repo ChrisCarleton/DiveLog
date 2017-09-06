@@ -261,7 +261,7 @@ describe('User routes:', () => {
 		});
 
 		it('user is rejected if display name is too long', done => {
-			testUser.displayName = faker.lorem.paragraph(3);
+			testUser.displayName = faker.lorem.paragraph(7);
 			testValidation(
 				USERS_ROUTE,
 				testUser,
