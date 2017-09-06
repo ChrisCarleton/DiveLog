@@ -19,5 +19,6 @@ module.exports = function(app) {
 
 	app.route(userBaseRoute)
 		.get(requireUser, requireProfileView, getProfileOwner, getProfile)
+		.patch(requireUser, requireProfileAuthority, getProfileOwner, updateProfile)
 		.put(requireUser, requireProfileAuthority, getProfileOwner, updateProfile);
 };
