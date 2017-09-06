@@ -1,11 +1,24 @@
 import bcrypt from 'bcrypt';
 import Bluebird from 'bluebird';
-import errorResponse, { serverErrorResponse } from '../utils/error-response';
-import { getUserByEmail, getUserByName, sanitizeUserInfo } from './helpers/users-helpers';
 import Joi from 'joi';
 import log from '../logger';
 import passwordStrengthRegex from '../utils/password-strength-regex';
 import Users from '../data/users.table';
+
+import errorResponse, {
+	badRequestResponse,
+	forbiddenActionResponse,
+	notAuthroizedResponse,
+	resourceNotFoundResponse,
+	serverErrorResponse
+} from '../utils/error-response';
+
+import {
+	doUpdateProfile,
+	getUserByEmail,
+	getUserByName,
+	sanitizeUserInfo
+} from './helpers/users-helpers';
 
 const signUpValidation = Joi.object().keys({
 	userName: Joi
@@ -23,6 +36,37 @@ const signUpValidation = Joi.object().keys({
 		.required(),
 	displayName: Joi.string().max(100)
 });
+
+const updateProfileValidation = Joi.object().keys({
+	displayName: Joi.string().max(100).allow(null),
+	email: Joi.string().email().max(150).allow(null),
+	location: Joi.string().max(150).allow(null),
+	dateOfBirth: Joi.string().isoDate().allow(null),
+	certificationAgencies: Joi.string().max(150).allow(null),
+	diverType: Joi.string().valid([
+		null,
+		'novice',
+		'vacation',
+		'typical',
+		'advanced',
+		'tech',
+		'commercial',
+		'divemaster',
+		'instructor']),
+	numberOfDives: Joi.string().valid([
+		null,
+		'unknown',
+		'no logs',
+		'0',
+		'<20',
+		'<50',
+		'<100',
+		'<500',
+		'<1000',
+		'<5000',
+		'<9000',
+		'9000+'])
+}).required();
 
 const ERR_USERNAME_TAKEN = 'user name taken';
 const ERR_EMAIL_TAKEN = 'email taken';
@@ -119,4 +163,79 @@ export function signUp(req, res) {
 
 export function me(req, res) {
 	res.json(sanitizeUserInfo(req.user));
+}
+
+export function getProfile(req, res) {
+	res.json(sanitizeUserInfo(req.profileOwner));
+}
+
+export function updateProfile(req, res) {
+	if (req.body.email === null) {
+		return forbiddenActionResponse(
+			res,
+			'E-mail address cannot be deleted from a user\'s profile.');
+	}
+
+	const validation = Joi.validate(req.body, updateProfileValidation);
+	if (validation.error) {
+		log.debug('Update profile request failed validation:', validation.error.details);
+		return badRequestResponse(
+			res,
+			validation.error.details);
+	}
+
+	doUpdateProfile(req.profileOwner, req.body)
+		.then(profile => {
+			res.json(sanitizeUserInfo(profile));
+		})
+		.catch(err => {
+			if (err.name === 'EmailInUseError') {
+				return forbiddenActionResponse(
+					res,
+					'Unable to change e-mail address. Address is already taken by another user!');
+			}
+
+			log.error('An error occurred while attempting to update a user\'s profile:', err);
+			serverErrorResponse(res);
+		});
+}
+
+export function getProfileOwner(req, res, next) {
+	getUserByName(req.params['user'])
+		.then(user => {
+			if (!user) {
+				return resourceNotFoundResponse(res);
+			}
+
+			req.profileOwner = user;
+			next();
+		})
+		.catch(err => {
+			log.error('An error occurred while trying to fetch the owner of a user profile', err);
+			serverErrorResponse(res);
+		});
+}
+
+export function requireProfileAuthority(req, res, next) {
+	if (req.params.user === req.user.userName) {
+		return next();
+	}
+
+	if (req.user.role === 'admin') {
+		return next();
+	}
+
+	notAuthroizedResponse(res);
+}
+
+export function requireProfileView(req, res, next) {
+	if (req.params.user === req.user.userName) {
+		return next();
+	}
+
+	if (req.user.role === 'admin') {
+		return next();
+	}
+
+	notAuthroizedResponse(res);
 }

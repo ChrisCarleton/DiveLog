@@ -268,11 +268,46 @@ export function sanitizeUserInfo(user) {
 		'userId',
 		'userName',
 		'displayName',
+		'location',
+		'dateOfBirth',
+		'certificationAgencies',
+		'diverType',
+		'numberOfDives',
 		'role',
 		'imageUrl',
-		'createdAt']);
+		'createdAt',
+		'updatedAt']);
 	sanitized.hasPassword = !_.isNil(user.passwordHash);
 	sanitized.email = user.displayEmail;
 
 	return sanitized;
+}
+
+export function doUpdateProfile(user, info) {
+	let update;
+
+	if (info.email && info.email.toLowerCase() !== user.email) {
+		info.displayEmail = info.email;
+		info.email = info.email.toLowerCase();
+		update = Object.assign({ userId: user.userId }, info);
+
+		return getUserByEmail(info.email)
+			.then(exists => {
+				if (exists) {
+					throw new EmailInUseError(
+						'Unable to update profile because requested new e-mail is already in use.');
+				}
+
+				return Users.updateAsync(update);
+			})
+			.then(result => {
+				return result.attrs;
+			});
+	}
+
+	update = Object.assign({ userId: user.userId }, info);
+	return Users.updateAsync(update)
+		.then(result => {
+			return result.attrs;
+		});
 }

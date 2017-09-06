@@ -1,12 +1,15 @@
 import ConnectOAuth from './profile/connect-oauth.jsx';
 import GeneralInfo from './profile/general.jsx';
 import { IndexLinkContainer, LinkContainer } from 'react-router-bootstrap';
+import moment from 'moment';
 import PageHeader from './controls/page-header.jsx';
 import Password from './profile/password.jsx';
+import Privacy from './profile/privacy.jsx';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import RequireAuth from './controls/require-auth.jsx';
+import Settings from './profile/settings.jsx';
 import UserStore from '../stores/user-store';
 
 import {
@@ -54,14 +57,12 @@ class Profile extends React.Component {
 		const userName = this.props.match.params.userName;
 		const displayName = this.state.user.displayName
 			|| this.state.user.userName
-			|| '';
-		const title = displayName.endsWith('s')
-			? `${displayName}' Profile`
-			: `${displayName}'s Profile`;
+			|| 'Profile';
+		const memberSince = `Member since: ${moment(this.state.user.createdAt).fromNow()}.`;
 
 		return (
 			<div>
-				<PageHeader heading={ title } alertKey={ ALERT_KEY } />
+				<PageHeader heading={ displayName } subHeading={ memberSince } alertKey={ ALERT_KEY } />
 				<Grid>
 					<Row>
 						<Col xs={ 3 }>
@@ -69,8 +70,12 @@ class Profile extends React.Component {
 								<IndexLinkContainer to={ `/profile/${userName}` }>
 									<NavItem>My Info</NavItem>
 								</IndexLinkContainer>
-								<NavItem>Settings</NavItem>
-								<NavItem>Privacy</NavItem>
+								<LinkContainer to={ `/profile/${userName}/settings` }>
+									<NavItem>Settings</NavItem>
+								</LinkContainer>
+								<LinkContainer to={ `/profile/${userName}/privacy` }>
+									<NavItem>Privacy</NavItem>
+								</LinkContainer>
 								<LinkContainer to={ `/profile/${userName}/password` }>
 									<NavItem>Change Password</NavItem>
 								</LinkContainer>
@@ -82,7 +87,9 @@ class Profile extends React.Component {
 						<Col xs={ 9 }>
 							<Switch>
 								<Route exact path="/profile/:userName" component={ GeneralInfo } />
+								<Route exact path="/profile/:userName/settings" component={ Settings } />
 								<Route exact path="/profile/:userName/password" component={ Password } />
+								<Route exact path="/profile/:userName/privacy" component={ Privacy } />
 								<Route exact path="/profile/:userName/oauth" component={ ConnectOAuth } />
 								<Route>
 									<Redirect to="/errors/notfound" />
