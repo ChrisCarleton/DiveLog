@@ -6,8 +6,8 @@ import {
 } from 'react-bootstrap';
 
 class Settings extends React.Component {
-	submit(model) {
-		console.log(model);
+	submit() {
+
 	}
 
 	render() {

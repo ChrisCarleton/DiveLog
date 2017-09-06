@@ -91,8 +91,9 @@ class GeneralInfo extends React.Component {
 			<div>
 				<h3>My Info</h3>
 				<p className="help-block">
-					<strong>Note:</strong> Your profile information is not shared with or sold to anyone not directly affiliated with this site.
+					<strong>Note:</strong> Your profile information is not shared with or sold to anyone!
 					You can control which users of this site can see your profile information using the Privacy tab.
+					By default, your profile information and dive logs are private.
 				</p>
 				<Formsy.Form className="form-horizontal" onValidSubmit={ this.submit }>
 					<TextBox
@@ -113,6 +114,7 @@ class GeneralInfo extends React.Component {
 						name="email"
 						label="Email address"
 						value={ user.email }
+						placeholder="The e-mail address at which you prefer to be reached."
 						required
 						validations={{
 							isEmail: true,

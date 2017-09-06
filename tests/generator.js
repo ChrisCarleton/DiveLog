@@ -1,11 +1,13 @@
 import bcrypt from 'bcrypt';
 import faker from 'faker';
 import geolib from 'geolib';
+import moment from 'moment';
 
 const salt = bcrypt.genSaltSync(10);
 
 function generateUser(password) {
 	const email = faker.internet.email();
+	const dob = moment(faker.date.past(50, new Date())).subtract(12, 'y').toISOString();
 
 	return {
 		userName: faker.internet.userName().toLowerCase(),
@@ -13,7 +15,7 @@ function generateUser(password) {
 		email: email.toLowerCase(),
 		displayEmail: email,
 		location: faker.fake('{{address.cityPrefix}} {{name.firstName}}{{address.citySuffix}}, {{address.countryCode}}'),
-		dateOfBirth: faker.date.past(50, new Date()).toISOString(),
+		dateOfBirth: dob,
 		certificationAgencies: faker.random.arrayElement(['PADI', 'SSI', 'NAUI']),
 		diverType: faker.random.arrayElement([
 			'novice', 'vacation', 'typical', 'advanced', 'tech', 'commercial',

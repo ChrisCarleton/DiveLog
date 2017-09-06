@@ -442,6 +442,8 @@ describe('User routes:', () => {
 					return Users.getAsync(user1.userId);
 				})
 				.then(res => {
+					expect(res.get('displayEmail')).to.equal(user1.displayEmail);
+					expect(res.get('email')).to.equal(user1.email);
 					expect(_.pick(res.attrs, profileFields)).to.eql(newInfo);
 					done();
 				})
