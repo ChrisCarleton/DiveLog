@@ -286,7 +286,7 @@ export function sanitizeUserInfo(user) {
 export function doUpdateProfile(user, info) {
 	let update;
 
-	if (info.email) {
+	if (info.email && info.email.toLowerCase() !== user.email) {
 		info.displayEmail = info.email;
 		info.email = info.email.toLowerCase();
 		update = Object.assign({ userId: user.userId }, info);
@@ -308,10 +308,6 @@ export function doUpdateProfile(user, info) {
 	update = Object.assign({ userId: user.userId }, info);
 	return Users.updateAsync(update)
 		.then(result => {
-			if (!result) {
-				console.log('whoa!!');
-			}
-
 			return result.attrs;
 		});
 }

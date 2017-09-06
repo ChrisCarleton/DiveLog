@@ -15,7 +15,7 @@ const Users = db.define(
 			displayName: Joi.string().max(100),
 			location: Joi.string().max(150),
 			dateOfBirth: Joi.string().isoDate(),
-			certificationAgencies: Joi.string().max(250),
+			certificationAgencies: Joi.string().max(150),
 			diverType: Joi.string().valid([
 				'novice',
 				'vacation',

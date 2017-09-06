@@ -1,19 +1,16 @@
+import _ from 'lodash';
 import { app } from '../../service/server';
 import bcrypt from 'bcrypt';
+import Bluebird from 'bluebird';
 import { expect } from 'chai';
 import faker from 'faker';
 import generator from '../generator';
 import { purgeTable } from '../test-utils';
+import { sanitizeUserInfo } from '../../service/controllers/helpers/users-helpers';
 import supertest from 'supertest';
 import Users from '../../service/data/users.table';
 
 const request = supertest(app);
-
-const purgeUserTable = done => {
-	purgeTable(Users, 'userId')
-		.then(() => done())
-		.catch(done);
-};
 
 const testValidation = (route, data, expectedErr, done) => {
 	request
@@ -32,13 +29,67 @@ const USERS_ROUTE = '/api/users/';
 
 describe('User routes:', () => {
 
+	const cookies = {};
+	const password = 'W@tW@tS0n!';
+	let user1, user2, adminUser;
+
+	function loginUser(user) {
+		if (cookies[user.userName]) {
+			return Bluebird.resolve(cookies[user.userName]);
+		}
+
+		return request
+			.post('/api/auth/login/')
+			.send({
+				username: user.userName,
+				password: password
+			})
+			.expect(200)
+			.then(res => {
+				cookies[user.userName] = res.headers['set-cookie'];
+				return cookies[user.userName];
+			});
+	}
+
+	function loginUser1() {
+		return loginUser(user1);
+	}
+
+	function loginAdmin() {
+		return loginUser(adminUser);
+	}
+
+	before(done => {
+		user1 = generator.generateUser(password);
+		user2 = generator.generateUser(password);
+		adminUser = generator.generateUser(password);
+		adminUser.role = 'admin';
+
+		Bluebird
+			.all([
+				Users.createAsync(user1),
+				Users.createAsync(user2),
+				Users.createAsync(adminUser)
+			])
+			.spread((u1, u2, a) => {
+				user1.userId = u1.get('userId');
+				user2.userId = u2.get('userId');
+				adminUser.userId = a.get('userId');
+				done();
+			})
+			.catch(done);
+	});
+
+	after(done => {
+		purgeTable(Users, 'userId')
+			.then(() => done())
+			.catch(done);
+	});
+
 	describe('create user:', () => {
 
 		const password = 'j0esP@ssw0rd';
 		let testUser;
-
-		before(purgeUserTable);
-		afterEach(purgeUserTable);
 
 		beforeEach(() => {
 			testUser = {
@@ -267,6 +318,442 @@ describe('User routes:', () => {
 				.catch(done);
 		});
 
+	});
+
+	describe('Get profile:', () => {
+		it('will return a user\'s profile', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.expect(200);
+				})
+				.then(res => {
+					user1.createdAt = res.body.createdAt;
+					expect(res.body).to.eql(sanitizeUserInfo(user1));
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is unauthenticated', done => {
+			request
+				.get(`/api/users/${user1.userName}`)
+				.expect(401)
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user does not have access to view the profile', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get(`/api/users/${user2.userName}`)
+						.set('cookie', cookie)
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will allow admins to view other user\'s profiles', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get(`/api/users/${user2.userName}`)
+						.set('cookie', cookie)
+						.expect(200);
+				})
+				.then(res => {
+					user2.createdAt = res.body.createdAt;
+					expect(res.body).to.eql(sanitizeUserInfo(user2));
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if an admin tries to view a profile that does not exist', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get('/api/users/MadeUpUser')
+						.set('cookie', cookie)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
+	describe('Update profile:', () => {
+
+		let newInfo;
+		const profileFields
+			= ['displayName', 'location', 'certificationAgencies', 'diverType', 'numberOfDives'];
+		beforeEach(done => {
+			newInfo = {
+				displayName: 'Best User',
+				location: 'London, UK',
+				certificationAgencies: 'PADI, BSAC',
+				diverType: 'typical',
+				numberOfDives: '<500'
+			};
+
+			Users.updateAsync(
+				_.pick(
+					user1,
+					_.concat(profileFields, ['userId', 'email', 'displayEmail'])))
+				.then(() => done())
+				.catch(done);
+		});
+
+		after(done => {
+			Users.updateAsync(
+				_.pick(
+					user1,
+					_.concat(profileFields, ['userId', 'email', 'displayEmail'])))
+				.then(() => done())
+				.catch(done);
+		});
+
+		it('will update a user\'s profile', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body.email).to.equal(user1.displayEmail);
+					expect(_.pick(res.body, profileFields)).to.eql(newInfo);
+					return Users.getAsync(user1.userId);
+				})
+				.then(res => {
+					expect(_.pick(res.attrs, profileFields)).to.eql(newInfo);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will change a user\'s email address', done => {
+			const expectedEmail = faker.internet.email();
+			newInfo.email = expectedEmail;
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(200);
+				})
+				.then(res => {
+					delete newInfo.email;
+					expect(res.body.email).to.equal(expectedEmail);
+					expect(_.pick(res.body, profileFields)).to.eql(newInfo);
+					return Users.getAsync(user1.userId);
+				})
+				.then(res => {
+					expect(res.get('displayEmail')).to.equal(expectedEmail);
+					expect(res.get('email')).to.equal(expectedEmail.toLowerCase());
+
+					expect(_.pick(res.attrs, profileFields)).to.eql(newInfo);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will allow users to remove fields', done => {
+			newInfo = {
+				displayName: null,
+				location: null,
+				certificationAgencies: null,
+				diverType: null,
+				numberOfDives: null
+			};
+
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body.email).to.equal(user1.displayEmail);
+					expect(_.pick(res.body, profileFields)).to.be.empty;
+					return Users.getAsync(user1.userId);
+				})
+				.then(res => {
+					expect(_.pick(res.attrs, profileFields)).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if email is invalid', done => {
+			newInfo.email = 'not valid';
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 403 if email is already taken', done => {
+			newInfo.email = user2.displayEmail;
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(403);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3200);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 403 if user attempts to remove their e-mail address', done => {
+			newInfo.email = null;
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(403);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3200);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if location is too long', done => {
+			newInfo.location = faker.lorem.paragraph(7);
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if display name is too long', done => {
+			newInfo.displayName = faker.lorem.paragraph(7);
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if date of birth is not a valid ISO date', done => {
+			newInfo.dateOfBirth = 'lol. not a date.';
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if certification agencies is too long', done => {
+			newInfo.certificationAgencies = faker.lorem.paragraph(7);
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if diver type is not valid', done => {
+			newInfo.diverType = 'exceptional';
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if number of dives is not valid', done => {
+			newInfo.numberOfDives = '42';
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 400 if an unvalidated field is provided in the request body', done => {
+			newInfo.likesBoats = true;
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(400);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if profile does not exist', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put('/api/users/MadeUpUser')
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user is unauthenticated', done => {
+			request
+				.put(`/api/users/${user1.userName}`)
+				.send(newInfo)
+				.expect(401)
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 401 if user attempts to update another user\'s profile', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user2.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(401);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will allow admins to update other user\'s profiles', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.put(`/api/users/${user1.userName}`)
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(200);
+				})
+				.then(res => {
+					expect(res.body.email).to.equal(user1.displayEmail);
+					expect(_.pick(res.body, profileFields)).to.eql(newInfo);
+					return Users.getAsync(user1.userId);
+				})
+				.then(res => {
+					expect(_.pick(res.attrs, profileFields)).to.eql(newInfo);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('will return 404 if an admin attempts to update a profile that does not exist', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.put('/api/users/MadeUpUser')
+						.set('cookie', cookie)
+						.send(newInfo)
+						.expect(404);
+				})
+				.then(res => {
+					expect(res.body.errorId).to.equal(2100);
+					done();
+				})
+				.catch(done);
+		});
 	});
 
 });

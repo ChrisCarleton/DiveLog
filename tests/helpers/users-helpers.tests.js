@@ -760,6 +760,7 @@ describe('Users helper methods', () => {
 		});
 
 		it('will update user\'s profile', done => {
+			newInfo.email = user.displayEmail;
 			Users.createAsync(user)
 				.then(result => {
 					user.userId = result.get('userId');
