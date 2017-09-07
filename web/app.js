@@ -1,3 +1,4 @@
+import AdminDashboard from './components/admin.jsx';
 import alt from './alt';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Chrome from './components/chrome.jsx';
@@ -33,6 +34,7 @@ class AppRouter extends React.Component {
 						<Route exact path="/logbook/:userName/new" component={ LogEntry } />
 						<Route exact path="/logbook/:userName/:logId" component={ LogEntry } />
 						<Route path="/profile/:userName" component={ Profile } />
+						<Route exact path="/admin" component={ AdminDashboard } />
 						<Route exact path="/error/notFound" component={ NotFound } />
 						<Route exact path="/error/server" component={ ServerError } />
 						<Route exact path="/error/emailInUse" component={ EmailInUse } />

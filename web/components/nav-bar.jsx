@@ -55,6 +55,17 @@ class AppNavbar extends React.Component {
 			</LinkContainer>);
 	}
 
+	renderAdminNav() {
+		if (!this.state.user || this.state.user.role !== 'admin') {
+			return null;
+		}
+
+		return (
+			<LinkContainer to="/admin">
+				<NavItem>Admin Dashboard</NavItem>
+			</LinkContainer>);
+	}
+
 	render() {
 		return (
 			<Navbar fixedTop collapseOnSelect>
@@ -72,6 +83,7 @@ class AppNavbar extends React.Component {
 							<NavItem>Home</NavItem>
 						</IndexLinkContainer>
 						{ this.renderUserNav() }
+						{ this.renderAdminNav() }
 					</Nav>
 					{ this.state.user ?
 						<Nav pullRight>

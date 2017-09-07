@@ -29,12 +29,17 @@ class RequireAuth extends React.Component {
 			return <Redirect to={ `/login?${query}` } />;
 		}
 
+		if (this.props.requireAdmin && this.state.currentUser.role !== 'admin') {
+			return <Redirect to="/" />
+		}
+
 		return null;
 	}
 }
 
 RequireAuth.propTypes = {
-	location: PropTypes.object.isRequired
+	location: PropTypes.object.isRequired,
+	requireAdmin: PropTypes.bool
 };
 
 export default withRouter(RequireAuth);
