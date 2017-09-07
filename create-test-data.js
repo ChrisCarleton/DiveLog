@@ -15,6 +15,7 @@ module.exports = gulpUtil => {
 	const adminUser = {
 		userName: 'TestAdmin',
 		email: 'test-admin@bottomtime.ca',
+		displayEmail: 'Test-Admin@bottomtime.ca',
 		displayName: 'Test Administrator',
 		role: 'admin',
 		passwordHash: adminHash

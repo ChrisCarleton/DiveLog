@@ -62,6 +62,9 @@ function writeData(password) {
 		email: {
 			S: 'admin@bottomtime.ca'
 		},
+		displayEmail: {
+			S: 'admin@bottomtime.ca'
+		},
 		displayName: {
 			S: 'Administrator'
 		},
@@ -87,7 +90,10 @@ function writeData(password) {
 
 function getPassword() {
 	if (!promptForPassword) {
-		return Bluebird.resolve('admin');
+		return Bluebird.resolve({
+			password: 'admin',
+			confirmPassword: 'admin'
+		});
 	}
 
 	prompt.start();
