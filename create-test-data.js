@@ -13,7 +13,7 @@ module.exports = gulpUtil => {
 	const adminHash = bcrypt.hashSync('adm!n', bcrypt.genSaltSync(10));
 
 	const adminUser = {
-		userName: 'TestAdmin',
+		userName: 'testadmin',
 		email: 'test-admin@bottomtime.ca',
 		displayEmail: 'Test-Admin@bottomtime.ca',
 		displayName: 'Test Administrator',

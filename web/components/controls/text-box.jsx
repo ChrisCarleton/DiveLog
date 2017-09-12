@@ -9,17 +9,30 @@ import {
 	ControlLabel,
 	FormControl,
 	FormGroup,
-	HelpBlock
+	HelpBlock,
+	InputGroup
 } from 'react-bootstrap';
 
 class TextBox extends React.Component {
 	constructor() {
 		super();
 		this.onTextChanged = this.onTextChanged.bind(this);
+		this.renderAddon = this.renderAddon.bind(this);
 	}
 
 	onTextChanged(e) {
 		this.props.setValue(e.target.value);
+	}
+
+	renderAddon() {
+		if (!this.props.unit) {
+			return null;
+		}
+
+		return (
+			<InputGroup.Addon>
+				{ this.props.unit || null }
+			</InputGroup.Addon>);
 	}
 
 	render() {
@@ -54,20 +67,22 @@ class TextBox extends React.Component {
 						</span>
 					</ControlLabel>
 				</Col>
-				<Col sm={7}>
-					<FormControl
-						type={this.props.isPassword ? 'password' : 'text'}
-						value={value}
-						placeholder={this.props.placeholder}
-						onChange={this.props.onChange || this.onTextChanged} />
-					<FormControl.Feedback />
+				<Col sm={8}>
+					<InputGroup>
+						<FormControl
+							type={this.props.isPassword ? 'password' : 'text'}
+							value={value}
+							placeholder={this.props.placeholder}
+							onChange={this.props.onChange || this.onTextChanged} />
+						<FormControl.Feedback />
+						{ this.renderAddon() }
+					</InputGroup>
 					{ errorMessage ? <HelpBlock>{errorMessage}</HelpBlock> : null }
 				</Col>
-				<Col sm={2}>
-					<span className="tb-unit">{ this.props.unit }</span>
+				<Col sm={1}>
 					{ this.props.helpText
-						? <div className="tb-help-bubble"><HelpBubble id={this.props.controlId + '_help'}>{this.props.helpText}</HelpBubble></div>
-						: null }
+							? <HelpBubble id={this.props.controlId + '_help'}>{this.props.helpText}</HelpBubble>
+							: null }
 				</Col>
 			</FormGroup>);
 	}
