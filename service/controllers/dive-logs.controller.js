@@ -19,7 +19,7 @@ import {
 
 const listLogsQueryValidation = Joi.object().keys({
 	limit: Joi.number().integer().positive().max(1000),
-	order: Joi.string().regex(/^(asc|desc)$/i),
+	order: Joi.string().valid(['asc', 'desc']).insensitive(),
 	before: Joi.string().isoDate(),
 	after: Joi.string().isoDate()
 }).nand('before', 'after');

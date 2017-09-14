@@ -17,6 +17,7 @@ import {
 	doUpdateProfile,
 	getUserByEmail,
 	getUserByName,
+	getUsersAutoComplete,
 	sanitizeUserInfo
 } from './helpers/users-helpers';
 
@@ -68,6 +69,11 @@ const updateProfileValidation = Joi.object().keys({
 		'9000+'])
 }).required();
 
+const listUsersValidation = Joi.object().keys({
+	limit: Joi.number().integer().positive().max(1000),
+	order: Joi.string().valid(['asc', 'desc']).insensitive()
+});
+
 const ERR_USERNAME_TAKEN = 'user name taken';
 const ERR_EMAIL_TAKEN = 'email taken';
 
@@ -76,10 +82,8 @@ export function signUp(req, res) {
 	const validation = Joi.validate(req.body, signUpValidation);
 	if (validation.error) {
 		log.debug('Sign up request failed validation:', validation.error.details);
-		return errorResponse(
+		return badRequestResponse(
 			res,
-			1000,
-			'Bad request: Validation failed.',
 			validation.error.details);
 	}
 
@@ -159,6 +163,35 @@ export function signUp(req, res) {
 				err);
 			serverErrorResponse(res);
 		});
+}
+
+export function autoCompleteUsers(req, res) {
+	const validation = Joi.validate(req.query.search, Joi.string().min(2));
+	if (validation.error) {
+		return badRequestResponse(res, validation.error.details);
+	}
+
+	getUsersAutoComplete(req.query.search)
+		.then(results => {
+			res.json(results);
+		})
+		.catch(err => {
+			log.error('An error occurred while doing a user auto-complete look-up:', err);
+			serverErrorResponse(res);
+		});
+}
+
+export function listUsers(req, res, next) {
+	if (req.query.search) {
+		return next();
+	}
+
+	const validation = Joi.validate(req.query, listUsersValidation);
+	if (validation.error) {
+		return badRequestResponse(res, validation.error.details);
+	}
+
+	res.send('ok');
 }
 
 export function me(req, res) {

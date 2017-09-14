@@ -1,13 +1,15 @@
 import {
+	autoCompleteUsers,
 	getProfile,
 	getProfileOwner,
+	listUsers,
 	me,
 	requireProfileAuthority,
 	requireProfileView,
 	signUp,
 	updateProfile
 } from '../controllers/users.controller';
-import { requireUser } from '../controllers/auth.controller';
+import { requireAdminUser, requireUser } from '../controllers/auth.controller';
 
 module.exports = function(app) {
 	const meBaseRoute = '/api/user/';
@@ -15,7 +17,10 @@ module.exports = function(app) {
 	const userBaseRoute = usersBaseRoute + ':user/';
 
 	app.get(meBaseRoute, requireUser, me);
-	app.post(usersBaseRoute, signUp);
+
+	app.route(usersBaseRoute)
+		.get(requireAdminUser, listUsers, autoCompleteUsers)
+		.post(signUp);
 
 	app.route(userBaseRoute)
 		.get(requireUser, requireProfileView, getProfileOwner, getProfile)

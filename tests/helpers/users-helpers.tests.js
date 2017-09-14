@@ -18,6 +18,7 @@ import {
 	getOrCreateOAuthAccount,
 	getOrConnectOAuthAccount,
 	getOAuthAccounts,
+	getUsersAutoComplete,
 	removeOAuthConnection
 } from '../../service/controllers/helpers/users-helpers';
 
@@ -822,5 +823,61 @@ describe('Users helper methods', () => {
 				})
 				.catch(done);
 		});
+	});
+
+	describe('getUsersAutoComplete method', () => {
+
+		after(done => {
+			purgeTable(Users, 'userId')
+				.then(() => done())
+				.catch(done);
+		});
+
+		it('returns list of users', done => {
+			const users = [
+				generator.generateUser(),
+				generator.generateUser(),
+				generator.generateUser(),
+				generator.generateUser(),
+				generator.generateUser()];
+
+			users[0].userName = 'ulyses';
+			users[0].email = 'humdrum@yahoo.com';
+			users[1].userName = 'david';
+			users[1].email = 'ultimate_dave@gmail.com';
+			users[2].userName = 'ultimo';
+			users[2].email = 'that_guy@hotmail.com';
+			users[3].userName = 'jim';
+			users[3].email = 'zoooom33@facebook.com';
+			users[4].userName = 'ulma';
+			users[4].email = 'ulma@gmail.com';
+
+			Users.createAsync(users)
+				.then(() => {
+					return getUsersAutoComplete('Ul');
+				})
+				.then(result => {
+					expect(result).to.be.an('array');
+					expect(result.length).to.equal(5);
+					expect(result).to.include('ulyses');
+					expect(result).to.include('ultimate_dave@gmail.com');
+					expect(result).to.include('ultimo');
+					expect(result).to.include('ulma');
+					expect(result).to.include('ulma@gmail.com');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('returns empty array if no results are found', done => {
+			getUsersAutoComplete('Fib')
+				.then(result => {
+					expect(result).to.be.an('array');
+					expect(result).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
 	});
 });

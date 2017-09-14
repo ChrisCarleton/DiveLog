@@ -311,3 +311,26 @@ export function doUpdateProfile(user, info) {
 			return result.attrs;
 		});
 }
+
+export function getUsersAutoComplete(search) {
+	const lowered = search.toLowerCase();
+	return Bluebird.all([
+		Users
+			.scan()
+			.where('userName').beginsWith(lowered)
+			.attributes(['userName'])
+			.limit(25)
+			.execAsync(),
+		Users
+			.scan()
+			.where('email').beginsWith(lowered)
+			.attributes(['email'])
+			.limit(25)
+			.execAsync()])
+		.spread((userNames, emails) => {
+			const all = _.concat(userNames.Items, emails.Items);
+			return _.map(all, i => {
+				return i.get('userName') || i.get('email');
+			});
+		});
+}

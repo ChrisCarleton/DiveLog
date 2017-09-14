@@ -81,8 +81,8 @@ class TextBox extends React.Component {
 				</Col>
 				<Col sm={1}>
 					{ this.props.helpText
-							? <HelpBubble id={this.props.controlId + '_help'}>{this.props.helpText}</HelpBubble>
-							: null }
+						? <HelpBubble id={this.props.controlId + '_help'}>{this.props.helpText}</HelpBubble>
+						: null }
 				</Col>
 			</FormGroup>);
 	}

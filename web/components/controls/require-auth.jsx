@@ -30,7 +30,7 @@ class RequireAuth extends React.Component {
 		}
 
 		if (this.props.requireAdmin && this.state.currentUser.role !== 'admin') {
-			return <Redirect to="/" />
+			return <Redirect to="/" />;
 		}
 
 		return null;

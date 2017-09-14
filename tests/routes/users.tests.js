@@ -758,4 +758,112 @@ describe('User routes:', () => {
 		});
 	});
 
+	describe('auto-complete users', () => {
+
+		it('returns a list of user names and e-mails', done => {
+			const users = [
+				generator.generateUser(),
+				generator.generateUser(),
+				generator.generateUser(),
+				generator.generateUser(),
+				generator.generateUser()];
+
+			users[0].userName = 'ulyses';
+			users[0].email = 'humdrum@yahoo.com';
+			users[1].userName = 'david';
+			users[1].email = 'ultimate_dave@gmail.com';
+			users[2].userName = 'ultimo';
+			users[2].email = 'that_guy@hotmail.com';
+			users[3].userName = 'jim';
+			users[3].email = 'zoooom33@facebook.com';
+			users[4].userName = 'ulma';
+			users[4].email = 'ulma@gmail.com';
+
+			Users.createAsync(users)
+				.then(() => {
+					return loginAdmin();
+				})
+				.then(cookie => {
+					return request
+						.get('/api/users')
+						.set('cookie', cookie)
+						.query({ search: 'Ul' })
+						.expect(200);
+				})
+				.then(result => {
+					expect(result.body).to.be.an('array');
+					expect(result.body.length).to.equal(5);
+					expect(result.body).to.include('ulyses');
+					expect(result.body).to.include('ultimate_dave@gmail.com');
+					expect(result.body).to.include('ultimo');
+					expect(result.body).to.include('ulma');
+					expect(result.body).to.include('ulma@gmail.com');
+					done();
+				})
+				.catch(done);
+		});
+
+		it('returns an empty array if there are no results to return', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get('/api/users')
+						.set('cookie', cookie)
+						.query({ search: 'Jeeves' })
+						.expect(200);
+				})
+				.then(result => {
+					expect(result.body).to.be.an('array');
+					expect(result.body).to.be.empty;
+					done();
+				})
+				.catch(done);
+		});
+
+		it('returns 401 if user is unauthenticated', done => {
+			request
+				.get('/api/users')
+				.query({ search: 'Desmond' })
+				.expect(401)
+				.then(result => {
+					expect(result.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('returns 401 if user is not an administrator', done => {
+			loginUser1()
+				.then(cookie => {
+					return request
+						.get('/api/users')
+						.set('cookie', cookie)
+						.query({ search: 'Tom' })
+						.expect(401);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(3100);
+					done();
+				})
+				.catch(done);
+		});
+
+		it('returns 400 if search string is shorter than 2 characters', done => {
+			loginAdmin()
+				.then(cookie => {
+					return request
+						.get('/api/users')
+						.set('cookie', cookie)
+						.query({ search: 'i' })
+						.expect(400);
+				})
+				.then(result => {
+					expect(result.body.errorId).to.equal(1000);
+					done();
+				})
+				.catch(done);
+		});
+
+	});
+
 });

@@ -9,12 +9,10 @@ import {
 	Button,
 	ButtonGroup,
 	ButtonToolbar,
-	Col,
 	ControlLabel,
 	FormControl,
 	FormGroup,
 	Glyphicon,
-	Grid,
 	InputGroup
 } from 'react-bootstrap';
 
